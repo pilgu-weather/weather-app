@@ -7,48 +7,63 @@ API_KEY = "2fd339c206c2fa601c64bc589a4750e9"
 
 @app.route("/", methods=["GET", "POST"])
 def home():
+    lat = request.args.get("lat")
+    lon = request.args.get("lon")
+
     temp = None
     feels_like = None
     pm = None
     pm_text = None
     outfits = []
     extra_items = []
+    icon_url = None
+    city_name = None
 
-    if request.method == "GET":
-        return render_template(
-            "index.html",
-            temp=None,
-            feels_like=None,
-            pm=None,
-            pm_text=None,
-            outfits=[],
-            extra_items=[]
-        )
+    # 💥 ✅ 1. GPS로 들어온 경우 (GET)
+    if lat and lon:
+        url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API_KEY}&units=metric"
+        data = requests.get(url).json()
 
-    if request.method == "POST":
-        city = request.form["city"]
-
-        # 🌤 날씨 데이터
-        url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
-        response = requests.get(url)
-        data = response.json()
-
+        city_name = data["name"]
         temp = data["main"]["temp"]
         feels_like = data["main"]["feels_like"]
         real_temp = feels_like
 
         weather_main = data["weather"][0]["main"]
         wind_speed = data["wind"]["speed"]
+
         icon = data["weather"][0]["icon"]
         icon_url = f"https://openweathermap.org/img/wn/{icon}@2x.png"
 
         # 🌫 미세먼지
+        air_url = f"http://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={API_KEY}"
+        air_data = requests.get(air_url).json()
+
+        pm = air_data["list"][0]["main"]["aqi"]
+
+    # 💥 ✅ 2. 도시 입력 (POST)
+    elif request.method == "POST":
+        city = request.form["city"]
+
+        url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
+        data = requests.get(url).json()
+
+        city_name = city
+        temp = data["main"]["temp"]
+        feels_like = data["main"]["feels_like"]
+        real_temp = feels_like
+
+        weather_main = data["weather"][0]["main"]
+        wind_speed = data["wind"]["speed"]
+
+        icon = data["weather"][0]["icon"]
+        icon_url = f"https://openweathermap.org/img/wn/{icon}@2x.png"
+
         lat = data["coord"]["lat"]
         lon = data["coord"]["lon"]
 
         air_url = f"http://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={API_KEY}"
-        air_response = requests.get(air_url)
-        air_data = air_response.json()
+        air_data = requests.get(air_url).json()
 
         pm = air_data["list"][0]["main"]["aqi"]
 
@@ -124,7 +139,8 @@ def home():
         pm_text=pm_text,
         outfits=outfits,
         extra_items=extra_items,
-        icon_url=icon_url
+        icon_url=icon_url,
+        city_name=city_name
     )
 
 if __name__ == "__main__":

@@ -51,7 +51,12 @@
             color: white;
         }
 
-        /* 🍎 GLASS CARD */
+        .location-btn {
+            margin-top: 10px;
+            width: 100%;
+            background: #007aff;
+        }
+
         .card {
             margin-top: 20px;
             padding: 20px;
@@ -74,6 +79,13 @@
         .sub {
             color: #6e6e73;
             font-size: 14px;
+        }
+
+        .city {
+            font-size: 20px;
+            font-weight: 500;
+            text-align: center;
+            margin-top: 10px;
         }
 
         .grid {
@@ -112,7 +124,6 @@
             font-size: 18px;
             margin-top: 30px;
         }
-
     </style>
 </head>
 
@@ -122,17 +133,39 @@
 
     <h1>Today’s Fit</h1>
 
+    <!-- 🔍 검색 -->
     <form method="POST">
         <input type="text" name="city" placeholder="Seoul">
         <button type="submit">Go</button>
     </form>
 
+    <!-- 📍 현재 위치 버튼 -->
+    <button class="location-btn" onclick="getLocation()">현재 위치로 보기</button>
+
+    <script>
+    function getLocation() {
+        navigator.geolocation.getCurrentPosition((pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+
+            window.location.href = `/?lat=${lat}&lon=${lon}`;
+        });
+    }
+    </script>
+
     {% if temp %}
 
-    <!-- 🍎 날씨 -->
+    <!-- 📍 도시 이름 -->
+    {% if city_name %}
+    <div class="city">{{ city_name }}</div>
+    {% endif %}
+
+    <!-- 🌤 날씨 -->
     <div class="card weather-card">
-     <img src="{{ icon_url }}" style="width:60px;">
-     <div class="temp">{{ temp }}°</div>
+        {% if icon_url %}
+        <img src="{{ icon_url }}" style="width:60px;">
+        {% endif %}
+        <div class="temp">{{ temp }}°</div>
         <div class="sub">Feels like {{ feels_like }}°</div>
         <div class="sub">Air: {{ pm_text }}</div>
     </div>
@@ -140,7 +173,6 @@
     <!-- 👕 코디 -->
     {% for outfit in outfits %}
     <div class="card">
-
         <div class="grid">
 
             <div class="item">
@@ -165,7 +197,6 @@
         <a href="{{ outfit.link }}" target="_blank" class="btn">
             View Style
         </a>
-
     </div>
     {% endfor %}
 
