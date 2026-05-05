@@ -14,6 +14,17 @@ def home():
     outfits = []
     extra_items = []
 
+    if request.method == "GET":
+        return render_template(
+            "index.html",
+            temp=None,
+            feels_like=None,
+            pm=None,
+            pm_text=None,
+            outfits=[],
+            extra_items=[]
+        )
+
     if request.method == "POST":
         city = request.form["city"]
 
@@ -28,6 +39,8 @@ def home():
 
         weather_main = data["weather"][0]["main"]
         wind_speed = data["wind"]["speed"]
+        icon = data["weather"][0]["icon"]
+        icon_url = f"https://openweathermap.org/img/wn/{icon}@2x.png"
 
         # 🌫 미세먼지
         lat = data["coord"]["lat"]
@@ -110,7 +123,8 @@ def home():
         pm=pm,
         pm_text=pm_text,
         outfits=outfits,
-        extra_items=extra_items
+        extra_items=extra_items,
+        icon_url=icon_url
     )
 
 if __name__ == "__main__":
