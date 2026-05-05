@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>날씨 옷 추천</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            width: 200px;
+            text-align: center;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .card img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 12px;
+            background-color: black;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .btn:hover {
+            background-color: gray;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>오늘 뭐 입지?</h1>
+
+<form method="POST">
+    <input type="text" name="city" placeholder="도시 입력 (예: Seoul)">
+    <button type="submit">날씨 확인</button>
+</form>
+
+{% if temp %}
+    <h2>현재 온도: {{ temp }}°C</h2>
+    <h3>체감온도: {{ feels_like }}°C</h3>
+    <h3>미세먼지: {{ pm_text }}</h3>
+
+    <div class="container">
+
+        {% for outfit in outfits %}
+            <div class="card">
+
+                <h3>👕 상의</h3>
+                <img src="{{ outfit.top.img }}">
+                <p>{{ outfit.top.name }}</p>
+
+                <h3>👖 하의</h3>
+                <img src="{{ outfit.bottom.img }}">
+                <p>{{ outfit.bottom.name }}</p>
+
+                {% if outfit.outer %}
+                    <h3>🧥 아우터</h3>
+                    <img src="{{ outfit.outer.img }}">
+                    <p>{{ outfit.outer.name }}</p>
+                {% endif %}
+
+                <a href="{{ outfit.link }}" target="_blank" class="btn">
+                    보러가기
+                </a>
+
+            </div>
+        {% endfor %}
+
+    </div>
+{% endif %}
+
+{% if extra_items %}
+    <h2>🌦 추가 추천</h2>
+
+    <div class="container">
+        {% for item in extra_items %}
+            <div class="card">
+                <img src="{{ item.img }}">
+                <h3>{{ item.name }}</h3>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+</body>
+</html>
