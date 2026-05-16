@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+< HEAD
 
 from flask import Flask, render_template, request
 import requests
@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 API_KEY = "2fd339c206c2fa601c64bc589a4750e9"
 
-<<<<<<< HEAD
+< HEAD
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -112,7 +112,7 @@ def home():
         wind_speed = data["wind"]["speed"]
 
         icon = data["weather"][0]["icon"]
-<<<<<<< HEAD
+< HEAD
 
         icon_url = (
             f"https://openweathermap.org/img/wn/{icon}@2x.png"
@@ -221,7 +221,7 @@ def home():
         lat = data["coord"]["lat"]
         lon = data["coord"]["lon"]
 
-<<<<<<< HEAD
+< HEAD
     # =========================
     # 현재 위치
     # =========================
