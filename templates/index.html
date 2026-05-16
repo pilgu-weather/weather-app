@@ -1,0 +1,561 @@
+
+<!DOCTYPE html>
+<html lang="ko" translate="no">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="google"
+          content="notranslate">
+
+    <title>Weather Fit</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+
+            margin: 0;
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #edf2f7,
+                    #f8f9fb
+                );
+
+            color: #1d1d1f;
+        }
+
+        .container {
+
+            max-width: 430px;
+
+            margin: auto;
+
+            padding: 22px;
+        }
+
+        .logo {
+
+            font-size: 34px;
+
+            font-weight: 800;
+
+            letter-spacing: -1px;
+
+            margin-bottom: 24px;
+        }
+
+        form {
+
+            display: flex;
+
+            gap: 10px;
+        }
+
+        input {
+
+            flex: 1;
+
+            padding: 16px;
+
+            border-radius: 20px;
+
+            border:
+                1px solid rgba(255,255,255,0.35);
+
+            background:
+                rgba(255,255,255,0.45);
+
+            backdrop-filter: blur(18px);
+
+            outline: none;
+
+            font-size: 15px;
+
+            color: #1d1d1f;
+
+            box-shadow:
+                0 4px 20px rgba(0,0,0,0.03);
+        }
+
+        button {
+
+            padding: 16px 18px;
+
+            border-radius: 20px;
+
+            border: none;
+
+            background: rgba(255,255,255,0.45);
+
+            color: #1d1d1f;
+
+            backdrop-filter: blur(18px);
+
+            border:
+                1px solid rgba(255,255,255,0.4);
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+        .location-btn {
+
+            width: 100%;
+
+            margin-top: 14px;
+        }
+
+        .card {
+
+            margin-top: 22px;
+
+            padding: 28px;
+
+            border-radius: 34px;
+
+            background:
+                rgba(255,255,255,0.42);
+
+            backdrop-filter: blur(24px);
+
+            border:
+                1px solid rgba(255,255,255,0.38);
+
+            box-shadow:
+                0 10px 40px rgba(0,0,0,0.04);
+        }
+
+        .weather-card {
+
+            text-align: center;
+        }
+
+        .city {
+
+            font-size: 26px;
+
+            font-weight: 700;
+
+            margin-bottom: 8px;
+        }
+
+        .temp {
+
+            font-size: 78px;
+
+            font-weight: 800;
+
+            letter-spacing: -4px;
+
+            margin-top: 6px;
+        }
+
+        .sub {
+
+            font-size: 17px;
+
+            color: #6e6e73;
+
+            margin-top: 8px;
+
+            line-height: 1.5;
+        }
+
+        .message {
+
+            margin-top: 18px;
+
+            padding: 16px;
+
+            border-radius: 20px;
+
+            background:
+                rgba(255,255,255,0.35);
+
+            font-size: 15px;
+
+            color: #4b4b4f;
+
+            line-height: 1.6;
+        }
+
+        .style-image {
+
+            width: 100%;
+
+            height: 260px;
+
+            object-fit: cover;
+
+            border-radius: 26px;
+
+            margin-bottom: 18px;
+        }
+
+        .style-label {
+
+            font-size: 13px;
+
+            color: #8e8e93;
+
+            letter-spacing: 1px;
+
+            margin-bottom: 10px;
+        }
+
+        .style-title {
+
+            font-size: 34px;
+
+            font-weight: 800;
+
+            letter-spacing: -1px;
+
+            margin-bottom: 14px;
+        }
+
+        .style-desc {
+
+            font-size: 17px;
+
+            color: #4b4b4f;
+
+            line-height: 1.7;
+        }
+
+        .mood {
+
+            margin-top: 18px;
+
+            font-size: 15px;
+
+            color: #8e8e93;
+
+            line-height: 1.6;
+        }
+
+        .section-title {
+
+            font-size: 24px;
+
+            font-weight: 700;
+
+            margin-bottom: 18px;
+        }
+
+        .grid {
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 14px;
+        }
+
+        .item {
+
+            width: 48%;
+        }
+
+        .item img {
+
+            width: 100%;
+
+            height: 220px;
+
+            object-fit: cover;
+
+            border-radius: 24px;
+        }
+
+        .item-name {
+
+            text-align: center;
+
+            margin-top: 10px;
+
+            font-size: 16px;
+
+            color: #4b4b4f;
+        }
+
+        .btn {
+
+            display: block;
+
+            margin-top: 24px;
+
+            padding: 16px;
+
+            border-radius: 22px;
+
+            text-align: center;
+
+            text-decoration: none;
+
+            background:
+                rgba(255,255,255,0.5);
+
+            color: #1d1d1f;
+
+            border:
+                1px solid rgba(255,255,255,0.4);
+
+            font-weight: 700;
+        }
+
+        .extra-card img {
+
+            width: 100%;
+
+            height: 140px;
+
+            object-fit: cover;
+
+            border-radius: 22px;
+        }
+
+        .extra-name {
+
+            margin-top: 10px;
+
+            text-align: center;
+
+            color: #555;
+
+            font-size: 15px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">
+        Weather Fit
+    </div>
+
+    <!-- 검색 -->
+
+    <form method="POST" action="/">
+
+        <input type="text"
+               name="city"
+               placeholder="Search city">
+
+        <button type="submit">
+            Go
+        </button>
+
+    </form>
+
+    <!-- 현재 위치 -->
+
+    <button type="button"
+            class="location-btn"
+            onclick="getLocation()">
+
+        현재 위치로 보기
+
+    </button>
+
+    <script>
+
+        function getLocation() {
+
+            navigator.geolocation.getCurrentPosition(
+
+                (pos) => {
+
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+
+                    window.location.href =
+                        `/?lat=${lat}&lon=${lon}`;
+                }
+            );
+        }
+
+    </script>
+
+    {% if temp %}
+
+    <!-- 날씨 카드 -->
+
+    <div class="card weather-card">
+
+        <div class="city">
+            {{ city_name }}
+        </div>
+
+        <img src="{{ icon_url }}"
+             style="width:90px;">
+
+        <div class="temp">
+            {{ temp }}°
+        </div>
+
+        <div class="sub">
+            체감 {{ feels_like }}°
+        </div>
+
+        <div class="sub">
+            최저 {{ temp_min }}°
+            /
+            최고 {{ temp_max }}°
+        </div>
+
+        <div class="sub">
+            미세먼지 {{ pm_text }}
+        </div>
+
+    </div>
+
+    <!-- AI 스타일 카드 -->
+
+    <div class="card">
+
+        <img src="{{ style_img }}"
+             class="style-image">
+
+        <div class="style-label">
+            TODAY’S STYLE
+        </div>
+
+        <div class="style-title">
+            {{ style_name }}
+        </div>
+
+        <div class="style-desc">
+            {{ style_desc }}
+        </div>
+
+        <div class="mood">
+            {{ mood_message }}
+        </div>
+
+    </div>
+
+    <!-- 추천 코디 -->
+
+    {% for outfit in outfits %}
+
+    <div class="card">
+
+        <div class="section-title">
+            오늘의 추천 코디
+        </div>
+
+        <div class="grid">
+
+            <div class="item">
+
+                <img src="{{ outfit.top.img }}">
+
+                <div class="item-name">
+                    {{ outfit.top.name }}
+                </div>
+
+            </div>
+
+            <div class="item">
+
+                <img src="{{ outfit.bottom.img }}">
+
+                <div class="item-name">
+                    {{ outfit.bottom.name }}
+                </div>
+
+            </div>
+
+            {% if outfit.outer %}
+
+            <div class="item">
+
+                <img src="{{ outfit.outer.img }}">
+
+                <div class="item-name">
+                    {{ outfit.outer.name }}
+                </div>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+        <a href="{{ outfit.link }}"
+           target="_blank"
+           class="btn">
+
+            View Style
+
+        </a>
+
+    </div>
+
+    {% endfor %}
+
+    <!-- 추가 추천 -->
+
+    {% if extra_items %}
+
+    <div class="card">
+
+        <div class="section-title">
+
+            Extra Recommendations
+
+        </div>
+
+        <div class="grid">
+
+            {% for item in extra_items %}
+
+            <div class="item extra-card">
+
+                <img src="{{ item.img }}">
+
+                <div class="extra-name">
+
+                    {{ item.name }}
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>
