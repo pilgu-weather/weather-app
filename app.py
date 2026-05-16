@@ -291,7 +291,7 @@ def home():
 
         style_name = "남친룩"
 
-        style_img = "/static/styles/style3.png"
+        style_img = "/static/styles/newlook1.png"
 
         style_desc = (
             "반팔 + 긴바지 + 가디건 조합 추천"
