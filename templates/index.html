@@ -8,9 +8,6 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <meta name="google"
-          content="notranslate">
-
     <title>Weather Fit</title>
 
     <style>
@@ -86,9 +83,6 @@
             font-size: 15px;
 
             color: #1d1d1f;
-
-            box-shadow:
-                0 4px 20px rgba(0,0,0,0.03);
         }
 
         button {
@@ -111,8 +105,6 @@
             font-weight: 600;
 
             cursor: pointer;
-
-            transition: 0.2s;
         }
 
         .location-btn {
@@ -120,6 +112,52 @@
             width: 100%;
 
             margin-top: 14px;
+        }
+
+        .style-buttons {
+
+            display: flex;
+
+            gap: 10px;
+
+            overflow-x: auto;
+
+            margin-top: 20px;
+
+            padding-bottom: 4px;
+        }
+
+        .style-btn {
+
+            padding:
+                12px 18px;
+
+            border-radius: 18px;
+
+            text-decoration: none;
+
+            color: #1d1d1f;
+
+            background:
+                rgba(255,255,255,0.45);
+
+            border:
+                1px solid rgba(255,255,255,0.35);
+
+            backdrop-filter: blur(18px);
+
+            font-size: 14px;
+
+            white-space: nowrap;
+
+            transition: 0.2s;
+        }
+
+        .style-btn.active {
+
+            background: #1d1d1f;
+
+            color: white;
         }
 
         .card {
@@ -174,8 +212,6 @@
             color: #6e6e73;
 
             margin-top: 8px;
-
-            line-height: 1.5;
         }
 
         .style-image {
@@ -235,76 +271,6 @@
             line-height: 1.6;
         }
 
-        .section-title {
-
-            font-size: 24px;
-
-            font-weight: 700;
-
-            margin-bottom: 18px;
-        }
-
-        .grid {
-
-            display: flex;
-
-            flex-wrap: wrap;
-
-            gap: 14px;
-        }
-
-        .item {
-
-            width: 48%;
-        }
-
-        .item img {
-
-            width: 100%;
-
-            height: 220px;
-
-            object-fit: cover;
-
-            border-radius: 24px;
-        }
-
-        .item-name {
-
-            text-align: center;
-
-            margin-top: 10px;
-
-            font-size: 16px;
-
-            color: #4b4b4f;
-        }
-
-        .btn {
-
-            display: block;
-
-            margin-top: 24px;
-
-            padding: 16px;
-
-            border-radius: 22px;
-
-            text-align: center;
-
-            text-decoration: none;
-
-            background:
-                rgba(255,255,255,0.5);
-
-            color: #1d1d1f;
-
-            border:
-                1px solid rgba(255,255,255,0.4);
-
-            font-weight: 700;
-        }
-
     </style>
 
 </head>
@@ -336,6 +302,31 @@
         현재 위치로 보기
 
     </button>
+
+    <div class="style-buttons">
+
+        <a href="/?style=minimal"
+           class="style-btn {% if selected_style == 'minimal' %}active{% endif %}">
+
+            미니멀
+
+        </a>
+
+        <a href="/?style=street"
+           class="style-btn {% if selected_style == 'street' %}active{% endif %}">
+
+            스트릿
+
+        </a>
+
+        <a href="/?style=boyfriend"
+           class="style-btn {% if selected_style == 'boyfriend' %}active{% endif %}">
+
+            남친룩
+
+        </a>
+
+    </div>
 
     <script>
 
@@ -409,64 +400,6 @@
         </div>
 
     </div>
-
-    {% for outfit in outfits %}
-
-    <div class="card">
-
-        <div class="section-title">
-            오늘의 추천 코디
-        </div>
-
-        <div class="grid">
-
-            <div class="item">
-
-                <img src="{{ outfit.top.img }}">
-
-                <div class="item-name">
-                    {{ outfit.top.name }}
-                </div>
-
-            </div>
-
-            <div class="item">
-
-                <img src="{{ outfit.bottom.img }}">
-
-                <div class="item-name">
-                    {{ outfit.bottom.name }}
-                </div>
-
-            </div>
-
-            {% if outfit.outer %}
-
-            <div class="item">
-
-                <img src="{{ outfit.outer.img }}">
-
-                <div class="item-name">
-                    {{ outfit.outer.name }}
-                </div>
-
-            </div>
-
-            {% endif %}
-
-        </div>
-
-        <a href="{{ outfit.link }}"
-           target="_blank"
-           class="btn">
-
-            View Style
-
-        </a>
-
-    </div>
-
-    {% endfor %}
 
     {% endif %}
 
