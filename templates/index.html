@@ -236,61 +236,62 @@
         }
 
         /* =========================
-           ITEMS
+           STYLE INFO
         ========================== */
 
-        .items-grid {
+        .style-info {
 
-            display: grid;
-
-            grid-template-columns:
-                repeat(2, 1fr);
-
-            gap: 14px;
+            margin-top: 10px;
         }
 
-        .item-box {
+        .style-title {
 
-            background:
-                rgba(255,255,255,0.5);
+            font-size: 30px;
 
-            border:
-                1px solid rgba(255,255,255,0.4);
-
-            border-radius: 22px;
-
-            padding: 14px;
-
-            text-align: center;
-        }
-
-        .item-box img {
-
-            width: 100%;
-
-            height: 90px;
-
-            object-fit: contain;
+            font-weight: 800;
 
             margin-bottom: 10px;
         }
 
-        .item-title {
+        .style-desc {
 
-            font-size: 15px;
-
-            font-weight: 700;
-
-            margin-bottom: 6px;
-        }
-
-        .item-desc {
-
-            font-size: 13px;
+            font-size: 16px;
 
             color: #8e8e93;
 
-            line-height: 1.5;
+            line-height: 1.6;
+
+            margin-bottom: 22px;
+        }
+
+        .shop-btn {
+
+            display: inline-block;
+
+            width: 100%;
+
+            text-align: center;
+
+            padding: 16px;
+
+            border-radius: 22px;
+
+            background: #1d1d1f;
+
+            color: white;
+
+            text-decoration: none;
+
+            font-size: 16px;
+
+            font-weight: 700;
+
+            transition: 0.3s;
+        }
+
+        .shop-btn:hover {
+
+            opacity: 0.88;
         }
 
         /* =========================
@@ -425,47 +426,23 @@
             <img src="/static/styles/minimal.png"
                  class="style-image">
 
-            <div class="items-grid">
+            <div class="style-info">
 
-                <div class="item-box">
-                    <img src="/static/items/tshirt.png">
-                    <div class="item-title">
-                        화이트 티셔츠
-                    </div>
-                    <div class="item-desc">
-                        심플하게 포인트
-                    </div>
+                <div class="style-title">
+                    미니멀 룩
                 </div>
 
-                <div class="item-box">
-                    <img src="/static/items/shorts.png">
-                    <div class="item-title">
-                        블랙 반바지
-                    </div>
-                    <div class="item-desc">
-                        깔끔한 기본 아이템
-                    </div>
+                <div class="style-desc">
+                    심플하고 깔끔한 여름 데일리 스타일.
                 </div>
 
-                <div class="item-box">
-                    <img src="/static/items/shoes.png">
-                    <div class="item-title">
-                        화이트 스니커즈
-                    </div>
-                    <div class="item-desc">
-                        데일리 필수템
-                    </div>
-                </div>
+                <a href="https://www.musinsa.com"
+                   target="_blank"
+                   class="shop-btn">
 
-                <div class="item-box">
-                    <img src="/static/items/watch.png">
-                    <div class="item-title">
-                        시계
-                    </div>
-                    <div class="item-desc">
-                        모던한 무드 완성
-                    </div>
-                </div>
+                   상세 보기
+
+                </a>
 
             </div>
 
@@ -478,47 +455,24 @@
             <img src="/static/styles/boyfriend.png"
                  class="style-image">
 
-            <div class="items-grid">
+            <div class="style-info">
 
-                <div class="item-box">
-                    <img src="/static/items/shirt.png">
-                    <div class="item-title">
-                        라이트 셔츠
-                    </div>
-                    <div class="item-desc">
-                        부드러운 컬러감
-                    </div>
+                <div class="style-title">
+                    남친룩
                 </div>
 
-                <div class="item-box">
-                    <img src="/static/items/tee.png">
-                    <div class="item-title">
-                        화이트 티셔츠
-                    </div>
-                    <div class="item-desc">
-                        심플한 이너
-                    </div>
+                <div class="style-desc">
+                    셔츠와 반바지 기반의
+                    깔끔한 데이트 무드 스타일.
                 </div>
 
-                <div class="item-box">
-                    <img src="/static/items/beige.png">
-                    <div class="item-title">
-                        베이지 쇼츠
-                    </div>
-                    <div class="item-desc">
-                        데이트 무드
-                    </div>
-                </div>
+                <a href="https://www.musinsa.com"
+                   target="_blank"
+                   class="shop-btn">
 
-                <div class="item-box">
-                    <img src="/static/items/shoes.png">
-                    <div class="item-title">
-                        화이트 스니커즈
-                    </div>
-                    <div class="item-desc">
-                        깔끔한 마무리
-                    </div>
-                </div>
+                   상세 보기
+
+                </a>
 
             </div>
 
@@ -531,47 +485,24 @@
             <img src="/static/styles/street.png"
                  class="style-image">
 
-            <div class="items-grid">
+            <div class="style-info">
 
-                <div class="item-box">
-                    <img src="/static/items/streettee.png">
-                    <div class="item-title">
-                        오버핏 티셔츠
-                    </div>
-                    <div class="item-desc">
-                        스트릿 무드
-                    </div>
+                <div class="style-title">
+                    스트릿 무드
                 </div>
 
-                <div class="item-box">
-                    <img src="/static/items/layered.png">
-                    <div class="item-title">
-                        레이어드 나시
-                    </div>
-                    <div class="item-desc">
-                        레이어드 포인트
-                    </div>
+                <div class="style-desc">
+                    오버핏과 레이어드 중심의
+                    힙한 여름 스트릿 스타일.
                 </div>
 
-                <div class="item-box">
-                    <img src="/static/items/sweatshorts.png">
-                    <div class="item-title">
-                        스웻 쇼츠
-                    </div>
-                    <div class="item-desc">
-                        편안한 핏감
-                    </div>
-                </div>
+                <a href="https://www.musinsa.com"
+                   target="_blank"
+                   class="shop-btn">
 
-                <div class="item-box">
-                    <img src="/static/items/jordan.png">
-                    <div class="item-title">
-                        블랙 스니커즈
-                    </div>
-                    <div class="item-desc">
-                        힙한 스트릿 감성
-                    </div>
-                </div>
+                   상세 보기
+
+                </a>
 
             </div>
 
