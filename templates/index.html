@@ -114,52 +114,6 @@
             margin-top: 14px;
         }
 
-        .style-buttons {
-
-            display: flex;
-
-            gap: 10px;
-
-            overflow-x: auto;
-
-            margin-top: 20px;
-
-            padding-bottom: 4px;
-        }
-
-        .style-btn {
-
-            padding:
-                12px 18px;
-
-            border-radius: 18px;
-
-            text-decoration: none;
-
-            color: #1d1d1f;
-
-            background:
-                rgba(255,255,255,0.45);
-
-            border:
-                1px solid rgba(255,255,255,0.35);
-
-            backdrop-filter: blur(18px);
-
-            font-size: 14px;
-
-            white-space: nowrap;
-
-            transition: 0.2s;
-        }
-
-        .style-btn.active {
-
-            background: #1d1d1f;
-
-            color: white;
-        }
-
         .card {
 
             margin-top: 22px;
@@ -212,6 +166,56 @@
             color: #6e6e73;
 
             margin-top: 8px;
+        }
+
+        /* =========================
+           SWIPE CAROUSEL
+        ========================== */
+
+        .carousel {
+
+            display: flex;
+
+            gap: 20px;
+
+            overflow-x: auto;
+
+            scroll-snap-type: x mandatory;
+
+            scroll-behavior: smooth;
+
+            padding-bottom: 10px;
+
+            margin-top: 22px;
+        }
+
+        .carousel::-webkit-scrollbar {
+
+            display: none;
+        }
+
+        .style-card {
+
+            min-width: 100%;
+
+            scroll-snap-align: center;
+
+            padding: 28px;
+
+            border-radius: 34px;
+
+            background:
+                rgba(255,255,255,0.42);
+
+            backdrop-filter: blur(24px);
+
+            border:
+                1px solid rgba(255,255,255,0.38);
+
+            box-shadow:
+                0 10px 40px rgba(0,0,0,0.04);
+
+            flex-shrink: 0;
         }
 
         .style-image {
@@ -303,31 +307,6 @@
 
     </button>
 
-    <div class="style-buttons">
-
-        <a href="/?style=minimal"
-           class="style-btn {% if selected_style == 'minimal' %}active{% endif %}">
-
-            미니멀
-
-        </a>
-
-        <a href="/?style=street"
-           class="style-btn {% if selected_style == 'street' %}active{% endif %}">
-
-            스트릿
-
-        </a>
-
-        <a href="/?style=boyfriend"
-           class="style-btn {% if selected_style == 'boyfriend' %}active{% endif %}">
-
-            남친룩
-
-        </a>
-
-    </div>
-
     <script>
 
         function getLocation() {
@@ -378,25 +357,86 @@
 
     </div>
 
-    <div class="card">
+    <!-- SWIPE CAROUSEL -->
 
-        <img src="{{ style_img }}"
-             class="style-image">
+    <div class="carousel">
 
-        <div class="style-label">
-            TODAY’S STYLE
+        <!-- MINIMAL -->
+
+        <div class="style-card">
+
+            <img src="/static/styles/minimal.png"
+                 class="style-image">
+
+            <div class="style-label">
+                TODAY’S STYLE
+            </div>
+
+            <div class="style-title">
+                미니멀
+            </div>
+
+            <div class="style-desc">
+                깔끔하고 담백한 실루엣.
+                차분한 무드의 데일리 스타일.
+            </div>
+
+            <div class="mood">
+                Simple is powerful.
+            </div>
+
         </div>
 
-        <div class="style-title">
-            {{ style_name }}
+        <!-- STREET -->
+
+        <div class="style-card">
+
+            <img src="/static/styles/street.png"
+                 class="style-image">
+
+            <div class="style-label">
+                TODAY’S STYLE
+            </div>
+
+            <div class="style-title">
+                스트릿
+            </div>
+
+            <div class="style-desc">
+                와이드 핏과 레이어드 중심.
+                자유로운 스트릿 감성.
+            </div>
+
+            <div class="mood">
+                Urban energy mood.
+            </div>
+
         </div>
 
-        <div class="style-desc">
-            {{ style_desc }}
-        </div>
+        <!-- BOYFRIEND -->
 
-        <div class="mood">
-            {{ mood_message }}
+        <div class="style-card">
+
+            <img src="/static/styles/boyfriend.png"
+                 class="style-image">
+
+            <div class="style-label">
+                TODAY’S STYLE
+            </div>
+
+            <div class="style-title">
+                남친룩
+            </div>
+
+            <div class="style-desc">
+                부드럽고 호감형 느낌.
+                데이트 무드 스타일링.
+            </div>
+
+            <div class="mood">
+                Soft and clean vibe.
+            </div>
+
         </div>
 
     </div>
