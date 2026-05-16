@@ -259,7 +259,7 @@ def home():
 
         style_name = "미니멀 썸머룩"
 
-        style_img = "/static/styles/style3.png"
+        style_img = "/static/styles/newlook1.png"
 
         style_desc = (
             "반팔 + 반바지 조합 추천"
@@ -323,7 +323,7 @@ def home():
 
         style_name = "시티보이룩"
 
-        style_img = "/static/styles/style3.png"
+        style_img = "/static/styles/newlook1.png"
 
         style_desc = (
             "얇은 니트 + 와이드 팬츠 추천"
@@ -355,7 +355,7 @@ def home():
 
         style_name = "감성 캐주얼"
 
-        style_img = "/static/styles/style3.png"
+        style_img = "/static/styles/newlook1.png"
 
         style_desc = (
             "가디건 + 긴바지 조합 추천"
@@ -390,7 +390,7 @@ def home():
 
         style_name = "윈터 스트릿"
 
-        style_img = "/static/styles/style3.png"
+        style_img = "/static/styles/newlook1.png"
 
         style_desc = (
             "후드 + 두꺼운 자켓 추천"
