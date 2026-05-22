@@ -1,4 +1,3 @@
-id="m4x8qp"
 from flask import Flask, render_template, request
 import requests
 from datetime import datetime
@@ -24,11 +23,6 @@ def home():
     outfits = []
     extra_items = []
 
-    style_name = ""
-    style_desc = ""
-    mood_message = ""
-    style_img = ""
-
     icon_url = None
     city_name = None
 
@@ -39,15 +33,6 @@ def home():
     lon = None
 
     error = None
-
-    # =========================
-    # 스타일 선택
-    # =========================
-
-    selected_style = request.args.get(
-        "style",
-        "minimal"
-    )
 
     # =========================
     # 도시 검색
@@ -245,100 +230,136 @@ def home():
         pm_text = "최악"
 
     # =========================
-    # 스타일 선택 로직
+    # 계절 판단
     # =========================
 
-    if selected_style == "street":
+    if temp >= 27:
 
-        style_name = "스트릿 무드"
+        season = "summer"
 
-        style_desc = (
-            "오버핏 + 와이드 팬츠 기반 스트릿 스타일"
-        )
+    elif temp >= 20:
 
-        mood_message = (
-            "오늘은 무드 있게, 살짝 힙하게."
-        )
+        season = "spring"
 
-        style_img = "/static/styles/street.png"
+    elif temp >= 10:
 
-    elif selected_style == "boyfriend":
-
-        style_name = "남친룩"
-
-        style_desc = (
-            "셔츠 + 슬랙스 기반 깔끔한 스타일"
-        )
-
-        mood_message = (
-            "꾸안꾸 느낌으로 가기 좋은 날."
-        )
-
-        style_img = "/static/styles/boyfriend.png"
+        season = "fall"
 
     else:
 
-        style_name = "미니멀 룩"
-
-        style_desc = (
-            "심플하고 깔끔한 데일리 스타일"
-        )
-
-        mood_message = (
-            "미니멀은 언제나 실패하지 않는다."
-        )
-
-        style_img = "/static/styles/minimal.png"
+        season = "winter"
 
     # =========================
-    # 코디 추천
+    # 계절별 스타일 추천
     # =========================
 
-    outfits = [
-        {
-            "top": {
-                "name": "반팔",
-                "img": "https://images.unsplash.com/photo-1520975922284-8b456906c813?auto=format&fit=crop&w=300&q=80"
+    if season == "summer":
+
+        outfits = [
+
+            {
+                "title": "여름 미니멀",
+                "desc": "반팔과 쇼츠 기반의 깔끔한 여름 스타일.",
+                "img": "/static/styles/summer_minimal.png"
             },
 
-            "bottom": {
-                "name": "긴바지",
-                "img": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=300&q=80"
+            {
+                "title": "여름 남친룩",
+                "desc": "린넨 셔츠와 반바지 조합의 데이트룩.",
+                "img": "/static/styles/summer_boyfriend.png"
             },
 
-            "outer": {
-                "name": "가디건",
-                "img": "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=300&q=80"
+            {
+                "title": "여름 스트릿",
+                "desc": "오버핏 반팔 중심의 스트릿 무드.",
+                "img": "/static/styles/summer_street.png"
+            }
+
+        ]
+
+    elif season == "spring":
+
+        outer_text = "가디건"
+
+        if wind_speed >= 5:
+
+            outer_text = "바람막이"
+
+        outfits = [
+
+            {
+                "title": "봄 미니멀",
+                "desc": f"{outer_text} 기반의 깔끔한 미니멀룩.",
+                "img": "/static/styles/spring_minimal.png"
             },
 
-            "link": "https://www.musinsa.com"
-        }
-    ]
+            {
+                "title": "봄 남친룩",
+                "desc": "셔츠 레이어드 중심의 데이트 스타일.",
+                "img": "/static/styles/spring_boyfriend.png"
+            },
 
-    # =========================
-    # 추가 추천
-    # =========================
+            {
+                "title": "봄 스트릿",
+                "desc": f"{outer_text} 기반의 스트릿 코디.",
+                "img": "/static/styles/spring_street.png"
+            }
 
-    if weather_main == "Rain":
+        ]
 
-        extra_items.append({
-            "name": "우산 추천",
-            "img": "https://images.unsplash.com/photo-1520975922284-8b456906c813?auto=format&fit=crop&w=300&q=80"
-        })
+    elif season == "fall":
 
-    if wind_speed >= 5:
+        outer_text = "가디건"
 
-        extra_items.append({
-            "name": "바람막이 추천",
-            "img": "https://images.unsplash.com/photo-1542060748-10c28b62716f?auto=format&fit=crop&w=300&q=80"
-        })
+        if wind_speed >= 5:
 
-    if pm >= 3:
+            outer_text = "바람막이"
 
-        extra_items.append({
-            "name": "마스크 추천",
-            "img": "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=300&q=80"
-        })
+        outfits = [
+
+            {
+                "title": "가을 미니멀",
+                "desc": f"{outer_text}와 슬랙스 기반 감성 코디.",
+                "img": "/static/styles/fall_minimal.png"
+            },
+
+            {
+                "title": "가을 남친룩",
+                "desc": "자켓과 셔츠 조합의 데일리룩.",
+                "img": "/static/styles/fall_boyfriend.png"
+            },
+
+            {
+                "title": "가을 스트릿",
+                "desc": "후드와 와이드 팬츠 기반 스트릿룩.",
+                "img": "/static/styles/fall_street.png"
+            }
+
+        ]
+
+    else:
+
+        outfits = [
+
+            {
+                "title": "겨울 미니멀",
+                "desc": "코트와 니트 중심의 겨울 스타일.",
+                "img": "/static/styles/winter_minimal.png"
+            },
+
+            {
+                "title": "겨울 남친룩",
+                "desc": "패딩과 머플러 기반 데일리룩.",
+                "img": "/static/styles/winter_boyfriend.png"
+            },
+
+            {
+                "title": "겨울 스트릿",
+                "desc": "패딩과 후드 조합의 스트릿 무드.",
+                "img": "/static/styles/winter_street.png"
+            }
+
+        ]
 
     return render_template(
 
@@ -355,18 +376,9 @@ def home():
         pm_text=pm_text,
 
         outfits=outfits,
-        extra_items=extra_items,
-
-        style_name=style_name,
-        style_desc=style_desc,
-        mood_message=mood_message,
-
-        style_img=style_img,
 
         icon_url=icon_url,
         city_name=city_name,
-
-        selected_style=selected_style,
 
         error=error
     )
