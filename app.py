@@ -1,3 +1,4 @@
+id="m4x8qp"
 from flask import Flask, render_template, request
 import requests
 from datetime import datetime
@@ -38,6 +39,15 @@ def home():
     lon = None
 
     error = None
+
+    # =========================
+    # 스타일 선택
+    # =========================
+
+    selected_style = request.args.get(
+        "style",
+        "minimal"
+    )
 
     # =========================
     # 도시 검색
@@ -160,6 +170,7 @@ def home():
             dt_txt = item["dt_txt"]
 
             date_part = dt_txt.split(" ")[0]
+
             hour_part = int(
                 dt_txt.split(" ")[1].split(":")[0]
             )
@@ -234,171 +245,75 @@ def home():
         pm_text = "최악"
 
     # =========================
-    # 옷 추천
+    # 스타일 선택 로직
     # =========================
 
-    if day_temp >= 28:
+    if selected_style == "street":
 
-        outfits = [
-            {
-                "top": {
-                    "name": "반팔",
-                    "img": "https://images.unsplash.com/photo-1520975922284-8b456906c813?auto=format&fit=crop&w=300&q=80"
-                },
-
-                "bottom": {
-                    "name": "반바지",
-                    "img": "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?auto=format&fit=crop&w=300&q=80"
-                },
-
-                "outer": None,
-
-                "link": "https://www.musinsa.com"
-            }
-        ]
-
-        style_name = "미니멀 썸머룩"
-
-        style_img = "/static/styles/newlook1.png"
+        style_name = "스트릿 무드"
 
         style_desc = (
-            "반팔 + 반바지 조합 추천"
+            "오버핏 + 와이드 팬츠 기반 스트릿 스타일"
         )
 
         mood_message = (
-            "가볍게 입어도 충분히 분위기 나는 날."
+            "오늘은 무드 있게, 살짝 힙하게."
         )
 
-    elif day_temp >= 24:
+        style_img = "/static/styles/street.png"
 
-        outfits = [
-            {
-                "top": {
-                    "name": "반팔",
-                    "img": "https://images.unsplash.com/photo-1520975922284-8b456906c813?auto=format&fit=crop&w=300&q=80"
-                },
-
-                "bottom": {
-                    "name": "긴바지",
-                    "img": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=300&q=80"
-                },
-
-                "outer": None,
-
-                "link": "https://www.musinsa.com"
-            }
-        ]
+    elif selected_style == "boyfriend":
 
         style_name = "남친룩"
 
-        style_img = "/static/styles/newlook1.png"
-
         style_desc = (
-            "반팔 + 긴바지 + 가디건 조합 추천"
+            "셔츠 + 슬랙스 기반 깔끔한 스타일"
         )
 
         mood_message = (
-            "낮에는 덥고 저녁은 선선해. 가디건 하나 챙기면 좋은 날."
+            "꾸안꾸 느낌으로 가기 좋은 날."
         )
 
-    elif day_temp >= 20:
-
-        outfits = [
-            {
-                "top": {
-                    "name": "얇은 긴팔",
-                    "img": "https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=300&q=80"
-                },
-
-                "bottom": {
-                    "name": "긴바지",
-                    "img": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=300&q=80"
-                },
-
-                "outer": None,
-
-                "link": "https://www.musinsa.com"
-            }
-        ]
-
-        style_name = "시티보이룩"
-
-        style_img = "/static/styles/newlook1.png"
-
-        style_desc = (
-            "얇은 니트 + 와이드 팬츠 추천"
-        )
-
-        mood_message = (
-            "꾸미기 좋은 기온."
-        )
-
-    elif day_temp >= 16:
-
-        outfits = [
-            {
-                "top": {
-                    "name": "가디건",
-                    "img": "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=300&q=80"
-                },
-
-                "bottom": {
-                    "name": "긴바지",
-                    "img": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=300&q=80"
-                },
-
-                "outer": None,
-
-                "link": "https://www.musinsa.com"
-            }
-        ]
-
-        style_name = "감성 캐주얼"
-
-        style_img = "/static/styles/newlook1.png"
-
-        style_desc = (
-            "가디건 + 긴바지 조합 추천"
-        )
-
-        mood_message = (
-            "포근한 분위기가 잘 어울리는 날."
-        )
+        style_img = "/static/styles/boyfriend.png"
 
     else:
 
-        outfits = [
-            {
-                "top": {
-                    "name": "후드티",
-                    "img": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=300&q=80"
-                },
-
-                "bottom": {
-                    "name": "청바지",
-                    "img": "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=300&q=80"
-                },
-
-                "outer": {
-                    "name": "두꺼운 자켓",
-                    "img": "https://images.unsplash.com/photo-1542060748-10c28b62716f?auto=format&fit=crop&w=300&q=80"
-                },
-
-                "link": "https://www.musinsa.com"
-            }
-        ]
-
-        style_name = "윈터 스트릿"
-
-        style_img = "/static/styles/newlook1.png"
+        style_name = "미니멀 룩"
 
         style_desc = (
-            "후드 + 두꺼운 자켓 추천"
+            "심플하고 깔끔한 데일리 스타일"
         )
 
         mood_message = (
-            "따뜻함이 가장 중요한 하루."
+            "미니멀은 언제나 실패하지 않는다."
         )
+
+        style_img = "/static/styles/minimal.png"
+
+    # =========================
+    # 코디 추천
+    # =========================
+
+    outfits = [
+        {
+            "top": {
+                "name": "반팔",
+                "img": "https://images.unsplash.com/photo-1520975922284-8b456906c813?auto=format&fit=crop&w=300&q=80"
+            },
+
+            "bottom": {
+                "name": "긴바지",
+                "img": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=300&q=80"
+            },
+
+            "outer": {
+                "name": "가디건",
+                "img": "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=300&q=80"
+            },
+
+            "link": "https://www.musinsa.com"
+        }
+    ]
 
     # =========================
     # 추가 추천
@@ -450,6 +365,8 @@ def home():
 
         icon_url=icon_url,
         city_name=city_name,
+
+        selected_style=selected_style,
 
         error=error
     )
