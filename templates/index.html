@@ -291,10 +291,6 @@
             transform: scale(1.03);
         }
 
-        /* =========================
-           STYLE INFO
-        ========================== */
-
         .style-info {
 
             margin-top: 10px;
@@ -361,10 +357,6 @@
 
             opacity: 0.94;
         }
-
-        /* =========================
-           DOTS
-        ========================== */
 
         .dots {
 
@@ -452,8 +444,6 @@
 
     {% if temp %}
 
-    <!-- WEATHER -->
-
     <div class="card weather-card">
 
         <div class="city">
@@ -487,19 +477,21 @@
 
     <div class="carousel">
 
+        {% for outfit in outfits %}
+
         <div class="style-card">
 
-            <img src="/static/styles/minimal.png"
+            <img src="{{ outfit.img }}"
                  class="style-image">
 
             <div class="style-info">
 
                 <div class="style-title">
-                    미니멀 룩
+                    {{ outfit.title }}
                 </div>
 
                 <div class="style-desc">
-                    심플하고 깔끔한 여름 데일리 스타일.
+                    {{ outfit.desc }}
                 </div>
 
                 <a href="https://www.musinsa.com"
@@ -514,61 +506,7 @@
 
         </div>
 
-        <div class="style-card">
-
-            <img src="/static/styles/boyfriend.png"
-                 class="style-image">
-
-            <div class="style-info">
-
-                <div class="style-title">
-                    남친룩
-                </div>
-
-                <div class="style-desc">
-                    셔츠와 반바지 기반의
-                    깔끔한 데이트 무드 스타일.
-                </div>
-
-                <a href="https://www.musinsa.com"
-                   target="_blank"
-                   class="shop-btn">
-
-                   상세 보기
-
-                </a>
-
-            </div>
-
-        </div>
-
-        <div class="style-card">
-
-            <img src="/static/styles/street.png"
-                 class="style-image">
-
-            <div class="style-info">
-
-                <div class="style-title">
-                    스트릿 무드
-                </div>
-
-                <div class="style-desc">
-                    오버핏과 레이어드 중심의
-                    힙한 여름 스트릿 스타일.
-                </div>
-
-                <a href="https://www.musinsa.com"
-                   target="_blank"
-                   class="shop-btn">
-
-                   상세 보기
-
-                </a>
-
-            </div>
-
-        </div>
+        {% endfor %}
 
     </div>
 
@@ -576,9 +514,11 @@
 
     <div class="dots">
 
-        <span class="dot active"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
+        {% for outfit in outfits %}
+
+        <span class="dot {% if loop.first %}active{% endif %}"></span>
+
+        {% endfor %}
 
     </div>
 
@@ -594,26 +534,30 @@
     const dots =
         document.querySelectorAll(".dot");
 
-    carousel.addEventListener("scroll", () => {
+    if (carousel) {
 
-        const cardWidth =
-            carousel.querySelector(".style-card")
-            .offsetWidth + 22;
+        carousel.addEventListener("scroll", () => {
 
-        const index =
-            Math.round(
-                carousel.scrollLeft / cardWidth
-            );
+            const cardWidth =
+                carousel.querySelector(".style-card")
+                .offsetWidth + 22;
 
-        dots.forEach((dot) => {
-            dot.classList.remove("active");
+            const index =
+                Math.round(
+                    carousel.scrollLeft / cardWidth
+                );
+
+            dots.forEach((dot) => {
+                dot.classList.remove("active");
+            });
+
+            if (dots[index]) {
+                dots[index].classList.add("active");
+            }
+
         });
 
-        if (dots[index]) {
-            dots[index].classList.add("active");
-        }
-
-    });
+    }
 
 </script>
 
