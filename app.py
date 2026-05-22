@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import requests
 from datetime import datetime
+import random
 
 app = Flask(__name__)
 
@@ -21,7 +22,6 @@ def home():
     pm_text = None
 
     outfits = []
-    extra_items = []
 
     icon_url = None
     city_name = None
@@ -126,6 +126,9 @@ def home():
         icon_url = (
             f"https://openweathermap.org/img/wn/{icon}@2x.png"
         )
+
+        lat = data["coord"]["lat"]
+        lon = data["coord"]["lon"]
 
     else:
 
@@ -259,37 +262,61 @@ def home():
 
             {
                 "title": "여름 미니멀",
+
                 "desc": "반팔과 쇼츠 기반의 깔끔한 여름 스타일.",
-                "img": "/static/styles/summer_minimal.png"
+
+                "img": random.choice([
+
+                    "/static/styles/summer_minimal_1.png",
+                    "/static/styles/summer_minimal_2.png",
+                    "/static/styles/summer_minimal_3.png",
+                    "/static/styles/summer_minimal_4.png",
+                    "/static/styles/summer_minimal_5.png"
+
+                ])
             },
 
             {
                 "title": "여름 남친룩",
+
                 "desc": "린넨 셔츠와 반바지 조합의 데이트룩.",
-                "img": "/static/styles/summer_boyfriend.png"
+
+                "img": random.choice([
+
+                    "/static/styles/summer_boyfriend_1.png",
+                    "/static/styles/summer_boyfriend_2.png",
+                    "/static/styles/summer_boyfriend_3.png",
+                    "/static/styles/summer_boyfriend_4.png",
+                    "/static/styles/summer_boyfriend_5.png"
+
+                ])
             },
 
             {
                 "title": "여름 스트릿",
+
                 "desc": "오버핏 반팔 중심의 스트릿 무드.",
-                "img": "/static/styles/summer_street.png"
+
+                "img": random.choice([
+
+                    "/static/styles/summer_street_1.png",
+                    "/static/styles/summer_street_2.png",
+                    "/static/styles/summer_street_3.png",
+                    "/static/styles/summer_street_4.png",
+                    "/static/styles/summer_street_5.png"
+
+                ])
             }
 
         ]
 
     elif season == "spring":
 
-        outer_text = "가디건"
-
-        if wind_speed >= 5:
-
-            outer_text = "바람막이"
-
         outfits = [
 
             {
                 "title": "봄 미니멀",
-                "desc": f"{outer_text} 기반의 깔끔한 미니멀룩.",
+                "desc": "가디건 기반의 깔끔한 미니멀룩.",
                 "img": "/static/styles/spring_minimal.png"
             },
 
@@ -301,7 +328,7 @@ def home():
 
             {
                 "title": "봄 스트릿",
-                "desc": f"{outer_text} 기반의 스트릿 코디.",
+                "desc": "가벼운 바람막이 중심 스트릿룩.",
                 "img": "/static/styles/spring_street.png"
             }
 
@@ -309,17 +336,11 @@ def home():
 
     elif season == "fall":
 
-        outer_text = "가디건"
-
-        if wind_speed >= 5:
-
-            outer_text = "바람막이"
-
         outfits = [
 
             {
                 "title": "가을 미니멀",
-                "desc": f"{outer_text}와 슬랙스 기반 감성 코디.",
+                "desc": "가디건과 슬랙스 기반 감성 코디.",
                 "img": "/static/styles/fall_minimal.png"
             },
 
