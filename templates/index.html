@@ -33,6 +33,30 @@
                 );
 
             color: #1d1d1f;
+
+            position: relative;
+
+            overflow-x: hidden;
+        }
+
+        body::before {
+
+            content: "";
+
+            position: fixed;
+
+            inset: 0;
+
+            background:
+                radial-gradient(
+                    circle at top left,
+                    rgba(255,255,255,0.9),
+                    transparent 40%
+                );
+
+            z-index: -1;
+
+            pointer-events: none;
         }
 
         .container {
@@ -46,11 +70,11 @@
 
         .logo {
 
-            font-size: 34px;
+            font-size: 36px;
 
             font-weight: 800;
 
-            letter-spacing: -1px;
+            letter-spacing: -1.5px;
 
             margin-bottom: 24px;
         }
@@ -68,13 +92,13 @@
 
             padding: 16px;
 
-            border-radius: 20px;
+            border-radius: 22px;
 
             border:
-                1px solid rgba(255,255,255,0.35);
+                1px solid rgba(255,255,255,0.45);
 
             background:
-                rgba(255,255,255,0.45);
+                rgba(255,255,255,0.58);
 
             backdrop-filter: blur(18px);
 
@@ -83,17 +107,21 @@
             font-size: 15px;
 
             color: #1d1d1f;
+
+            box-shadow:
+                inset 0 1px 1px rgba(255,255,255,0.8);
         }
 
         button {
 
             padding: 16px 18px;
 
-            border-radius: 20px;
+            border-radius: 22px;
 
             border: none;
 
-            background: rgba(255,255,255,0.45);
+            background:
+                rgba(255,255,255,0.58);
 
             color: #1d1d1f;
 
@@ -102,9 +130,12 @@
             border:
                 1px solid rgba(255,255,255,0.4);
 
-            font-weight: 600;
+            font-weight: 700;
 
             cursor: pointer;
+
+            box-shadow:
+                0 8px 20px rgba(0,0,0,0.06);
         }
 
         .location-btn {
@@ -120,18 +151,19 @@
 
             padding: 28px;
 
-            border-radius: 34px;
+            border-radius: 36px;
 
             background:
-                rgba(255,255,255,0.42);
+                rgba(255,255,255,0.58);
 
             backdrop-filter: blur(24px);
 
             border:
-                1px solid rgba(255,255,255,0.38);
+                1px solid rgba(255,255,255,0.45);
 
             box-shadow:
-                0 10px 40px rgba(0,0,0,0.04);
+                0 18px 50px rgba(0,0,0,0.10),
+                inset 0 1px 1px rgba(255,255,255,0.85);
         }
 
         .weather-card {
@@ -141,20 +173,20 @@
 
         .city {
 
-            font-size: 26px;
+            font-size: 28px;
 
-            font-weight: 700;
+            font-weight: 800;
 
             margin-bottom: 8px;
         }
 
         .temp {
 
-            font-size: 78px;
+            font-size: 82px;
 
             font-weight: 800;
 
-            letter-spacing: -4px;
+            letter-spacing: -5px;
 
             margin-top: 6px;
         }
@@ -176,7 +208,7 @@
 
             display: flex;
 
-            gap: 20px;
+            gap: 22px;
 
             overflow-x: auto;
 
@@ -186,7 +218,7 @@
 
             padding: 10px;
 
-            margin-top: 22px;
+            margin-top: 24px;
 
             cursor: grab;
         }
@@ -204,20 +236,36 @@
 
             padding: 22px;
 
-            border-radius: 34px;
+            border-radius: 36px;
 
             background:
-                rgba(255,255,255,0.42);
+                rgba(255,255,255,0.58);
 
             backdrop-filter: blur(24px);
 
             border:
-                1px solid rgba(255,255,255,0.38);
+                1px solid rgba(255,255,255,0.45);
 
             box-shadow:
-                0 10px 40px rgba(0,0,0,0.04);
+                0 18px 50px rgba(0,0,0,0.12),
+                inset 0 1px 1px rgba(255,255,255,0.85);
 
             flex-shrink: 0;
+
+            transition:
+                transform 0.35s ease,
+                box-shadow 0.35s ease;
+        }
+
+        .style-card:hover {
+
+            transform:
+                translateY(-8px)
+                scale(1.01);
+
+            box-shadow:
+                0 28px 60px rgba(0,0,0,0.16),
+                inset 0 1px 1px rgba(255,255,255,0.9);
         }
 
         .style-image {
@@ -230,9 +278,17 @@
 
             object-position: center top;
 
-            border-radius: 26px;
+            border-radius: 28px;
 
             margin-bottom: 22px;
+
+            transition:
+                transform 0.5s ease;
+        }
+
+        .style-card:hover .style-image {
+
+            transform: scale(1.03);
         }
 
         /* =========================
@@ -246,11 +302,13 @@
 
         .style-title {
 
-            font-size: 30px;
+            font-size: 31px;
 
             font-weight: 800;
 
             margin-bottom: 10px;
+
+            letter-spacing: -1px;
         }
 
         .style-desc {
@@ -259,9 +317,9 @@
 
             color: #8e8e93;
 
-            line-height: 1.6;
+            line-height: 1.7;
 
-            margin-bottom: 22px;
+            margin-bottom: 24px;
         }
 
         .shop-btn {
@@ -272,11 +330,16 @@
 
             text-align: center;
 
-            padding: 16px;
+            padding: 17px;
 
-            border-radius: 22px;
+            border-radius: 24px;
 
-            background: #1d1d1f;
+            background:
+                linear-gradient(
+                    180deg,
+                    #2c2c2e,
+                    #111111
+                );
 
             color: white;
 
@@ -287,11 +350,16 @@
             font-weight: 700;
 
             transition: 0.3s;
+
+            box-shadow:
+                0 10px 24px rgba(0,0,0,0.20);
         }
 
         .shop-btn:hover {
 
-            opacity: 0.88;
+            transform: translateY(-3px);
+
+            opacity: 0.94;
         }
 
         /* =========================
@@ -324,7 +392,7 @@
 
         .dot.active {
 
-            width: 28px;
+            width: 30px;
 
             border-radius: 20px;
 
@@ -419,8 +487,6 @@
 
     <div class="carousel">
 
-        <!-- MINIMAL -->
-
         <div class="style-card">
 
             <img src="/static/styles/minimal.png"
@@ -447,8 +513,6 @@
             </div>
 
         </div>
-
-        <!-- BOYFRIEND -->
 
         <div class="style-card">
 
@@ -477,8 +541,6 @@
             </div>
 
         </div>
-
-        <!-- STREET -->
 
         <div class="style-card">
 
@@ -524,8 +586,6 @@
 
 </div>
 
-<!-- ACTIVE DOT SCRIPT -->
-
 <script>
 
     const carousel =
@@ -538,7 +598,7 @@
 
         const cardWidth =
             carousel.querySelector(".style-card")
-            .offsetWidth + 20;
+            .offsetWidth + 22;
 
         const index =
             Math.round(
