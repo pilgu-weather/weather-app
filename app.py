@@ -261,7 +261,7 @@ def home():
         outfits = [
 
             {
-                "title": "여름 미니멀",
+                "title": "Summer Minimal",
                 "desc": "반팔과 쇼츠 기반의 깔끔한 여름 스타일.",
                 "img": random.choice([
                     "/static/styles/summer_minimal_1.png",
@@ -273,19 +273,19 @@ def home():
             },
 
             {
-                "title": "여름 남친룩",
+                "title": "Summer Urban",
                 "desc": "린넨 셔츠와 반바지 조합의 데이트룩.",
                 "img": random.choice([
-                    "/static/styles/summer_boyfriend_1.png",
-                    "/static/styles/summer_boyfriend_2.png",
-                    "/static/styles/summer_boyfriend_3.png",
-                    "/static/styles/summer_boyfriend_4.png",
-                    "/static/styles/summer_boyfriend_5.png"
+                    "/static/styles/summer_urban_1.png",
+                    "/static/styles/summer_urban_2.png",
+                    "/static/styles/summer_urban_3.png",
+                    "/static/styles/summer_urban_4.png",
+                    "/static/styles/summer_urban_5.png"
                 ])
             },
 
             {
-                "title": "여름 스트릿",
+                "title": "Summer Street",
                 "desc": "오버핏 반팔 중심의 스트릿 무드.",
                 "img": random.choice([
                     "/static/styles/summer_street_1.png",
