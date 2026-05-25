@@ -2,6 +2,7 @@ from flask import Flask, render_template, request
 import requests
 from datetime import datetime
 import random
+import os
 
 app = Flask(__name__)
 
@@ -240,7 +241,7 @@ def home():
 
         season = "summer"
 
-    elif temp >= 20:
+    elif temp >= 16:
 
         season = "spring"
 
@@ -253,176 +254,75 @@ def home():
         season = "winter"
 
     # =========================
-    # 계절별 스타일 추천
+    # 스타일 추천
     # =========================
 
-    if season == "summer":
+    styles = [
 
-        outfits = [
+        {
+            "folder": "minimal",
+            "title": f"{season.title()} Minimal",
+            "desc": "깔끔하고 미니멀한 감성룩"
+        },
 
-            {
-                "title": "Summer Minimal",
-                "desc": "반팔과 쇼츠 기반의 깔끔한 여름 스타일.",
-                "img": random.choice([
-                    "/static/styles/summer_minimal_1.png",
-                    "/static/styles/summer_minimal_2.png",
-                    "/static/styles/summer_minimal_3.png",
-                    "/static/styles/summer_minimal_4.png",
-                    "/static/styles/summer_minimal_5.png"
-                ])
-            },
+        {
+            "folder": "urban",
+            "title": f"{season.title()} Urban",
+            "desc": "도시 감성 데일리룩"
+        },
 
-            {
-                "title": "Summer Urban",
-                "desc": "린넨 셔츠와 반바지 조합의 데이트룩.",
-                "img": random.choice([
-                    "/static/styles/summer_urban_1.png",
-                    "/static/styles/summer_urban_2.png",
-                    "/static/styles/summer_urban_3.png",
-                    "/static/styles/summer_urban_4.png",
-                    "/static/styles/summer_urban_5.png"
-                ])
-            },
+        {
+            "folder": "street",
+            "title": f"{season.title()} Street",
+            "desc": "트렌디한 스트릿 무드"
+        }
 
-            {
-                "title": "Summer Street",
-                "desc": "오버핏 반팔 중심의 스트릿 무드.",
-                "img": random.choice([
-                    "/static/styles/summer_street_1.png",
-                    "/static/styles/summer_street_2.png",
-                    "/static/styles/summer_street_3.png",
-                    "/static/styles/summer_street_4.png",
-                    "/static/styles/summer_street_5.png"
-                ])
-            }
+    ]
 
-        ]
+    outfits = []
 
-    elif season == "spring":
+    for style in styles:
 
-        outfits = [
+        folder_path = (
+            f"static/styles/{season}/{style['folder']}"
+        )
 
-            {
-                "title": "봄 미니멀",
-                "desc": "가디건 기반의 깔끔한 미니멀룩.",
-                "img": random.choice([
-                    "/static/styles/spring_minimal_1.png",
-                    "/static/styles/spring_minimal_2.png",
-                    "/static/styles/spring_minimal_3.png",
-                    "/static/styles/spring_minimal_4.png",
-                    "/static/styles/spring_minimal_5.png"
-                ])
-            },
+        try:
 
-            {
-                "title": "봄 남친룩",
-                "desc": "셔츠 레이어드 중심의 데이트 스타일.",
-                "img": random.choice([
-                    "/static/styles/spring_boyfriend_1.png",
-                    "/static/styles/spring_boyfriend_2.png",
-                    "/static/styles/spring_boyfriend_3.png",
-                    "/static/styles/spring_boyfriend_4.png",
-                    "/static/styles/spring_boyfriend_5.png"
-                ])
-            },
+            image_list = os.listdir(folder_path)
 
-            {
-                "title": "봄 스트릿",
-                "desc": "가벼운 바람막이 중심 스트릿룩.",
-                "img": random.choice([
-                    "/static/styles/spring_street_1.png",
-                    "/static/styles/spring_street_2.png",
-                    "/static/styles/spring_street_3.png",
-                    "/static/styles/spring_street_4.png",
-                    "/static/styles/spring_street_5.png"
-                ])
-            }
+            image_list = [
 
-        ]
+                img for img in image_list
 
-    elif season == "fall":
+                if img.endswith((
+                    ".png",
+                    ".jpg",
+                    ".jpeg",
+                    ".webp"
+                ))
+            ]
 
-        outfits = [
+            random_image = random.choice(image_list)
 
-            {
-                "title": "가을 미니멀",
-                "desc": "가디건과 슬랙스 기반 감성 코디.",
-                "img": random.choice([
-                    "/static/styles/fall_minimal_1.png",
-                    "/static/styles/fall_minimal_2.png",
-                    "/static/styles/fall_minimal_3.png",
-                    "/static/styles/fall_minimal_4.png",
-                    "/static/styles/fall_minimal_5.png"
-                ])
-            },
+            img_path = (
+                f"/static/styles/"
+                f"{season}/"
+                f"{style['folder']}/"
+                f"{random_image}"
+            )
 
-            {
-                "title": "가을 남친룩",
-                "desc": "자켓과 셔츠 조합의 데일리룩.",
-                "img": random.choice([
-                    "/static/styles/fall_boyfriend_1.png",
-                    "/static/styles/fall_boyfriend_2.png",
-                    "/static/styles/fall_boyfriend_3.png",
-                    "/static/styles/fall_boyfriend_4.png",
-                    "/static/styles/fall_boyfriend_5.png"
-                ])
-            },
+        except:
 
-            {
-                "title": "가을 스트릿",
-                "desc": "후드와 와이드 팬츠 기반 스트릿룩.",
-                "img": random.choice([
-                    "/static/styles/fall_street_1.png",
-                    "/static/styles/fall_street_2.png",
-                    "/static/styles/fall_street_3.png",
-                    "/static/styles/fall_street_4.png",
-                    "/static/styles/fall_street_5.png"
-                ])
-            }
+            img_path = "/static/styles/default.png"
 
-        ]
+        outfits.append({
 
-    else:
+            "title": style["title"],
+            "desc": style["desc"],
+            "img": img_path
 
-        outfits = [
-
-            {
-                "title": "겨울 미니멀",
-                "desc": "코트와 니트 중심의 겨울 스타일.",
-                "img": random.choice([
-                    "/static/styles/winter_minimal_1.png",
-                    "/static/styles/winter_minimal_2.png",
-                    "/static/styles/winter_minimal_3.png",
-                    "/static/styles/winter_minimal_4.png",
-                    "/static/styles/winter_minimal_5.png"
-                ])
-            },
-
-            {
-                "title": "겨울 남친룩",
-                "desc": "패딩과 머플러 기반 데일리룩.",
-                "img": random.choice([
-                    "/static/styles/winter_boyfriend_1.png",
-                    "/static/styles/winter_boyfriend_2.png",
-                    "/static/styles/winter_boyfriend_3.png",
-                    "/static/styles/winter_boyfriend_4.png",
-                    "/static/styles/winter_boyfriend_5.png"
-                ])
-            },
-
-            {
-                "title": "겨울 스트릿",
-                "desc": "패딩과 후드 조합의 스트릿 무드.",
-                "img": random.choice([
-                    "/static/styles/winter_street_1.png",
-                    "/static/styles/winter_street_2.png",
-                    "/static/styles/winter_street_3.png",
-                    "/static/styles/winter_street_4.png",
-                    "/static/styles/winter_street_5.png"
-                ])
-            }
-
-        ]
+        })
 
     return render_template(
 
