@@ -1,399 +1,566 @@
-from flask import Flask, render_template, request
-import requests
-from datetime import datetime
-import random
-import os
+<!DOCTYPE html>
+<html lang="ko" translate="no">
 
-app = Flask(__name__)
+<head>
 
-API_KEY = "2fd339c206c2fa601c64bc589a4750e9"
+    <meta charset="UTF-8">
 
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-@app.route("/", methods=["GET", "POST"])
-def home():
+    <title>Weather Fit</title>
 
-    temp = None
-    feels_like = None
+    <style>
 
-    temp_min = None
-    temp_max = None
-    day_temp = None
-
-    pm = None
-    pm_text = None
-
-    outfits = []
-
-    icon_url = None
-    city_name = None
-
-    weather_main = None
-    wind_speed = 0
-
-    lat = None
-    lon = None
-
-    error = None
-
-    # =========================
-    # 도시 검색
-    # =========================
-
-    if request.method == "POST":
-
-        city = request.form["city"]
-
-        weather_url = (
-            f"https://api.openweathermap.org/data/2.5/weather"
-            f"?q={city}&appid={API_KEY}&units=metric"
-        )
-
-        response = requests.get(weather_url)
-        data = response.json()
-
-        if response.status_code != 200:
-
-            error = "도시를 찾을 수 없습니다."
-
-            return render_template(
-                "index.html",
-                error=error
-            )
-
-        city_name = data["name"]
-
-        temp = round(data["main"]["temp"])
-        feels_like = round(data["main"]["feels_like"])
-
-        weather_main = data["weather"][0]["main"]
-        wind_speed = data["wind"]["speed"]
-
-        icon = data["weather"][0]["icon"]
-
-        icon_url = (
-            f"https://openweathermap.org/img/wn/{icon}@2x.png"
-        )
-
-        lat = data["coord"]["lat"]
-        lon = data["coord"]["lon"]
-
-    # =========================
-    # 현재 위치
-    # =========================
-
-    elif request.args.get("lat") and request.args.get("lon"):
-
-        try:
-
-            lat = float(request.args.get("lat"))
-            lon = float(request.args.get("lon"))
-
-        except:
-
-            error = "위치 정보를 불러오지 못했습니다."
-
-            return render_template(
-                "index.html",
-                error=error
-            )
-
-        weather_url = (
-            f"https://api.openweathermap.org/data/2.5/weather"
-            f"?lat={lat}&lon={lon}&appid={API_KEY}&units=metric"
-        )
-
-        response = requests.get(weather_url)
-        data = response.json()
-
-        if response.status_code != 200:
-
-            error = "현재 위치 날씨를 가져오지 못했습니다."
-
-            return render_template(
-                "index.html",
-                error=error
-            )
-
-        city_name = data["name"]
-
-        temp = round(data["main"]["temp"])
-        feels_like = round(data["main"]["feels_like"])
-
-        weather_main = data["weather"][0]["main"]
-        wind_speed = data["wind"]["speed"]
-
-        icon = data["weather"][0]["icon"]
-
-        icon_url = (
-            f"https://openweathermap.org/img/wn/{icon}@2x.png"
-        )
-
-        lat = data["coord"]["lat"]
-        lon = data["coord"]["lon"]
-
-    else:
-
-        return render_template("index.html")
-
-    # =========================
-    # Forecast API
-    # =========================
-
-    forecast_url = (
-        f"https://api.openweathermap.org/data/2.5/forecast"
-        f"?lat={lat}&lon={lon}&appid={API_KEY}&units=metric"
-    )
-
-    forecast_response = requests.get(forecast_url)
-    forecast_data = forecast_response.json()
-
-    today = datetime.now().strftime("%Y-%m-%d")
-
-    today_temps = []
-    daytime_temps = []
-
-    if "list" in forecast_data:
-
-        for item in forecast_data["list"]:
-
-            dt_txt = item["dt_txt"]
-
-            date_part = dt_txt.split(" ")[0]
-
-            hour_part = int(
-                dt_txt.split(" ")[1].split(":")[0]
-            )
-
-            if date_part == today:
-
-                current_temp = item["main"]["temp"]
-
-                today_temps.append(current_temp)
-
-                if 12 <= hour_part <= 15:
-
-                    daytime_temps.append(current_temp)
-
-    if today_temps:
-
-        temp_min = round(min(today_temps))
-        temp_max = round(max(today_temps))
-
-    else:
-
-        temp_min = temp
-        temp_max = temp
-
-    if daytime_temps:
-
-        day_temp = round(
-            sum(daytime_temps) / len(daytime_temps)
-        )
-
-    else:
-
-        day_temp = temp
-
-    # =========================
-    # 미세먼지
-    # =========================
-
-    air_url = (
-        f"https://api.openweathermap.org/data/2.5/air_pollution"
-        f"?lat={lat}&lon={lon}&appid={API_KEY}"
-    )
-
-    air_data = requests.get(air_url).json()
-
-    if "list" in air_data:
-
-        pm = air_data["list"][0]["main"]["aqi"]
-
-    else:
-
-        pm = 1
-
-    if pm == 1:
-
-        pm_text = "좋음"
-
-    elif pm == 2:
-
-        pm_text = "보통"
-
-    elif pm == 3:
-
-        pm_text = "나쁨"
-
-    elif pm == 4:
-
-        pm_text = "매우 나쁨"
-
-    else:
-
-        pm_text = "최악"
-
-    # =========================
-    # 계절 판단
-    # =========================
-
-    if temp >= 27:
-
-        season = "summer"
-
-    elif temp >= 16:
-
-        season = "spring"
-
-    elif temp >= 10:
-
-        season = "fall"
-
-    else:
-
-        season = "winter"
-
-    # =========================
-    # 기본 스타일
-    # =========================
-
-    styles = [
-
-        {
-            "folder": "casual",
-            "title": f"{season.title()} Casual",
-            "desc": "편안하고 자연스러운 데일리룩"
-        },
-
-        {
-            "folder": "urban",
-            "title": f"{season.title()} Urban",
-            "desc": "도시 감성 데일리룩"
-        },
-
-        {
-            "folder": "street",
-            "title": f"{season.title()} Street",
-            "desc": "트렌디한 스트릿 무드"
-        },
-
-        {
-            "folder": "minimal",
-            "title": f"{season.title()} Minimal",
-            "desc": "깔끔하고 미니멀한 감성룩"
+        * {
+            box-sizing: border-box;
         }
 
-    ]
+        body {
 
-    # =========================
-    # 비 오는 날 추천
-    # =========================
+            margin: 0;
 
-    if weather_main in [
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                sans-serif;
 
-        "Rain",
-        "Drizzle",
-        "Thunderstorm"
+            background:
+                linear-gradient(
+                    180deg,
+                    #edf2f7,
+                    #f8f9fb
+                );
 
-    ]:
+            color: #1d1d1f;
 
-        styles.insert(0, {
+            position: relative;
 
-            "folder": "rain",
+            overflow-x: hidden;
+        }
 
-            "title": "Rain Mood",
+        body::before {
 
-            "desc": "우산과 바람막이 중심 장마 코디"
+            content: "";
 
-        })
+            position: fixed;
 
-    # =========================
-    # 미세먼지 추천
-    # =========================
+            inset: 0;
 
-    if pm >= 4:
+            background:
+                radial-gradient(
+                    circle at top left,
+                    rgba(255,255,255,0.9),
+                    transparent 40%
+                );
 
-        styles.insert(0, {
+            z-index: -1;
 
-            "folder": "dust",
+            pointer-events: none;
+        }
 
-            "title": "Dust Protection",
+        .container {
 
-            "desc": "마스크와 고프코어 기반 스타일"
+            max-width: 430px;
 
-        })
+            margin: auto;
 
-    # =========================
-    # 랜덤 이미지 선택
-    # =========================
+            padding: 22px;
+        }
 
-    outfits = []
+        .logo {
 
-    for style in styles:
+            font-size: 36px;
 
-        folder_path = (
-            f"static/styles/{season}/{style['folder']}"
-        )
+            font-weight: 800;
 
-        try:
+            letter-spacing: -1.5px;
 
-            image_list = os.listdir(folder_path)
+            margin-bottom: 24px;
+        }
 
-            image_list = [
+        form {
 
-                img for img in image_list
+            display: flex;
 
-                if img.endswith((
-                    ".png",
-                    ".jpg",
-                    ".jpeg",
-                    ".webp"
-                ))
-            ]
+            gap: 10px;
+        }
 
-            random_image = random.choice(image_list)
+        input {
 
-            img_path = (
-                f"/static/styles/"
-                f"{season}/"
-                f"{style['folder']}/"
-                f"{random_image}"
-            )
+            flex: 1;
 
-        except:
+            padding: 16px;
 
-            img_path = "/static/styles/default.png"
+            border-radius: 22px;
 
-        outfits.append({
+            border:
+                1px solid rgba(255,255,255,0.45);
 
-            "title": style["title"],
-            "desc": style["desc"],
-            "img": img_path
+            background:
+                rgba(255,255,255,0.58);
 
-        })
+            backdrop-filter: blur(18px);
 
-    return render_template(
+            outline: none;
 
-        "index.html",
+            font-size: 15px;
 
-        temp=temp,
-        feels_like=feels_like,
+            color: #1d1d1f;
 
-        temp_min=temp_min,
-        temp_max=temp_max,
-        day_temp=day_temp,
+            box-shadow:
+                inset 0 1px 1px rgba(255,255,255,0.8);
+        }
 
-        pm=pm,
-        pm_text=pm_text,
+        button {
 
-        outfits=outfits,
+            padding: 16px 18px;
 
-        icon_url=icon_url,
-        city_name=city_name,
+            border-radius: 22px;
 
-        error=error
-    )
+            border: none;
 
+            background:
+                rgba(255,255,255,0.58);
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+            color: #1d1d1f;
+
+            backdrop-filter: blur(18px);
+
+            border:
+                1px solid rgba(255,255,255,0.4);
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 8px 20px rgba(0,0,0,0.06);
+        }
+
+        .location-btn {
+
+            width: 100%;
+
+            margin-top: 14px;
+        }
+
+        .card {
+
+            margin-top: 22px;
+
+            padding: 28px;
+
+            border-radius: 36px;
+
+            background:
+                rgba(255,255,255,0.58);
+
+            backdrop-filter: blur(24px);
+
+            border:
+                1px solid rgba(255,255,255,0.45);
+
+            box-shadow:
+                0 18px 50px rgba(0,0,0,0.10),
+                inset 0 1px 1px rgba(255,255,255,0.85);
+        }
+
+        .weather-card {
+
+            text-align: center;
+        }
+
+        .city {
+
+            font-size: 28px;
+
+            font-weight: 800;
+
+            margin-bottom: 8px;
+        }
+
+        .temp {
+
+            font-size: 82px;
+
+            font-weight: 800;
+
+            letter-spacing: -5px;
+
+            margin-top: 6px;
+        }
+
+        .sub {
+
+            font-size: 17px;
+
+            color: #6e6e73;
+
+            margin-top: 8px;
+        }
+
+        /* =========================
+           CAROUSEL
+        ========================== */
+
+        .carousel {
+
+            display: flex;
+
+            gap: 22px;
+
+            overflow-x: auto;
+
+            scroll-snap-type: x mandatory;
+
+            scroll-behavior: smooth;
+
+            padding: 10px;
+
+            margin-top: 24px;
+
+            cursor: grab;
+        }
+
+        .carousel::-webkit-scrollbar {
+
+            display: none;
+        }
+
+        .style-card {
+
+            min-width: 85%;
+
+            scroll-snap-align: center;
+
+            padding: 22px;
+
+            border-radius: 36px;
+
+            background:
+                rgba(255,255,255,0.58);
+
+            backdrop-filter: blur(24px);
+
+            border:
+                1px solid rgba(255,255,255,0.45);
+
+            box-shadow:
+                0 18px 50px rgba(0,0,0,0.12),
+                inset 0 1px 1px rgba(255,255,255,0.85);
+
+            flex-shrink: 0;
+
+            transition:
+                transform 0.35s ease,
+                box-shadow 0.35s ease;
+        }
+
+        .style-card:hover {
+
+            transform:
+                translateY(-8px)
+                scale(1.01);
+
+            box-shadow:
+                0 28px 60px rgba(0,0,0,0.16),
+                inset 0 1px 1px rgba(255,255,255,0.9);
+        }
+
+        .style-image {
+
+            width: 100%;
+
+            height: 520px;
+
+            object-fit: cover;
+
+            object-position: center top;
+
+            border-radius: 28px;
+
+            margin-bottom: 22px;
+
+            transition:
+                transform 0.5s ease;
+        }
+
+        .style-card:hover .style-image {
+
+            transform: scale(1.03);
+        }
+
+        .style-info {
+
+            margin-top: 10px;
+        }
+
+        .style-title {
+
+            font-size: 31px;
+
+            font-weight: 800;
+
+            margin-bottom: 10px;
+
+            letter-spacing: -1px;
+        }
+
+        .style-desc {
+
+            font-size: 16px;
+
+            color: #8e8e93;
+
+            line-height: 1.7;
+
+            margin-bottom: 24px;
+        }
+
+        .shop-btn {
+
+            display: inline-block;
+
+            width: 100%;
+
+            text-align: center;
+
+            padding: 17px;
+
+            border-radius: 24px;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #2c2c2e,
+                    #111111
+                );
+
+            color: white;
+
+            text-decoration: none;
+
+            font-size: 16px;
+
+            font-weight: 700;
+
+            transition: 0.3s;
+
+            box-shadow:
+                0 10px 24px rgba(0,0,0,0.20);
+        }
+
+        .shop-btn:hover {
+
+            transform: translateY(-3px);
+
+            opacity: 0.94;
+        }
+
+        .dots {
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 8px;
+
+            margin-top: 18px;
+        }
+
+        .dot {
+
+            width: 10px;
+
+            height: 10px;
+
+            border-radius: 50%;
+
+            background: #c7c7cc;
+
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+
+            width: 30px;
+
+            border-radius: 20px;
+
+            background: #1d1d1f;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">
+        Weather Fit
+    </div>
+
+    <form method="POST" action="/">
+
+        <input type="text"
+               name="city"
+               placeholder="Search city">
+
+        <button type="submit">
+            Go
+        </button>
+
+    </form>
+
+    <button type="button"
+            class="location-btn"
+            onclick="getLocation()">
+
+        현재 위치로 보기
+
+    </button>
+
+    <script>
+
+        function getLocation() {
+
+            navigator.geolocation.getCurrentPosition(
+
+                (pos) => {
+
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+
+                    window.location.href =
+                        `/?lat=${lat}&lon=${lon}`;
+                }
+            );
+        }
+
+    </script>
+
+    {% if temp %}
+
+    <div class="card weather-card">
+
+        <div class="city">
+            {{ city_name }}
+        </div>
+
+        <img src="{{ icon_url }}"
+             style="width:90px;">
+
+        <div class="temp">
+            {{ temp }}°
+        </div>
+
+        <div class="sub">
+            체감 {{ feels_like }}°
+        </div>
+
+        <div class="sub">
+            최저 {{ temp_min }}°
+            /
+            최고 {{ temp_max }}°
+        </div>
+
+        <div class="sub">
+            미세먼지 {{ pm_text }}
+        </div>
+
+    </div>
+
+    <!-- SWIPE -->
+
+    <div class="carousel">
+
+        {% for outfit in outfits %}
+
+        <div class="style-card">
+
+            <img src="{{ outfit.img }}"
+                 class="style-image">
+
+            <div class="style-info">
+
+                <div class="style-title">
+                    {{ outfit.title }}
+                </div>
+
+                <div class="style-desc">
+                    {{ outfit.desc }}
+                </div>
+
+                <a href="https://www.musinsa.com"
+                   target="_blank"
+                   class="shop-btn">
+
+                   상세 보기
+
+                </a>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    <!-- DOTS -->
+
+    <div class="dots">
+
+        {% for outfit in outfits %}
+
+        <span class="dot {% if loop.first %}active{% endif %}"></span>
+
+        {% endfor %}
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+<script>
+
+    const carousel =
+        document.querySelector(".carousel");
+
+    const dots =
+        document.querySelectorAll(".dot");
+
+    if (carousel) {
+
+        carousel.addEventListener("scroll", () => {
+
+            const cardWidth =
+                carousel.querySelector(".style-card")
+                .offsetWidth + 22;
+
+            const index =
+                Math.round(
+                    carousel.scrollLeft / cardWidth
+                );
+
+            dots.forEach((dot) => {
+                dot.classList.remove("active");
+            });
+
+            if (dots[index]) {
+                dots[index].classList.add("active");
+            }
+
+        });
+
+    }
+
+</script>
+
+</body>
+
+</html>
