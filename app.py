@@ -237,7 +237,7 @@ def home():
     # 계절 판단
     # =========================
 
-    if temp >= 27:
+    if temp >= 23:
 
         season = "summer"
 
