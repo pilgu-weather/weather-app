@@ -254,15 +254,15 @@ def home():
         season = "winter"
 
     # =========================
-    # 스타일 추천
+    # 기본 스타일
     # =========================
 
     styles = [
 
         {
-            "folder": "minimal",
-            "title": f"{season.title()} Minimal",
-            "desc": "깔끔하고 미니멀한 감성룩"
+            "folder": "casual",
+            "title": f"{season.title()} Casual",
+            "desc": "편안하고 자연스러운 데일리룩"
         },
 
         {
@@ -274,10 +274,58 @@ def home():
         {
             "folder": "street",
             "title": f"{season.title()} Street",
-            "desc": "트렌디한 스트릿"
+            "desc": "트렌디한 스트릿 무드"
+        },
+
+        {
+            "folder": "minimal",
+            "title": f"{season.title()} Minimal",
+            "desc": "깔끔하고 미니멀한 감성룩"
         }
 
     ]
+
+    # =========================
+    # 비 오는 날 추천
+    # =========================
+
+    if weather_main in [
+
+        "Rain",
+        "Drizzle",
+        "Thunderstorm"
+
+    ]:
+
+        styles.insert(0, {
+
+            "folder": "rain",
+
+            "title": "Rain Mood",
+
+            "desc": "우산과 바람막이 중심 장마 코디"
+
+        })
+
+    # =========================
+    # 미세먼지 추천
+    # =========================
+
+    if pm >= 4:
+
+        styles.insert(0, {
+
+            "folder": "dust",
+
+            "title": "Dust Protection",
+
+            "desc": "마스크와 고프코어 기반 스타일"
+
+        })
+
+    # =========================
+    # 랜덤 이미지 선택
+    # =========================
 
     outfits = []
 
