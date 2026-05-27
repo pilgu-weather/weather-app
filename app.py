@@ -152,6 +152,9 @@ def home():
     today_temps = []
     daytime_temps = []
 
+    # 비 체크용
+    rain_today = False
+
     if "list" in forecast_data:
 
         for item in forecast_data["list"]:
@@ -164,15 +167,33 @@ def home():
                 dt_txt.split(" ")[1].split(":")[0]
             )
 
-            if date_part == today:
+            current_temp = item["main"]["temp"]
 
-                current_temp = item["main"]["temp"]
+            weather_type = item["weather"][0]["main"]
+
+            # 오늘 데이터만
+            if date_part == today:
 
                 today_temps.append(current_temp)
 
+                # 낮 대표 온도
                 if 12 <= hour_part <= 15:
 
                     daytime_temps.append(current_temp)
+
+                # 활동 시간 비 체크
+                if (
+                    6 <= hour_part <= 21
+                    and weather_type in [
+
+                        "Rain",
+                        "Drizzle",
+                        "Thunderstorm"
+
+                    ]
+                ):
+
+                    rain_today = True
 
     if today_temps:
 
@@ -286,16 +307,10 @@ def home():
     ]
 
     # =========================
-    # 비 오는 날 추천
+    # 비 추천
     # =========================
 
-    if weather_main in [
-
-        "Rain",
-        "Drizzle",
-        "Thunderstorm"
-
-    ]:
+    if rain_today:
 
         styles.insert(0, {
 
@@ -303,7 +318,7 @@ def home():
 
             "title": "Rain Mood",
 
-            "desc": "우산과 바람막이 중심 장마 코디"
+            "desc": "오늘은 우산과 바람막이 추천"
 
         })
 
@@ -337,7 +352,7 @@ def home():
 
             "title": "Layered Look",
 
-            "desc": "가벼운 외투와 레이어드 추천"
+            "desc": "오늘은 가벼운 외투와 레이어드 추천"
 
         })
 
@@ -399,6 +414,7 @@ def home():
 
         temp_min=temp_min,
         temp_max=temp_max,
+
         day_temp=day_temp,
 
         pm=pm,
