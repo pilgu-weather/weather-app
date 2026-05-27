@@ -79,6 +79,61 @@
             margin-bottom: 24px;
         }
 
+        /* =========================
+           MODE SWITCH
+        ========================== */
+
+        .mode-switch {
+
+            display: flex;
+
+            background:
+                rgba(255,255,255,0.58);
+
+            border-radius: 999px;
+
+            padding: 6px;
+
+            margin-bottom: 18px;
+
+            backdrop-filter: blur(24px);
+
+            border:
+                1px solid rgba(255,255,255,0.45);
+
+            box-shadow:
+                0 12px 30px rgba(0,0,0,0.08);
+        }
+
+        .mode-btn {
+
+            flex: 1;
+
+            text-align: center;
+
+            padding: 12px 0;
+
+            border-radius: 999px;
+
+            text-decoration: none;
+
+            color: #8e8e93;
+
+            font-weight: 600;
+
+            transition: 0.3s;
+        }
+
+        .mode-btn.active {
+
+            background: white;
+
+            color: #111;
+
+            box-shadow:
+                0 4px 12px rgba(0,0,0,0.08);
+        }
+
         .card {
 
             margin-top: 20px;
@@ -395,14 +450,19 @@
 
         window.onload = () => {
 
-            if (!window.location.search.includes("lat")) {
+            if (
+                !window.location.search.includes("lat")
+            ) {
 
                 navigator.geolocation.getCurrentPosition(
 
                     (pos) => {
 
-                        const lat = pos.coords.latitude;
-                        const lon = pos.coords.longitude;
+                        const lat =
+                            pos.coords.latitude;
+
+                        const lon =
+                            pos.coords.longitude;
 
                         window.location.href =
                             `/?lat=${lat}&lon=${lon}`;
@@ -420,6 +480,28 @@
 
     {% if temp %}
 
+    <!-- MODE SWITCH -->
+
+    <div class="mode-switch">
+
+        <a href="/?mode=today"
+           class="mode-btn {% if mode == 'today' %}active{% endif %}">
+
+            Today
+
+        </a>
+
+        <a href="/?mode=tomorrow"
+           class="mode-btn {% if mode == 'tomorrow' %}active{% endif %}">
+
+            Tomorrow
+
+        </a>
+
+    </div>
+
+    <!-- WEATHER CARD -->
+
     <div class="card weather-card">
 
         <div class="city">
@@ -433,7 +515,6 @@
             {{ temp }}°
         </div>
 
-
         <div class="sub">
             최저 {{ temp_min }}°
             /
@@ -444,7 +525,7 @@
             미세먼지 {{ pm_text }}
         </div>
 
-        <!-- HOURLY FORECAST -->
+        <!-- HOURLY -->
 
         <div class="hourly-strip">
 
@@ -471,7 +552,7 @@
 
     </div>
 
-    <!-- SWIPE -->
+    <!-- CAROUSEL -->
 
     <div class="carousel">
 

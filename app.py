@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 import os
 
@@ -12,9 +12,9 @@ API_KEY = "2fd339c206c2fa601c64bc589a4750e9"
 @app.route("/", methods=["GET", "POST"])
 def home():
 
-    temp = None
-    feels_like = None
+    mode = request.args.get("mode", "today")
 
+    temp = None
     temp_min = None
     temp_max = None
     day_temp = None
@@ -26,9 +26,6 @@ def home():
 
     icon_url = None
     city_name = None
-
-    weather_main = None
-    wind_speed = 0
 
     lat = None
     lon = None
@@ -65,10 +62,6 @@ def home():
         city_name = data["name"]
 
         temp = round(data["main"]["temp"])
-        feels_like = round(data["main"]["feels_like"])
-
-        weather_main = data["weather"][0]["main"]
-        wind_speed = data["wind"]["speed"]
 
         icon = data["weather"][0]["icon"]
 
@@ -119,10 +112,6 @@ def home():
         city_name = data["name"]
 
         temp = round(data["main"]["temp"])
-        feels_like = round(data["main"]["feels_like"])
-
-        weather_main = data["weather"][0]["main"]
-        wind_speed = data["wind"]["speed"]
 
         icon = data["weather"][0]["icon"]
 
@@ -134,7 +123,7 @@ def home():
         lon = data["coord"]["lon"]
 
     # =========================
-    # 첫 접속 기본값 (서울)
+    # 기본 서울
     # =========================
 
     else:
@@ -152,10 +141,6 @@ def home():
         city_name = data["name"]
 
         temp = round(data["main"]["temp"])
-        feels_like = round(data["main"]["feels_like"])
-
-        weather_main = data["weather"][0]["main"]
-        wind_speed = data["wind"]["speed"]
 
         icon = data["weather"][0]["icon"]
 
@@ -180,64 +165,27 @@ def home():
 
     today = datetime.now().strftime("%Y-%m-%d")
 
+    tomorrow = (
+        datetime.now() + timedelta(days=1)
+    ).strftime("%Y-%m-%d")
+
     today_temps = []
-    daytime_temps = []
+    tomorrow_temps = []
+
+    today_daytime = []
+    tomorrow_daytime = []
+
+    today_hourly = []
+    tomorrow_hourly = []
 
     rain_today = False
+    rain_tomorrow = False
 
-    # =========================
-    # HOURLY FORECAST
-    # =========================
-
-    try:
-
-        if "list" in forecast_data:
-
-            next_day_added = False
-
-            for item in forecast_data["list"]:
-
-                date_part = item["dt_txt"].split(" ")[0]
-
-                hour_part = item["dt_txt"][11:13]
-
-                # 오늘 데이터
-                if date_part == today:
-
-                    hourly_forecast.append({
-
-                        "time": hour_part,
-
-                        "icon": item["weather"][0]["icon"],
-
-                        "temp": round(item["main"]["temp"])
-
-                    })
-
-                # 다음날 00시 하나 추가
-                elif hour_part == "00" and not next_day_added:
-
-                    hourly_forecast.append({
-
-                        "time": "00",
-
-                        "icon": item["weather"][0]["icon"],
-
-                        "temp": round(item["main"]["temp"])
-
-                    })
-
-                    next_day_added = True
-
-    except:
-
-        hourly_forecast = []
-
-    # =========================
-    # TODAY ANALYSIS
-    # =========================
+    tomorrow_icon = icon_url
 
     if "list" in forecast_data:
+
+        next_day_added = False
 
         for item in forecast_data["list"]:
 
@@ -253,48 +201,144 @@ def home():
 
             weather_type = item["weather"][0]["main"]
 
+            weather_icon = item["weather"][0]["icon"]
+
+            # =========================
+            # TODAY
+            # =========================
+
             if date_part == today:
 
                 today_temps.append(current_temp)
 
-                # 낮 대표 온도
                 if 12 <= hour_part <= 15:
 
-                    daytime_temps.append(current_temp)
+                    today_daytime.append(current_temp)
 
-                # 활동시간 비 체크
                 if (
                     6 <= hour_part <= 21
                     and weather_type in [
-
                         "Rain",
                         "Drizzle",
                         "Thunderstorm"
-
                     ]
                 ):
 
                     rain_today = True
 
-    if today_temps:
+                today_hourly.append({
 
-        temp_min = round(min(today_temps))
-        temp_max = round(max(today_temps))
+                    "time": dt_txt[11:13],
+
+                    "icon": weather_icon,
+
+                    "temp": round(current_temp)
+
+                })
+
+            # =========================
+            # TODAY + 00
+            # =========================
+
+            elif (
+                dt_txt[11:13] == "00"
+                and not next_day_added
+            ):
+
+                today_hourly.append({
+
+                    "time": "00",
+
+                    "icon": weather_icon,
+
+                    "temp": round(current_temp)
+
+                })
+
+                next_day_added = True
+
+            # =========================
+            # TOMORROW
+            # =========================
+
+            if date_part == tomorrow:
+
+                tomorrow_temps.append(current_temp)
+
+                if 12 <= hour_part <= 15:
+
+                    tomorrow_daytime.append(current_temp)
+
+                    tomorrow_icon = (
+                        f"https://openweathermap.org/img/wn/{weather_icon}@2x.png"
+                    )
+
+                if (
+                    6 <= hour_part <= 21
+                    and weather_type in [
+                        "Rain",
+                        "Drizzle",
+                        "Thunderstorm"
+                    ]
+                ):
+
+                    rain_tomorrow = True
+
+                tomorrow_hourly.append({
+
+                    "time": dt_txt[11:13],
+
+                    "icon": weather_icon,
+
+                    "temp": round(current_temp)
+
+                })
+
+    # =========================
+    # TODAY MODE
+    # =========================
+
+    if mode == "today":
+
+        hourly_forecast = today_hourly
+
+        if today_temps:
+
+            temp_min = round(min(today_temps))
+            temp_max = round(max(today_temps))
+
+        if today_daytime:
+
+            day_temp = round(
+                sum(today_daytime) / len(today_daytime)
+            )
+
+        rain_mode = rain_today
+
+    # =========================
+    # TOMORROW MODE
+    # =========================
 
     else:
 
-        temp_min = temp
-        temp_max = temp
+        hourly_forecast = tomorrow_hourly
 
-    if daytime_temps:
+        icon_url = tomorrow_icon
 
-        day_temp = round(
-            sum(daytime_temps) / len(daytime_temps)
-        )
+        if tomorrow_temps:
 
-    else:
+            temp_min = round(min(tomorrow_temps))
+            temp_max = round(max(tomorrow_temps))
 
-        day_temp = temp
+            temp = temp_max
+
+        if tomorrow_daytime:
+
+            day_temp = round(
+                sum(tomorrow_daytime) / len(tomorrow_daytime)
+            )
+
+        rain_mode = rain_tomorrow
 
     # =========================
     # 미세먼지
@@ -356,7 +400,7 @@ def home():
         season = "winter"
 
     # =========================
-    # 기본 스타일
+    # 스타일
     # =========================
 
     styles = [
@@ -387,11 +431,7 @@ def home():
 
     ]
 
-    # =========================
-    # 비 추천
-    # =========================
-
-    if rain_today:
+    if rain_mode:
 
         styles.insert(0, {
 
@@ -402,10 +442,6 @@ def home():
             "desc": "오늘은 우산과 바람막이 추천"
 
         })
-
-    # =========================
-    # 미세먼지 추천
-    # =========================
 
     if pm >= 4:
 
@@ -418,10 +454,6 @@ def home():
             "desc": "마스크와 고프코어 기반 스타일"
 
         })
-
-    # =========================
-    # 일교차 추천
-    # =========================
 
     temp_gap = temp_max - temp_min
 
@@ -438,7 +470,7 @@ def home():
         })
 
     # =========================
-    # 랜덤 이미지 선택
+    # 이미지
     # =========================
 
     outfits = []
@@ -490,11 +522,12 @@ def home():
 
         "index.html",
 
+        mode=mode,
+
         temp=temp,
         temp_min=temp_min,
         temp_max=temp_max,
 
-        pm=pm,
         pm_text=pm_text,
 
         outfits=outfits,
