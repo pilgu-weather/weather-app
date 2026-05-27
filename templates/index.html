@@ -90,9 +90,9 @@
 
             flex: 1;
 
-            padding: 15px;
+            padding: 16px;
 
-            border-radius: 20px;
+            border-radius: 22px;
 
             border:
                 1px solid rgba(255,255,255,0.45);
@@ -114,9 +114,9 @@
 
         button {
 
-            padding: 15px 18px;
+            padding: 16px 18px;
 
-            border-radius: 20px;
+            border-radius: 22px;
 
             border: none;
 
@@ -142,16 +142,16 @@
 
             width: 100%;
 
-            margin-top: 12px;
+            margin-top: 14px;
         }
 
         .card {
 
-            margin-top: 18px;
+            margin-top: 22px;
 
-            padding: 22px 20px;
+            padding: 28px;
 
-            border-radius: 32px;
+            border-radius: 36px;
 
             background:
                 rgba(255,255,255,0.58);
@@ -166,10 +166,6 @@
                 inset 0 1px 1px rgba(255,255,255,0.85);
         }
 
-        /* =========================
-           WEATHER CARD
-        ========================== */
-
         .weather-card {
 
             text-align: center;
@@ -177,85 +173,31 @@
 
         .city {
 
-            font-size: 24px;
+            font-size: 28px;
 
             font-weight: 800;
 
-            margin-bottom: 2px;
-        }
-
-        .weather-icon {
-
-            width: 64px;
-
-            margin-top: -2px;
+            margin-bottom: 8px;
         }
 
         .temp {
 
-            font-size: 64px;
+            font-size: 82px;
 
             font-weight: 800;
 
-            letter-spacing: -4px;
+            letter-spacing: -5px;
 
-            line-height: 1;
-
-            margin-top: -6px;
+            margin-top: 6px;
         }
 
-        .mood {
+        .sub {
 
-            font-size: 18px;
-
-            font-weight: 700;
-
-            margin-top: 10px;
-
-            margin-bottom: 14px;
-
-            color: #2c2c2e;
-        }
-
-        .weather-inline {
-
-            font-size: 15px;
+            font-size: 17px;
 
             color: #6e6e73;
 
-            line-height: 1.6;
-        }
-
-        .style-tags {
-
-            display: flex;
-
-            justify-content: center;
-
-            gap: 8px;
-
-            flex-wrap: wrap;
-
-            margin-top: 18px;
-        }
-
-        .tag {
-
-            padding: 8px 14px;
-
-            border-radius: 999px;
-
-            background: rgba(255,255,255,0.7);
-
-            border: 1px solid rgba(255,255,255,0.5);
-
-            font-size: 13px;
-
-            font-weight: 600;
-
-            color: #1d1d1f;
-
-            backdrop-filter: blur(12px);
+            margin-top: 8px;
         }
 
         /* =========================
@@ -276,7 +218,7 @@
 
             padding: 10px;
 
-            margin-top: 14px;
+            margin-top: 24px;
 
             cursor: grab;
         }
@@ -339,6 +281,14 @@
             border-radius: 28px;
 
             margin-bottom: 22px;
+
+            transition:
+                transform 0.5s ease;
+        }
+
+        .style-card:hover .style-image {
+
+            transform: scale(1.03);
         }
 
         .style-info {
@@ -494,8 +444,6 @@
 
     {% if temp %}
 
-    <!-- WEATHER CARD -->
-
     <div class="card weather-card">
 
         <div class="city">
@@ -503,39 +451,24 @@
         </div>
 
         <img src="{{ icon_url }}"
-             class="weather-icon">
+             style="width:90px;">
 
         <div class="temp">
             {{ temp }}°
         </div>
 
-        <div class="mood">
-            Today's Fit Mood
+        <div class="sub">
+            체감 {{ feels_like }}°
         </div>
 
-        <div class="weather-inline">
-
-            Feels {{ feels_like }}°
-            ·
-            H{{ temp_max }}°
-            L{{ temp_min }}°
-
-            <br>
-
-            AQI {{ pm_text }}
-
+        <div class="sub">
+            최저 {{ temp_min }}°
+            /
+            최고 {{ temp_max }}°
         </div>
 
-        <div class="style-tags">
-
-            {% for outfit in outfits[:3] %}
-
-            <div class="tag">
-                {{ outfit.title }}
-            </div>
-
-            {% endfor %}
-
+        <div class="sub">
+            미세먼지 {{ pm_text }}
         </div>
 
     </div>
@@ -561,7 +494,8 @@
                     {{ outfit.desc }}
                 </div>
 
-                <a href="#"
+                <a href="https://www.musinsa.com"
+                   target="_blank"
                    class="shop-btn">
 
                    상세 보기
