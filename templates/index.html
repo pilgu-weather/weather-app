@@ -144,6 +144,51 @@
         }
 
         /* =========================
+           HOURLY FORECAST
+        ========================== */
+
+        .hourly-strip {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            margin-top: 24px;
+
+            padding: 0 4px;
+        }
+
+        .hour-item {
+
+            text-align: center;
+        }
+
+        .hour-time {
+
+            font-size: 13px;
+
+            color: #8e8e93;
+
+            margin-bottom: 2px;
+        }
+
+        .hour-icon {
+
+            width: 28px;
+
+            height: 28px;
+        }
+
+        .hour-temp {
+
+            font-size: 15px;
+
+            font-weight: 600;
+
+            margin-top: 2px;
+        }
+
+        /* =========================
            CAROUSEL
         ========================== */
 
@@ -400,6 +445,31 @@
 
         <div class="sub">
             미세먼지 {{ pm_text }}
+        </div>
+
+        <!-- HOURLY FORECAST -->
+
+        <div class="hourly-strip">
+
+            {% for item in hourly_forecast %}
+
+            <div class="hour-item">
+
+                <div class="hour-time">
+                    {{ item.time[:2] }}
+                </div>
+
+                <img src="https://openweathermap.org/img/wn/{{ item.icon }}@2x.png"
+                     class="hour-icon">
+
+                <div class="hour-temp">
+                    {{ item.temp }}°
+                </div>
+
+            </div>
+
+            {% endfor %}
+
         </div>
 
     </div>
