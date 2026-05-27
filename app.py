@@ -6,7 +6,7 @@ import os
 
 app = Flask(__name__)
 
-API_KEY = "YOUR_API_KEY"
+API_KEY = "2fd339c206c2fa601c64bc589a4750e9"
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -34,8 +34,6 @@ def home():
     lon = None
 
     error = None
-
-    hourly_forecast = []
 
     # =========================
     # 도시 검색
@@ -184,32 +182,6 @@ def home():
     daytime_temps = []
 
     rain_today = False
-
-    # =========================
-    # HOURLY FORECAST
-    # =========================
-
-    if "list" in forecast_data:
-
-        for item in forecast_data["list"][:8]:
-
-            time = item["dt_txt"][11:16]
-
-            icon = item["weather"][0]["icon"]
-
-            temp_hour = round(item["main"]["temp"])
-
-            hourly_forecast.append({
-
-                "time": time,
-                "icon": icon,
-                "temp": temp_hour
-
-            })
-
-    # =========================
-    # TODAY ANALYSIS
-    # =========================
 
     if "list" in forecast_data:
 
@@ -479,8 +451,6 @@ def home():
 
         icon_url=icon_url,
         city_name=city_name,
-
-        hourly_forecast=hourly_forecast,
 
         error=error
     )
