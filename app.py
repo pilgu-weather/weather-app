@@ -231,21 +231,21 @@ def home():
 
     else:
 
-        pm_text = "최악"
+        pm_text = "마스크 필수"
 
     # =========================
     # 계절 판단
     # =========================
 
-    if temp >= 23:
+    if day_temp >= 26:
 
         season = "summer"
 
-    elif temp >= 16:
+    elif day_temp >= 17:
 
         season = "spring"
 
-    elif temp >= 10:
+    elif day_temp >= 10:
 
         season = "fall"
 
@@ -320,6 +320,24 @@ def home():
             "title": "Dust Protection",
 
             "desc": "마스크와 고프코어 기반 스타일"
+
+        })
+
+    # =========================
+    # 일교차 추천
+    # =========================
+
+    temp_gap = temp_max - temp_min
+
+    if season in ["spring", "fall"] and temp_gap >= 8:
+
+        styles.insert(0, {
+
+            "folder": "layered",
+
+            "title": "Layered Look",
+
+            "desc": "가벼운 외투와 레이어드 추천"
 
         })
 
