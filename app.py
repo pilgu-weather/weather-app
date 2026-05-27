@@ -35,10 +35,6 @@ def home():
 
     error = None
 
-    # =========================
-    # HOURLY FORECAST
-    # =========================
-
     hourly_forecast = []
 
     # =========================
@@ -182,6 +178,13 @@ def home():
     forecast_response = requests.get(forecast_url)
     forecast_data = forecast_response.json()
 
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    today_temps = []
+    daytime_temps = []
+
+    rain_today = False
+
     # =========================
     # HOURLY FORECAST
     # =========================
@@ -190,28 +193,29 @@ def home():
 
         if "list" in forecast_data:
 
-            for item in forecast_data["list"][:8]:
+            for item in forecast_data["list"]:
 
-                hourly_forecast.append({
+                date_part = item["dt_txt"].split(" ")[0]
 
-                    "time": item["dt_txt"][11:13],
+                if date_part == today:
 
-                    "icon": item["weather"][0]["icon"],
+                    hourly_forecast.append({
 
-                    "temp": round(item["main"]["temp"])
+                        "time": item["dt_txt"][11:13],
 
-                })
+                        "icon": item["weather"][0]["icon"],
+
+                        "temp": round(item["main"]["temp"])
+
+                    })
 
     except:
 
         hourly_forecast = []
 
-    today = datetime.now().strftime("%Y-%m-%d")
-
-    today_temps = []
-    daytime_temps = []
-
-    rain_today = False
+    # =========================
+    # TODAY ANALYSIS
+    # =========================
 
     if "list" in forecast_data:
 
