@@ -193,21 +193,41 @@ def home():
 
         if "list" in forecast_data:
 
+            next_day_added = False
+
             for item in forecast_data["list"]:
 
                 date_part = item["dt_txt"].split(" ")[0]
 
+                hour_part = item["dt_txt"][11:13]
+
+                # 오늘 데이터
                 if date_part == today:
 
                     hourly_forecast.append({
 
-                        "time": item["dt_txt"][11:13],
+                        "time": hour_part,
 
                         "icon": item["weather"][0]["icon"],
 
                         "temp": round(item["main"]["temp"])
 
                     })
+
+                # 다음날 00시 하나 추가
+                elif hour_part == "00" and not next_day_added:
+
+                    hourly_forecast.append({
+
+                        "time": "00",
+
+                        "icon": item["weather"][0]["icon"],
+
+                        "temp": round(item["main"]["temp"])
+
+                    })
+
+                    next_day_added = True
 
     except:
 
@@ -471,12 +491,8 @@ def home():
         "index.html",
 
         temp=temp,
-        feels_like=feels_like,
-
         temp_min=temp_min,
         temp_max=temp_max,
-
-        day_temp=day_temp,
 
         pm=pm,
         pm_text=pm_text,
