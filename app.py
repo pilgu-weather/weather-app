@@ -131,9 +131,38 @@ def home():
         lat = data["coord"]["lat"]
         lon = data["coord"]["lon"]
 
+    # =========================
+    # 첫 접속 기본값 (서울)
+    # =========================
+
     else:
 
-        return render_template("index.html")
+        city = "Seoul"
+
+        weather_url = (
+            f"https://api.openweathermap.org/data/2.5/weather"
+            f"?q={city}&appid={API_KEY}&units=metric"
+        )
+
+        response = requests.get(weather_url)
+        data = response.json()
+
+        city_name = data["name"]
+
+        temp = round(data["main"]["temp"])
+        feels_like = round(data["main"]["feels_like"])
+
+        weather_main = data["weather"][0]["main"]
+        wind_speed = data["wind"]["speed"]
+
+        icon = data["weather"][0]["icon"]
+
+        icon_url = (
+            f"https://openweathermap.org/img/wn/{icon}@2x.png"
+        )
+
+        lat = data["coord"]["lat"]
+        lon = data["coord"]["lon"]
 
     # =========================
     # Forecast API
@@ -152,7 +181,6 @@ def home():
     today_temps = []
     daytime_temps = []
 
-    # 비 체크용
     rain_today = False
 
     if "list" in forecast_data:
@@ -171,7 +199,6 @@ def home():
 
             weather_type = item["weather"][0]["main"]
 
-            # 오늘 데이터만
             if date_part == today:
 
                 today_temps.append(current_temp)
@@ -181,7 +208,7 @@ def home():
 
                     daytime_temps.append(current_temp)
 
-                # 활동 시간 비 체크
+                # 활동시간 비 체크
                 if (
                     6 <= hour_part <= 21
                     and weather_type in [
@@ -295,7 +322,7 @@ def home():
         {
             "folder": "street",
             "title": "Street",
-            "desc": "트렌디한 스트릿룩"
+            "desc": "트렌디한 스트릿 무드"
         },
 
         {
