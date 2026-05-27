@@ -36,6 +36,12 @@ def home():
     error = None
 
     # =========================
+    # HOURLY FORECAST
+    # =========================
+
+    hourly_forecast = []
+
+    # =========================
     # 도시 검색
     # =========================
 
@@ -175,6 +181,30 @@ def home():
 
     forecast_response = requests.get(forecast_url)
     forecast_data = forecast_response.json()
+
+    # =========================
+    # HOURLY FORECAST
+    # =========================
+
+    try:
+
+        if "list" in forecast_data:
+
+            for item in forecast_data["list"][:8]:
+
+                hourly_forecast.append({
+
+                    "time": item["dt_txt"][11:13],
+
+                    "icon": item["weather"][0]["icon"],
+
+                    "temp": round(item["main"]["temp"])
+
+                })
+
+    except:
+
+        hourly_forecast = []
 
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -451,6 +481,8 @@ def home():
 
         icon_url=icon_url,
         city_name=city_name,
+
+        hourly_forecast=hourly_forecast,
 
         error=error
     )
