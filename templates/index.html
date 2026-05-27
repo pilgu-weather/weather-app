@@ -450,9 +450,12 @@
 
         window.onload = () => {
 
-            if (
-                !window.location.search.includes("lat")
-            ) {
+            const params =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+            if (!params.has("lat")) {
 
                 navigator.geolocation.getCurrentPosition(
 
@@ -464,8 +467,12 @@
                         const lon =
                             pos.coords.longitude;
 
+                        const mode =
+                            params.get("mode")
+                            || "today";
+
                         window.location.href =
-                            `/?lat=${lat}&lon=${lon}`;
+                            `/?lat=${lat}&lon=${lon}&mode=${mode}`;
                     },
 
                     () => {
@@ -484,14 +491,14 @@
 
     <div class="mode-switch">
 
-        <a href="/?mode=today"
+        <a href="/?lat={{ request.args.get('lat') }}&lon={{ request.args.get('lon') }}&mode=today"
            class="mode-btn {% if mode == 'today' %}active{% endif %}">
 
             Today
 
         </a>
 
-        <a href="/?mode=tomorrow"
+        <a href="/?lat={{ request.args.get('lat') }}&lon={{ request.args.get('lon') }}&mode=tomorrow"
            class="mode-btn {% if mode == 'tomorrow' %}active{% endif %}">
 
             Tomorrow
