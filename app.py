@@ -282,25 +282,25 @@ def home():
 
         {
             "folder": "casual",
-            "title": f"{season.title()} Casual",
+            "title": "Casual",
             "desc": "편안하고 자연스러운 데일리룩"
         },
 
         {
             "folder": "urban",
-            "title": f"{season.title()} Urban",
+            "title": "Urban",
             "desc": "도시 감성 데일리룩"
         },
 
         {
             "folder": "street",
-            "title": f"{season.title()} Street",
-            "desc": "트렌디한 스트릿 무드"
+            "title": "Street",
+            "desc": "트렌디한 스트릿룩"
         },
 
         {
             "folder": "minimal",
-            "title": f"{season.title()} Minimal",
+            "title": "Minimal",
             "desc": "깔끔하고 미니멀한 감성룩"
         }
 
