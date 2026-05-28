@@ -1,15 +1,13 @@
+
 from flask import Flask, render_template, request
 import requests
 from datetime import datetime, timedelta
 import random
 import os
-import json
 
 app = Flask(__name__)
 
 API_KEY = "2fd339c206c2fa601c64bc589a4750e9"
-
-CACHE_FILE = "forecast_cache.json"
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -34,8 +32,6 @@ def home():
     lon = None
 
     error = None
-
-    hourly_forecast = []
 
     # =========================
     # 도시 검색
@@ -178,9 +174,6 @@ def home():
     today_daytime = []
     tomorrow_daytime = []
 
-    today_hourly = []
-    tomorrow_hourly = []
-
     rain_today = False
     rain_tomorrow = False
 
@@ -242,16 +235,6 @@ def home():
                 and tomorrow_count < 8
             ):
 
-                tomorrow_hourly.append({
-
-                    "time": dt_txt[11:13],
-
-                    "icon": weather_icon,
-
-                    "temp": round(current_temp)
-
-                })
-
                 tomorrow_count += 1
 
                 tomorrow_temps.append(current_temp)
@@ -276,41 +259,10 @@ def home():
                     rain_tomorrow = True
 
     # =========================
-    # SAVE TOMORROW CACHE
-    # =========================
-
-    cache_data = {
-        "date": tomorrow,
-        "hourly": tomorrow_hourly
-    }
-
-    with open(CACHE_FILE, "w") as f:
-
-        json.dump(cache_data, f)
-
-    # =========================
     # TODAY MODE
     # =========================
 
     if mode == "today":
-
-        try:
-
-            with open(CACHE_FILE, "r") as f:
-
-                cached = json.load(f)
-
-            if cached["date"] == today:
-
-                hourly_forecast = cached["hourly"]
-
-            else:
-
-                hourly_forecast = tomorrow_hourly
-
-        except:
-
-            hourly_forecast = tomorrow_hourly
 
         if today_temps:
 
@@ -339,8 +291,6 @@ def home():
     # =========================
 
     else:
-
-        hourly_forecast = tomorrow_hourly
 
         icon_url = tomorrow_icon
 
@@ -569,8 +519,6 @@ def home():
 
         icon_url=icon_url,
         city_name=city_name,
-
-        hourly_forecast=hourly_forecast,
 
         error=error
     )
