@@ -220,7 +220,7 @@ def home():
             weather_icon = item["weather"][0]["icon"]
 
             # =========================
-            # TODAY → 현재 이후 + 내일 03시
+            # TODAY → 현재 이후 + 내일 전체
             # =========================
 
             if mode == "today":
@@ -230,7 +230,6 @@ def home():
                     and kst_hour >= now_hour
                 ) or (
                     forecast_date == tomorrow
-                    and kst_hour == 3
                 ):
 
                     hourly_forecast.append({
