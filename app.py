@@ -183,6 +183,8 @@ def home():
 
     tomorrow_icon = icon_url
 
+    tomorrow_midnight = None
+
     if "list" in forecast_data:
 
         next_day_added = False
@@ -286,10 +288,7 @@ def home():
 
                     rain_tomorrow = True
 
-                # =========================
                 # 06 ~ 21
-                # =========================
-
                 if 6 <= hour_part <= 21:
 
                     tomorrow_hourly.append({
@@ -302,13 +301,10 @@ def home():
 
                     })
 
-                # =========================
-                # + 00
-                # =========================
-
+                # 00 따로 저장
                 elif hour_part == 0:
 
-                    tomorrow_hourly.append({
+                    tomorrow_midnight = {
 
                         "time": "00",
 
@@ -316,7 +312,15 @@ def home():
 
                         "temp": round(current_temp)
 
-                    })
+                    }
+
+    # =========================
+    # TOMORROW + 00
+    # =========================
+
+    if tomorrow_midnight:
+
+        tomorrow_hourly.append(tomorrow_midnight)
 
     # =========================
     # TODAY MODE
@@ -331,11 +335,20 @@ def home():
             temp_min = round(min(today_temps))
             temp_max = round(max(today_temps))
 
+        else:
+
+            temp_min = 0
+            temp_max = 0
+
         if today_daytime:
 
             day_temp = round(
                 sum(today_daytime) / len(today_daytime)
             )
+
+        else:
+
+            day_temp = temp
 
         rain_mode = rain_today
 
@@ -356,11 +369,21 @@ def home():
 
             temp = temp_max
 
+        else:
+
+            temp = 0
+            temp_min = 0
+            temp_max = 0
+
         if tomorrow_daytime:
 
             day_temp = round(
                 sum(tomorrow_daytime) / len(tomorrow_daytime)
             )
+
+        else:
+
+            day_temp = temp
 
         rain_mode = rain_tomorrow
 
@@ -479,7 +502,13 @@ def home():
 
         })
 
-    temp_gap = temp_max - temp_min
+    if temp_min is not None and temp_max is not None:
+
+        temp_gap = temp_max - temp_min
+
+    else:
+
+        temp_gap = 0
 
     if season in ["spring", "fall"] and temp_gap >= 8:
 
