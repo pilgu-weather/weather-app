@@ -384,33 +384,42 @@ def home():
 
     air_data = requests.get(air_url).json()
 
-    if "list" in air_data:
+    try:
 
-        pm = air_data["list"][0]["main"]["aqi"]
+        pm25 = air_data["list"][0]["components"]["pm2_5"]
+
+    except:
+
+        pm25 = 0
+
+    # =========================
+    # PM2.5 기준
+    # =========================
+
+    if pm25 <= 59:
+
+        pm_text = "좋음"
+
+    elif pm25 <= 99:
+
+        pm_text = "보통"
+
+    elif pm25 <= 150:
+
+        pm_text = "약간 나쁨"
+
+    else:
+
+        pm_text = "나쁨"
+
+    # Dust 추천 기준
+    if pm25 >= 151:
+
+        pm = 4
 
     else:
 
         pm = 1
-
-    if pm == 1:
-
-        pm_text = "좋음"
-
-    elif pm == 2:
-
-        pm_text = "보통"
-
-    elif pm == 3:
-
-        pm_text = "나쁨"
-
-    elif pm == 4:
-
-        pm_text = "매우 나쁨"
-
-    else:
-
-        pm_text = "마스크 필수"
 
     # =========================
     # 계절 판단
