@@ -169,6 +169,8 @@ def home():
         datetime.now() + timedelta(days=1)
     ).strftime("%Y-%m-%d")
 
+    current_hour = datetime.now().hour
+
     today_temps = []
     tomorrow_temps = []
 
@@ -183,11 +185,7 @@ def home():
 
     tomorrow_icon = icon_url
 
-    tomorrow_midnight = None
-
     if "list" in forecast_data:
-
-        next_day_added = False
 
         for item in forecast_data["list"]:
 
@@ -228,7 +226,8 @@ def home():
 
                     rain_today = True
 
-                if 6 <= hour_part <= 21:
+                # 현재시간 이후만
+                if hour_part >= current_hour:
 
                     today_hourly.append({
 
@@ -239,27 +238,6 @@ def home():
                         "temp": round(current_temp)
 
                     })
-
-            # =========================
-            # TODAY + 00
-            # =========================
-
-            elif (
-                dt_txt[11:13] == "00"
-                and not next_day_added
-            ):
-
-                today_hourly.append({
-
-                    "time": "00",
-
-                    "icon": weather_icon,
-
-                    "temp": round(current_temp)
-
-                })
-
-                next_day_added = True
 
             # =========================
             # TOMORROW
@@ -288,8 +266,8 @@ def home():
 
                     rain_tomorrow = True
 
-                # 06 ~ 21
-                if 6 <= hour_part <= 21:
+                # 내일 전체
+                if hour_part <= 21:
 
                     tomorrow_hourly.append({
 
@@ -300,27 +278,6 @@ def home():
                         "temp": round(current_temp)
 
                     })
-
-                # 00 따로 저장
-                elif hour_part == 0:
-
-                    tomorrow_midnight = {
-
-                        "time": "00",
-
-                        "icon": weather_icon,
-
-                        "temp": round(current_temp)
-
-                    }
-
-    # =========================
-    # TOMORROW + 00
-    # =========================
-
-    if tomorrow_midnight:
-
-        tomorrow_hourly.append(tomorrow_midnight)
 
     # =========================
     # TODAY MODE
