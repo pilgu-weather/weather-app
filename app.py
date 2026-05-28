@@ -169,8 +169,6 @@ def home():
         datetime.now() + timedelta(days=1)
     ).strftime("%Y-%m-%d")
 
-    current_hour = datetime.now().hour
-
     today_temps = []
     tomorrow_temps = []
 
@@ -185,7 +183,14 @@ def home():
 
     tomorrow_icon = icon_url
 
+    # =========================
+    # FORECAST LOOP
+    # =========================
+
     if "list" in forecast_data:
+
+        today_count = 0
+        tomorrow_count = 0
 
         for item in forecast_data["list"]:
 
@@ -205,6 +210,25 @@ def home():
 
             # =========================
             # TODAY
+            # 현재 이후 6칸
+            # =========================
+
+            if today_count < 6:
+
+                today_hourly.append({
+
+                    "time": dt_txt[11:13],
+
+                    "icon": weather_icon,
+
+                    "temp": round(current_temp)
+
+                })
+
+                today_count += 1
+
+            # =========================
+            # TODAY DATA
             # =========================
 
             if date_part == today:
@@ -226,24 +250,27 @@ def home():
 
                     rain_today = True
 
-                # 현재시간 이후만
-                if hour_part >= current_hour:
-
-                    today_hourly.append({
-
-                        "time": dt_txt[11:13],
-
-                        "icon": weather_icon,
-
-                        "temp": round(current_temp)
-
-                    })
-
             # =========================
             # TOMORROW
+            # 00 ~ 21
             # =========================
 
-            if date_part == tomorrow:
+            if (
+                date_part == tomorrow
+                and tomorrow_count < 8
+            ):
+
+                tomorrow_hourly.append({
+
+                    "time": dt_txt[11:13],
+
+                    "icon": weather_icon,
+
+                    "temp": round(current_temp)
+
+                })
+
+                tomorrow_count += 1
 
                 tomorrow_temps.append(current_temp)
 
@@ -265,19 +292,6 @@ def home():
                 ):
 
                     rain_tomorrow = True
-
-                # 내일 전체
-                if hour_part <= 21:
-
-                    tomorrow_hourly.append({
-
-                        "time": dt_txt[11:13],
-
-                        "icon": weather_icon,
-
-                        "temp": round(current_temp)
-
-                    })
 
     # =========================
     # TODAY MODE
