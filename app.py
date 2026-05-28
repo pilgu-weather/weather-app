@@ -3,10 +3,13 @@ import requests
 from datetime import datetime, timedelta
 import random
 import os
+import json
 
 app = Flask(__name__)
 
-API_KEY = "2fd339c206c2fa601c64bc589a4750e9"
+API_KEY = "YOUR_API_KEY"
+
+CACHE_FILE = "forecast_cache.json"
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -189,19 +192,11 @@ def home():
 
     if "list" in forecast_data:
 
-        today_count = 0
         tomorrow_count = 0
-
-        now = datetime.now()
 
         for item in forecast_data["list"]:
 
             dt_txt = item["dt_txt"]
-
-            forecast_time = datetime.strptime(
-                dt_txt,
-                "%Y-%m-%d %H:%M:%S"
-            )
 
             date_part = dt_txt.split(" ")[0]
 
@@ -214,28 +209,6 @@ def home():
             weather_type = item["weather"][0]["main"]
 
             weather_icon = item["weather"][0]["icon"]
-
-            # =========================
-            # TODAY
-            # 현재시간 이후만
-            # =========================
-
-            if (
-                forecast_time > now
-                and today_count < 6
-            ):
-
-                today_hourly.append({
-
-                    "time": dt_txt[11:13],
-
-                    "icon": weather_icon,
-
-                    "temp": round(current_temp)
-
-                })
-
-                today_count += 1
 
             # =========================
             # TODAY DATA
@@ -262,7 +235,6 @@ def home():
 
             # =========================
             # TOMORROW
-            # 00 ~ 21
             # =========================
 
             if (
@@ -304,12 +276,41 @@ def home():
                     rain_tomorrow = True
 
     # =========================
+    # SAVE TOMORROW CACHE
+    # =========================
+
+    cache_data = {
+        "date": tomorrow,
+        "hourly": tomorrow_hourly
+    }
+
+    with open(CACHE_FILE, "w") as f:
+
+        json.dump(cache_data, f)
+
+    # =========================
     # TODAY MODE
     # =========================
 
     if mode == "today":
 
-        hourly_forecast = today_hourly
+        try:
+
+            with open(CACHE_FILE, "r") as f:
+
+                cached = json.load(f)
+
+            if cached["date"] == today:
+
+                hourly_forecast = cached["hourly"]
+
+            else:
+
+                hourly_forecast = tomorrow_hourly
+
+        except:
+
+            hourly_forecast = tomorrow_hourly
 
         if today_temps:
 
