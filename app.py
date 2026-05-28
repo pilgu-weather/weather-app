@@ -192,14 +192,26 @@ def home():
 
             dt_txt = item["dt_txt"]
 
-            date_part = dt_txt.split(" ")[0]
+            utc_date = dt_txt.split(" ")[0]
 
             raw_hour = int(
                 dt_txt.split(" ")[1].split(":")[0]
             )
 
             # UTC → KST
-            hour_part = (raw_hour + 9) % 24
+            kst_hour = (raw_hour + 9) % 24
+
+            # 날짜 보정
+            forecast_date = utc_date
+
+            if raw_hour + 9 >= 24:
+
+                forecast_date = (
+                    datetime.strptime(
+                        utc_date,
+                        "%Y-%m-%d"
+                    ) + timedelta(days=1)
+                ).strftime("%Y-%m-%d")
 
             current_temp = item["main"]["temp"]
 
@@ -208,18 +220,18 @@ def home():
             weather_icon = item["weather"][0]["icon"]
 
             # =========================
-            # TODAY
+            # TODAY → 현재 이후 스크롤
             # =========================
 
             if (
                 mode == "today"
-                and date_part == today
-                and hour_part >= now_hour
+                and forecast_date == today
+                and kst_hour >= now_hour
             ):
 
                 hourly_forecast.append({
 
-                    "time": f"{hour_part:02d}",
+                    "time": f"{kst_hour:02d}",
 
                     "icon": weather_icon,
 
@@ -228,18 +240,18 @@ def home():
                 })
 
             # =========================
-            # TOMORROW
+            # TOMORROW → 06~21 고정
             # =========================
 
             if (
                 mode == "tomorrow"
-                and date_part == tomorrow
-                and hour_part in [3, 6, 9, 12, 15, 18, 21]
+                and forecast_date == tomorrow
+                and kst_hour in [6, 9, 12, 15, 18, 21]
             ):
 
                 hourly_forecast.append({
 
-                    "time": f"{hour_part:02d}",
+                    "time": f"{kst_hour:02d}",
 
                     "icon": weather_icon,
 
@@ -251,16 +263,16 @@ def home():
             # TODAY DATA
             # =========================
 
-            if date_part == today:
+            if forecast_date == today:
 
                 today_temps.append(current_temp)
 
-                if 12 <= hour_part <= 15:
+                if 12 <= kst_hour <= 15:
 
                     today_daytime.append(current_temp)
 
                 if (
-                    6 <= hour_part <= 21
+                    6 <= kst_hour <= 21
                     and weather_type in [
                         "Rain",
                         "Drizzle",
@@ -274,11 +286,11 @@ def home():
             # TOMORROW DATA
             # =========================
 
-            if date_part == tomorrow:
+            if forecast_date == tomorrow:
 
                 tomorrow_temps.append(current_temp)
 
-                if 12 <= hour_part <= 15:
+                if 12 <= kst_hour <= 15:
 
                     tomorrow_daytime.append(current_temp)
 
@@ -287,7 +299,7 @@ def home():
                     )
 
                 if (
-                    6 <= hour_part <= 21
+                    6 <= kst_hour <= 21
                     and weather_type in [
                         "Rain",
                         "Drizzle",
