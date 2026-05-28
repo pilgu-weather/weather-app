@@ -220,24 +220,28 @@ def home():
             weather_icon = item["weather"][0]["icon"]
 
             # =========================
-            # TODAY → 현재 이후 스크롤
+            # TODAY → 현재 이후 + 내일 03시
             # =========================
 
-            if (
-                mode == "today"
-                and forecast_date == today
-                and kst_hour >= now_hour
-            ):
+            if mode == "today":
 
-                hourly_forecast.append({
+                if (
+                    forecast_date == today
+                    and kst_hour >= now_hour
+                ) or (
+                    forecast_date == tomorrow
+                    and kst_hour == 3
+                ):
 
-                    "time": f"{kst_hour:02d}",
+                    hourly_forecast.append({
 
-                    "icon": weather_icon,
+                        "time": f"{kst_hour:02d}",
 
-                    "temp": round(current_temp)
+                        "icon": weather_icon,
 
-                })
+                        "temp": round(current_temp)
+
+                    })
 
             # =========================
             # TOMORROW → 06~21 고정
