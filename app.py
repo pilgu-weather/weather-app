@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, request
 import requests
 from datetime import datetime, timedelta
@@ -187,6 +186,8 @@ def home():
 
     if "list" in forecast_data:
 
+        now_utc = datetime.utcnow()
+
         for item in forecast_data["list"]:
 
             dt_txt = item["dt_txt"]
@@ -212,7 +213,7 @@ def home():
             # 현재 이후 모든 forecast
             # =========================
 
-            if forecast_time >= datetime.now():
+            if forecast_time >= now_utc:
 
                 hourly_forecast.append({
 
