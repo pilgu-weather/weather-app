@@ -194,9 +194,12 @@ def home():
 
             date_part = dt_txt.split(" ")[0]
 
-            hour_part = int(
+            raw_hour = int(
                 dt_txt.split(" ")[1].split(":")[0]
             )
+
+            # UTC → KST
+            hour_part = (raw_hour + 9) % 24
 
             current_temp = item["main"]["temp"]
 
@@ -217,7 +220,7 @@ def home():
 
                 hourly_forecast.append({
 
-                    "time": dt_txt[11:13],
+                    "time": f"{hour_part:02d}",
 
                     "icon": weather_icon,
 
