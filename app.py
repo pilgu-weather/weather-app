@@ -208,14 +208,33 @@ def home():
             weather_icon = item["weather"][0]["icon"]
 
             # =========================
-            # 현재 이후 forecast
+            # TODAY
             # =========================
 
             if (
-                date_part == today
+                mode == "today"
+                and date_part == today
                 and hour_part >= now_hour
-            ) or (
-                date_part == tomorrow
+            ):
+
+                hourly_forecast.append({
+
+                    "time": f"{hour_part:02d}",
+
+                    "icon": weather_icon,
+
+                    "temp": round(current_temp)
+
+                })
+
+            # =========================
+            # TOMORROW
+            # =========================
+
+            if (
+                mode == "tomorrow"
+                and date_part == tomorrow
+                and hour_part in [3, 6, 9, 12, 15, 18, 21]
             ):
 
                 hourly_forecast.append({
