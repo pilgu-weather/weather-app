@@ -6,7 +6,7 @@ import os
 
 app = Flask(__name__)
 
-API_KEY = "2fd339c206c2fa601c64bc589a4750e9"
+API_KEY = "YOUR_API_KEY"
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -226,15 +226,17 @@ def home():
 
                     rain_today = True
 
-                today_hourly.append({
+                if 6 <= hour_part <= 21:
 
-                    "time": dt_txt[11:13],
+                    today_hourly.append({
 
-                    "icon": weather_icon,
+                        "time": dt_txt[11:13],
 
-                    "temp": round(current_temp)
+                        "icon": weather_icon,
 
-                })
+                        "temp": round(current_temp)
+
+                    })
 
             # =========================
             # TODAY + 00
@@ -284,15 +286,37 @@ def home():
 
                     rain_tomorrow = True
 
-                tomorrow_hourly.append({
+                # =========================
+                # 06 ~ 21
+                # =========================
 
-                    "time": dt_txt[11:13],
+                if 6 <= hour_part <= 21:
 
-                    "icon": weather_icon,
+                    tomorrow_hourly.append({
 
-                    "temp": round(current_temp)
+                        "time": dt_txt[11:13],
 
-                })
+                        "icon": weather_icon,
+
+                        "temp": round(current_temp)
+
+                    })
+
+                # =========================
+                # + 00
+                # =========================
+
+                elif hour_part == 0:
+
+                    tomorrow_hourly.append({
+
+                        "time": "00",
+
+                        "icon": weather_icon,
+
+                        "temp": round(current_temp)
+
+                    })
 
     # =========================
     # TODAY MODE
