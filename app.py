@@ -7,7 +7,7 @@ import json
 
 app = Flask(__name__)
 
-API_KEY = "YOUR_API_KEY"
+API_KEY = "2fd339c206c2fa601c64bc589a4750e9"
 
 CACHE_FILE = "forecast_cache.json"
 
