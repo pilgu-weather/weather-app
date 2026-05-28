@@ -169,6 +169,8 @@ def home():
         datetime.now() + timedelta(days=1)
     ).strftime("%Y-%m-%d")
 
+    now_hour = datetime.now().hour
+
     today_temps = []
     tomorrow_temps = []
 
@@ -186,16 +188,9 @@ def home():
 
     if "list" in forecast_data:
 
-        now_utc = datetime.utcnow()
-
         for item in forecast_data["list"]:
 
             dt_txt = item["dt_txt"]
-
-            forecast_time = datetime.strptime(
-                dt_txt,
-                "%Y-%m-%d %H:%M:%S"
-            )
 
             date_part = dt_txt.split(" ")[0]
 
@@ -210,10 +205,15 @@ def home():
             weather_icon = item["weather"][0]["icon"]
 
             # =========================
-            # 현재 이후 모든 forecast
+            # 현재 이후 forecast
             # =========================
 
-            if forecast_time >= now_utc:
+            if (
+                date_part == today
+                and hour_part >= now_hour
+            ) or (
+                date_part == tomorrow
+            ):
 
                 hourly_forecast.append({
 
