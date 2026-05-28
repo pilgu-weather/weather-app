@@ -205,8 +205,6 @@
 
             display: flex;
 
-            gap: 10px;
-
             overflow-x: auto;
 
             scroll-behavior: smooth;
@@ -216,6 +214,18 @@
             padding: 6px 2px;
 
             -webkit-overflow-scrolling: touch;
+
+            {% if mode == "today" %}
+
+            gap: 10px;
+
+            {% else %}
+
+            justify-content: space-between;
+
+            gap: 0;
+
+            {% endif %}
         }
 
         .hourly-strip::-webkit-scrollbar {
