@@ -33,6 +33,8 @@ def home():
 
     error = None
 
+    hourly_forecast = []
+
     # =========================
     # 도시 검색
     # =========================
@@ -180,16 +182,19 @@ def home():
     tomorrow_icon = icon_url
 
     # =========================
-    # FORECAST LOOP
+    # HOURLY FORECAST
     # =========================
 
     if "list" in forecast_data:
 
-        tomorrow_count = 0
-
         for item in forecast_data["list"]:
 
             dt_txt = item["dt_txt"]
+
+            forecast_time = datetime.strptime(
+                dt_txt,
+                "%Y-%m-%d %H:%M:%S"
+            )
 
             date_part = dt_txt.split(" ")[0]
 
@@ -202,6 +207,22 @@ def home():
             weather_type = item["weather"][0]["main"]
 
             weather_icon = item["weather"][0]["icon"]
+
+            # =========================
+            # 현재 이후 모든 forecast
+            # =========================
+
+            if forecast_time >= datetime.now():
+
+                hourly_forecast.append({
+
+                    "time": dt_txt[11:13],
+
+                    "icon": weather_icon,
+
+                    "temp": round(current_temp)
+
+                })
 
             # =========================
             # TODAY DATA
@@ -227,15 +248,10 @@ def home():
                     rain_today = True
 
             # =========================
-            # TOMORROW
+            # TOMORROW DATA
             # =========================
 
-            if (
-                date_part == tomorrow
-                and tomorrow_count < 8
-            ):
-
-                tomorrow_count += 1
+            if date_part == tomorrow:
 
                 tomorrow_temps.append(current_temp)
 
@@ -519,6 +535,8 @@ def home():
 
         icon_url=icon_url,
         city_name=city_name,
+
+        hourly_forecast=hourly_forecast,
 
         error=error
     )
