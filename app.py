@@ -169,6 +169,8 @@ def home():
         datetime.now() + timedelta(days=1)
     ).strftime("%Y-%m-%d")
 
+    current_hour = datetime.now().hour
+
     today_temps = []
     tomorrow_temps = []
 
@@ -210,10 +212,14 @@ def home():
 
             # =========================
             # TODAY
-            # 현재 이후 6칸
+            # 현재시간 이후만
             # =========================
 
-            if today_count < 6:
+            if (
+                date_part == today
+                and hour_part >= current_hour
+                and today_count < 6
+            ):
 
                 today_hourly.append({
 
