@@ -169,8 +169,6 @@ def home():
         datetime.now() + timedelta(days=1)
     ).strftime("%Y-%m-%d")
 
-    current_hour = datetime.now().hour
-
     today_temps = []
     tomorrow_temps = []
 
@@ -194,9 +192,16 @@ def home():
         today_count = 0
         tomorrow_count = 0
 
+        now = datetime.now()
+
         for item in forecast_data["list"]:
 
             dt_txt = item["dt_txt"]
+
+            forecast_time = datetime.strptime(
+                dt_txt,
+                "%Y-%m-%d %H:%M:%S"
+            )
 
             date_part = dt_txt.split(" ")[0]
 
@@ -216,8 +221,7 @@ def home():
             # =========================
 
             if (
-                date_part == today
-                and hour_part >= current_hour
+                forecast_time > now
                 and today_count < 6
             ):
 
