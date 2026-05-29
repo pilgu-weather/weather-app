@@ -37,6 +37,79 @@
             position: relative;
 
             overflow-x: hidden;
+
+            min-height: 100vh;
+
+            transition:
+                background 0.45s ease;
+        }
+
+        body.weather-clear {
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #9ed8ff,
+                    #d9f0ff 48%,
+                    #f8fbff
+                );
+        }
+
+        body.weather-clouds {
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #d9dee7,
+                    #eef1f5 52%,
+                    #f9fafb
+                );
+        }
+
+        body.weather-rain {
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #4d5560,
+                    #727b87 54%,
+                    #a7afb8
+                );
+        }
+
+        body.weather-snow {
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #cfe8ff,
+                    #eaf6ff 52%,
+                    #f8fbff
+                );
+        }
+
+        body.weather-thunderstorm {
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #202632,
+                    #3e4654 56%,
+                    #6d7480
+                );
+        }
+
+        body.weather-mist,
+        body.weather-fog,
+        body.weather-haze {
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #c8d1da,
+                    #e1e6eb 50%,
+                    #f7f8fa
+                );
         }
 
         body::before {
@@ -54,12 +127,178 @@
                     transparent 40%
                 );
 
-            z-index: -1;
+            z-index: 0;
 
             pointer-events: none;
         }
 
+        body::after {
+
+            content: "";
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 0;
+
+            pointer-events: none;
+
+            opacity: 0;
+        }
+
+        body.weather-rain::after {
+
+            opacity: 0.52;
+
+            background:
+                repeating-linear-gradient(
+                    112deg,
+                    transparent 0 18px,
+                    rgba(255,255,255,0.36) 19px 21px,
+                    transparent 22px 38px
+                );
+
+            background-size: 120px 120px;
+
+            animation:
+                rain-fall 0.72s linear infinite;
+        }
+
+        body.weather-snow::after {
+
+            opacity: 0.86;
+
+            background-image:
+                radial-gradient(
+                    circle,
+                    rgba(255,255,255,0.92) 0 2px,
+                    transparent 3px
+                ),
+                radial-gradient(
+                    circle,
+                    rgba(255,255,255,0.72) 0 1px,
+                    transparent 2px
+                );
+
+            background-size:
+                92px 92px,
+                148px 148px;
+
+            background-position:
+                0 0,
+                42px 28px;
+
+            animation:
+                snow-fall 9s linear infinite;
+        }
+
+        body.weather-thunderstorm::after {
+
+            opacity: 0;
+
+            background:
+                radial-gradient(
+                    circle at 72% 18%,
+                    rgba(255,255,255,0.95),
+                    rgba(180,210,255,0.38) 18%,
+                    transparent 42%
+                );
+
+            animation:
+                lightning-flash 5.8s linear infinite;
+        }
+
+        body.weather-mist::after,
+        body.weather-fog::after,
+        body.weather-haze::after {
+
+            opacity: 0.62;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(255,255,255,0.58),
+                    transparent
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(255,255,255,0.22),
+                    transparent,
+                    rgba(255,255,255,0.42)
+                );
+
+            filter: blur(18px);
+
+            transform:
+                translateX(-20%);
+
+            animation:
+                mist-drift 16s ease-in-out infinite alternate;
+        }
+
+        @keyframes rain-fall {
+
+            from {
+                background-position: 0 0;
+            }
+
+            to {
+                background-position: -48px 120px;
+            }
+        }
+
+        @keyframes snow-fall {
+
+            from {
+                background-position:
+                    0 -100px,
+                    42px -160px;
+            }
+
+            to {
+                background-position:
+                    0 100vh,
+                    42px 100vh;
+            }
+        }
+
+        @keyframes lightning-flash {
+
+            0%,
+            83%,
+            88%,
+            100% {
+                opacity: 0;
+            }
+
+            84%,
+            86% {
+                opacity: 0.72;
+            }
+
+            87% {
+                opacity: 0.24;
+            }
+        }
+
+        @keyframes mist-drift {
+
+            from {
+                transform: translateX(-24%);
+            }
+
+            to {
+                transform: translateX(18%);
+            }
+        }
+
         .container {
+
+            position: relative;
+
+            z-index: 1;
 
             max-width: 430px;
 
@@ -460,7 +699,7 @@
 
 </head>
 
-<body>
+<body class="weather-{{ weather_main|default('default')|lower }}">
 
 <div class="container">
 

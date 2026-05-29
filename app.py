@@ -55,6 +55,7 @@ def home():
 
     icon_url = None
     city_name = None
+    weather_main = "Default"
 
     lat = None
     lon = None
@@ -93,6 +94,7 @@ def home():
         temp = round(data["main"]["temp"])
 
         icon = data["weather"][0]["icon"]
+        weather_main = data["weather"][0]["main"]
 
         icon_url = (
             f"https://openweathermap.org/img/wn/{icon}@2x.png"
@@ -146,6 +148,7 @@ def home():
         temp = round(data["main"]["temp"])
 
         icon = data["weather"][0]["icon"]
+        weather_main = data["weather"][0]["main"]
 
         icon_url = (
             f"https://openweathermap.org/img/wn/{icon}@2x.png"
@@ -172,6 +175,7 @@ def home():
         temp = round(data["main"]["temp"])
 
         icon = data["weather"][0]["icon"]
+        weather_main = data["weather"][0]["main"]
 
         icon_url = (
             f"https://openweathermap.org/img/wn/{icon}@2x.png"
@@ -611,6 +615,7 @@ def home():
 
         icon_url=icon_url,
         city_name=city_name,
+        weather_main=weather_main,
 
         hourly_forecast=hourly_forecast,
 
