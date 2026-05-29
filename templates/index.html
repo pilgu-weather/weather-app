@@ -76,8 +76,6 @@
 
             align-items: center;
 
-            gap: 14px;
-
             margin-bottom: 24px;
         }
 
@@ -90,175 +88,53 @@
             letter-spacing: -1.5px;
         }
 
-        .mode-slider {
+        .mode-switch {
 
-            position: relative;
-
-            display: grid;
-
-            grid-template-columns: 1fr 1fr;
+            display: flex;
 
             align-items: center;
 
-            width: 168px;
-
-            height: 46px;
-
-            padding: 5px;
+            padding: 4px;
 
             border-radius: 999px;
 
             background:
-                linear-gradient(
-                    180deg,
-                    rgba(255,255,255,0.68),
-                    rgba(238,242,248,0.70)
-                );
+                rgba(255,255,255,0.58);
 
             backdrop-filter: blur(24px);
 
             border:
-                1px solid rgba(255,255,255,0.72);
+                1px solid rgba(255,255,255,0.45);
 
             box-shadow:
-                inset 0 1px 2px rgba(255,255,255,0.92),
-                inset 0 -4px 12px rgba(64,78,96,0.06),
-                0 8px 22px rgba(31,41,55,0.08);
-
-            cursor: grab;
-
-            user-select: none;
-
-            touch-action: pan-y;
+                0 8px 24px rgba(0,0,0,0.06);
         }
 
-        .mode-slider::before {
+        .mode-btn {
 
-            content: "";
-
-            position: absolute;
-
-            inset: 5px;
-
-            border-radius: inherit;
-
-            background:
-                linear-gradient(
-                    180deg,
-                    rgba(150,163,184,0.10),
-                    rgba(255,255,255,0.30)
-                );
-
-            box-shadow:
-                inset 0 1px 4px rgba(42,54,71,0.08);
-        }
-
-        .mode-slider.dragging {
-
-            cursor: grabbing;
-        }
-
-        .mode-track-label {
-
-            position: relative;
-
-            font-size: 13px;
-
-            font-weight: 750;
-
-            color: #8b929d;
-
-            text-align: center;
-
-            z-index: 2;
-
-            pointer-events: none;
-
-            transition:
-                color 0.24s ease,
-                text-shadow 0.24s ease;
-        }
-
-        .mode-slider[data-mode="today"] .mode-track-label.today,
-        .mode-slider[data-mode="tomorrow"] .mode-track-label.tomorrow {
-
-            color: #13161a;
-
-            text-shadow:
-                0 1px 0 rgba(255,255,255,0.86);
-        }
-
-        .mode-thumb {
-
-            position: absolute;
-
-            top: 5px;
-
-            left: 5px;
-
-            width: 78px;
-
-            height: 36px;
+            padding: 8px 14px;
 
             border-radius: 999px;
 
-            background:
-                linear-gradient(
-                    180deg,
-                    #ffffff,
-                    #f7f9fc 58%,
-                    #eef2f7
-                );
+            text-decoration: none;
 
-            border:
-                1px solid rgba(255,255,255,0.9);
+            font-size: 13px;
+
+            font-weight: 700;
+
+            color: #8e8e93;
+
+            transition: 0.25s;
+        }
+
+        .mode-btn.active {
+
+            background: white;
+
+            color: #111;
 
             box-shadow:
-                inset 0 1px 1px rgba(255,255,255,0.95),
-                inset 0 -3px 8px rgba(122,135,153,0.08),
-                0 6px 14px rgba(31,41,55,0.11),
-                0 1px 3px rgba(31,41,55,0.08);
-
-            transform:
-                translateX(0);
-
-            transition:
-                transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-                box-shadow 0.24s ease;
-
-            z-index: 1;
-        }
-
-        .mode-slider[data-mode="tomorrow"] .mode-thumb {
-
-            transform:
-                translateX(80px);
-        }
-
-        .mode-slider.dragging .mode-thumb {
-
-            transition: none;
-
-            box-shadow:
-                inset 0 1px 1px rgba(255,255,255,0.95),
-                inset 0 -3px 8px rgba(122,135,153,0.08),
-                0 9px 18px rgba(31,41,55,0.14),
-                0 2px 5px rgba(31,41,55,0.09);
-        }
-
-        @media (max-width: 380px) {
-
-            .top-bar {
-
-                flex-wrap: wrap;
-            }
-
-            .mode-slider {
-
-                width: 100%;
-
-                max-width: 178px;
-            }
+                0 3px 10px rgba(0,0,0,0.06);
         }
 
         .card {
@@ -594,22 +470,21 @@
             Weather Fit
         </div>
 
-        <div class="mode-slider"
-             data-mode="{{ mode }}"
-             role="switch"
-             aria-label="Forecast mode"
-             aria-checked="{% if mode == 'tomorrow' %}true{% else %}false{% endif %}"
-             tabindex="0">
+        <div class="mode-switch">
 
-            <div class="mode-thumb"></div>
+            <a href="/?lat={{ request.args.get('lat') }}&lon={{ request.args.get('lon') }}&mode=today"
+               class="mode-btn {% if mode == 'today' %}active{% endif %}">
 
-            <div class="mode-track-label today">
                 Today
-            </div>
 
-            <div class="mode-track-label tomorrow">
+            </a>
+
+            <a href="/?lat={{ request.args.get('lat') }}&lon={{ request.args.get('lon') }}&mode=tomorrow"
+               class="mode-btn {% if mode == 'tomorrow' %}active{% endif %}">
+
                 Tomorrow
-            </div>
+
+            </a>
 
         </div>
 
@@ -650,146 +525,6 @@
                     }
                 );
             }
-
-            const slider =
-                document.querySelector(".mode-slider");
-
-            if (!slider) {
-
-                return;
-            }
-
-            const thumb =
-                slider.querySelector(".mode-thumb");
-
-            const goToMode = (mode) => {
-
-                const currentMode =
-                    slider.dataset.mode || "today";
-
-                if (mode === currentMode) {
-
-                    return;
-                }
-
-                const nextParams =
-                    new URLSearchParams(
-                        window.location.search
-                    );
-
-                nextParams.set("mode", mode);
-
-                window.location.href =
-                    `/?${nextParams.toString()}`;
-            };
-
-            const setThumbPosition = (clientX) => {
-
-                const rect =
-                    slider.getBoundingClientRect();
-
-                const travel =
-                    rect.width - thumb.offsetWidth - 8;
-
-                const offset =
-                    Math.max(
-                        0,
-                        Math.min(
-                            travel,
-                            clientX - rect.left - thumb.offsetWidth / 2
-                        )
-                    );
-
-                thumb.style.transform =
-                    `translateX(${offset}px)`;
-
-                return offset / travel;
-            };
-
-            let isDragging =
-                false;
-
-            let dragRatio =
-                slider.dataset.mode === "tomorrow" ? 1 : 0;
-
-            slider.addEventListener("pointerdown", (event) => {
-
-                isDragging = true;
-
-                slider.classList.add("dragging");
-
-                slider.setPointerCapture(event.pointerId);
-
-                dragRatio =
-                    setThumbPosition(event.clientX);
-            });
-
-            slider.addEventListener("pointermove", (event) => {
-
-                if (!isDragging) {
-
-                    return;
-                }
-
-                dragRatio =
-                    setThumbPosition(event.clientX);
-            });
-
-            slider.addEventListener("pointerup", (event) => {
-
-                if (!isDragging) {
-
-                    return;
-                }
-
-                isDragging = false;
-
-                slider.classList.remove("dragging");
-
-                slider.releasePointerCapture(event.pointerId);
-
-                thumb.style.transform = "";
-
-                const targetMode =
-                    dragRatio >= 0.5 ? "tomorrow" : "today";
-
-                goToMode(targetMode);
-            });
-
-            slider.addEventListener("pointercancel", () => {
-
-                isDragging = false;
-
-                slider.classList.remove("dragging");
-
-                thumb.style.transform = "";
-            });
-
-            slider.addEventListener("keydown", (event) => {
-
-                if (
-                    event.key !== "ArrowLeft"
-                    && event.key !== "ArrowRight"
-                    && event.key !== "Enter"
-                    && event.key !== " "
-                ) {
-
-                    return;
-                }
-
-                event.preventDefault();
-
-                const targetMode =
-                    event.key === "ArrowLeft"
-                        ? "today"
-                        : event.key === "ArrowRight"
-                            ? "tomorrow"
-                            : slider.dataset.mode === "today"
-                                ? "tomorrow"
-                                : "today";
-
-                goToMode(targetMode);
-            });
         };
 
     </script>
