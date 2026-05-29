@@ -152,6 +152,16 @@
             opacity: 0.52;
 
             background:
+                radial-gradient(
+                    ellipse at 58% 10%,
+                    rgba(38,45,55,0.56) 0 15%,
+                    transparent 34%
+                ),
+                radial-gradient(
+                    ellipse at 32% 13%,
+                    rgba(43,50,60,0.42) 0 13%,
+                    transparent 31%
+                ),
                 repeating-linear-gradient(
                     112deg,
                     transparent 0 18px,
@@ -198,6 +208,16 @@
             opacity: 0;
 
             background:
+                radial-gradient(
+                    ellipse at 58% 10%,
+                    rgba(30,36,46,0.72) 0 16%,
+                    transparent 35%
+                ),
+                radial-gradient(
+                    ellipse at 28% 13%,
+                    rgba(28,34,44,0.48) 0 14%,
+                    transparent 32%
+                ),
                 radial-gradient(
                     circle at 72% 18%,
                     rgba(255,255,255,0.95),
@@ -292,6 +312,156 @@
             to {
                 transform: translateX(18%);
             }
+        }
+
+        .weather-objects {
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 0;
+
+            overflow: hidden;
+
+            pointer-events: none;
+        }
+
+        .weather-objects span {
+
+            position: absolute;
+
+            display: none;
+
+            opacity: 0;
+        }
+
+        .sun-object {
+
+            top: 32px;
+
+            right: -18px;
+
+            width: 150px;
+
+            height: 150px;
+
+            border-radius: 50%;
+
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(255,236,151,0.62) 0 34%,
+                    rgba(255,207,86,0.28) 35% 58%,
+                    transparent 70%
+                );
+
+            filter:
+                blur(0.3px);
+        }
+
+        .cloud-object {
+
+            width: 170px;
+
+            height: 58px;
+
+            border-radius: 999px;
+
+            background:
+                rgba(255,255,255,0.42);
+
+            filter:
+                blur(0.5px);
+        }
+
+        .cloud-object::before,
+        .cloud-object::after {
+
+            content: "";
+
+            position: absolute;
+
+            border-radius: 50%;
+
+            background:
+                inherit;
+        }
+
+        .cloud-object::before {
+
+            width: 74px;
+
+            height: 74px;
+
+            left: 28px;
+
+            top: -30px;
+        }
+
+        .cloud-object::after {
+
+            width: 94px;
+
+            height: 94px;
+
+            right: 24px;
+
+            top: -44px;
+        }
+
+        .cloud-one {
+
+            top: 92px;
+
+            left: -36px;
+        }
+
+        .cloud-two {
+
+            top: 172px;
+
+            right: -54px;
+
+            transform:
+                scale(0.82);
+        }
+
+        .cloud-three {
+
+            top: 300px;
+
+            left: 54%;
+
+            transform:
+                scale(0.62);
+        }
+
+        body.weather-clear .sun-object {
+
+            display: block;
+
+            opacity: 0.58;
+        }
+
+        body.weather-clouds .cloud-object {
+
+            display: block;
+
+            opacity: 0.46;
+        }
+
+        body.weather-rain .cloud-one,
+        body.weather-rain .cloud-two,
+        body.weather-thunderstorm .cloud-one,
+        body.weather-thunderstorm .cloud-two {
+
+            display: block;
+
+            opacity: 0.30;
+
+            background:
+                rgba(48,56,68,0.48);
         }
 
         .container {
@@ -700,6 +870,15 @@
 </head>
 
 <body class="weather-{{ weather_main|default('default')|lower }}">
+
+<div class="weather-objects" aria-hidden="true">
+
+    <span class="sun-object"></span>
+    <span class="cloud-object cloud-one"></span>
+    <span class="cloud-object cloud-two"></span>
+    <span class="cloud-object cloud-three"></span>
+
+</div>
 
 <div class="container">
 
