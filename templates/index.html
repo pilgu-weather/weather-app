@@ -76,6 +76,8 @@
 
             align-items: center;
 
+            gap: 14px;
+
             margin-bottom: 24px;
         }
 
@@ -88,11 +90,19 @@
             letter-spacing: -1.5px;
         }
 
-        .mode-switch {
+        .mode-slider {
 
-            display: flex;
+            position: relative;
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
 
             align-items: center;
+
+            width: 158px;
+
+            height: 42px;
 
             padding: 4px;
 
@@ -108,15 +118,22 @@
 
             box-shadow:
                 0 8px 24px rgba(0,0,0,0.06);
+
+            cursor: grab;
+
+            user-select: none;
+
+            touch-action: pan-y;
         }
 
-        .mode-btn {
+        .mode-slider.dragging {
 
-            padding: 8px 14px;
+            cursor: grabbing;
+        }
 
-            border-radius: 999px;
+        .mode-track-label {
 
-            text-decoration: none;
+            position: relative;
 
             font-size: 13px;
 
@@ -124,17 +141,71 @@
 
             color: #8e8e93;
 
-            transition: 0.25s;
+            text-align: center;
+
+            z-index: 2;
+
+            pointer-events: none;
         }
 
-        .mode-btn.active {
+        .mode-slider[data-mode="today"] .mode-track-label.today,
+        .mode-slider[data-mode="tomorrow"] .mode-track-label.tomorrow {
+
+            color: #111;
+        }
+
+        .mode-thumb {
+
+            position: absolute;
+
+            top: 4px;
+
+            left: 4px;
+
+            width: 74px;
+
+            height: 34px;
+
+            border-radius: 999px;
 
             background: white;
 
-            color: #111;
-
             box-shadow:
                 0 3px 10px rgba(0,0,0,0.06);
+
+            transform:
+                translateX(0);
+
+            transition:
+                transform 0.28s ease;
+
+            z-index: 1;
+        }
+
+        .mode-slider[data-mode="tomorrow"] .mode-thumb {
+
+            transform:
+                translateX(76px);
+        }
+
+        .mode-slider.dragging .mode-thumb {
+
+            transition: none;
+        }
+
+        @media (max-width: 380px) {
+
+            .top-bar {
+
+                flex-wrap: wrap;
+            }
+
+            .mode-slider {
+
+                width: 100%;
+
+                max-width: 178px;
+            }
         }
 
         .card {
@@ -470,21 +541,22 @@
             Weather Fit
         </div>
 
-        <div class="mode-switch">
+        <div class="mode-slider"
+             data-mode="{{ mode }}"
+             role="switch"
+             aria-label="Forecast mode"
+             aria-checked="{% if mode == 'tomorrow' %}true{% else %}false{% endif %}"
+             tabindex="0">
 
-            <a href="/?lat={{ request.args.get('lat') }}&lon={{ request.args.get('lon') }}&mode=today"
-               class="mode-btn {% if mode == 'today' %}active{% endif %}">
+            <div class="mode-thumb"></div>
 
+            <div class="mode-track-label today">
                 Today
+            </div>
 
-            </a>
-
-            <a href="/?lat={{ request.args.get('lat') }}&lon={{ request.args.get('lon') }}&mode=tomorrow"
-               class="mode-btn {% if mode == 'tomorrow' %}active{% endif %}">
-
+            <div class="mode-track-label tomorrow">
                 Tomorrow
-
-            </a>
+            </div>
 
         </div>
 
@@ -525,6 +597,146 @@
                     }
                 );
             }
+
+            const slider =
+                document.querySelector(".mode-slider");
+
+            if (!slider) {
+
+                return;
+            }
+
+            const thumb =
+                slider.querySelector(".mode-thumb");
+
+            const goToMode = (mode) => {
+
+                const currentMode =
+                    slider.dataset.mode || "today";
+
+                if (mode === currentMode) {
+
+                    return;
+                }
+
+                const nextParams =
+                    new URLSearchParams(
+                        window.location.search
+                    );
+
+                nextParams.set("mode", mode);
+
+                window.location.href =
+                    `/?${nextParams.toString()}`;
+            };
+
+            const setThumbPosition = (clientX) => {
+
+                const rect =
+                    slider.getBoundingClientRect();
+
+                const travel =
+                    rect.width - thumb.offsetWidth - 8;
+
+                const offset =
+                    Math.max(
+                        0,
+                        Math.min(
+                            travel,
+                            clientX - rect.left - thumb.offsetWidth / 2
+                        )
+                    );
+
+                thumb.style.transform =
+                    `translateX(${offset}px)`;
+
+                return offset / travel;
+            };
+
+            let isDragging =
+                false;
+
+            let dragRatio =
+                slider.dataset.mode === "tomorrow" ? 1 : 0;
+
+            slider.addEventListener("pointerdown", (event) => {
+
+                isDragging = true;
+
+                slider.classList.add("dragging");
+
+                slider.setPointerCapture(event.pointerId);
+
+                dragRatio =
+                    setThumbPosition(event.clientX);
+            });
+
+            slider.addEventListener("pointermove", (event) => {
+
+                if (!isDragging) {
+
+                    return;
+                }
+
+                dragRatio =
+                    setThumbPosition(event.clientX);
+            });
+
+            slider.addEventListener("pointerup", (event) => {
+
+                if (!isDragging) {
+
+                    return;
+                }
+
+                isDragging = false;
+
+                slider.classList.remove("dragging");
+
+                slider.releasePointerCapture(event.pointerId);
+
+                thumb.style.transform = "";
+
+                const targetMode =
+                    dragRatio >= 0.5 ? "tomorrow" : "today";
+
+                goToMode(targetMode);
+            });
+
+            slider.addEventListener("pointercancel", () => {
+
+                isDragging = false;
+
+                slider.classList.remove("dragging");
+
+                thumb.style.transform = "";
+            });
+
+            slider.addEventListener("keydown", (event) => {
+
+                if (
+                    event.key !== "ArrowLeft"
+                    && event.key !== "ArrowRight"
+                    && event.key !== "Enter"
+                    && event.key !== " "
+                ) {
+
+                    return;
+                }
+
+                event.preventDefault();
+
+                const targetMode =
+                    event.key === "ArrowLeft"
+                        ? "today"
+                        : event.key === "ArrowRight"
+                            ? "tomorrow"
+                            : slider.dataset.mode === "today"
+                                ? "tomorrow"
+                                : "today";
+
+                goToMode(targetMode);
+            });
         };
 
     </script>
