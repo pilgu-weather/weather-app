@@ -38,6 +38,42 @@ def get_location_name(lat, lon):
         return None
 
 
+def get_tomorrow_weather_main(weather_types):
+
+    if "Thunderstorm" in weather_types:
+
+        return "Thunderstorm"
+
+    if "Snow" in weather_types:
+
+        return "Snow"
+
+    if "Rain" in weather_types or "Drizzle" in weather_types:
+
+        return "Rain"
+
+    if (
+        "Mist" in weather_types
+        or "Fog" in weather_types
+        or "Haze" in weather_types
+    ):
+
+        return "Mist"
+
+    clear_count = weather_types.count("Clear")
+    clouds_count = weather_types.count("Clouds")
+
+    if clouds_count >= clear_count and clouds_count > 0:
+
+        return "Clouds"
+
+    if clear_count > 0:
+
+        return "Clear"
+
+    return "Clouds"
+
+
 @app.route("/", methods=["GET", "POST"])
 def home():
 
@@ -214,6 +250,7 @@ def home():
     rain_tomorrow = False
 
     tomorrow_icon = icon_url
+    tomorrow_weather_types = []
 
     # =========================
     # HOURLY FORECAST
@@ -294,6 +331,13 @@ def home():
                     "temp": round(current_temp)
 
                 })
+
+            if (
+                forecast_date == tomorrow
+                and kst_hour in [6, 9, 12, 15, 18, 21]
+            ):
+
+                tomorrow_weather_types.append(weather_type)
 
             # =========================
             # TODAY DATA
@@ -380,6 +424,9 @@ def home():
     else:
 
         icon_url = tomorrow_icon
+        weather_main = get_tomorrow_weather_main(
+            tomorrow_weather_types
+        )
 
         if tomorrow_temps:
 
