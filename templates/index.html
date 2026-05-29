@@ -122,9 +122,9 @@
 
             background:
                 radial-gradient(
-                    circle at top left,
-                    rgba(255,255,255,0.9),
-                    transparent 40%
+                    circle at 14% 0%,
+                    rgba(255,255,255,0.74),
+                    transparent 36%
                 );
 
             z-index: 0;
@@ -154,12 +154,12 @@
             background:
                 radial-gradient(
                     ellipse at 58% 10%,
-                    rgba(38,45,55,0.56) 0 15%,
+                    rgba(38,45,55,0.42) 0 15%,
                     transparent 34%
                 ),
                 radial-gradient(
                     ellipse at 32% 13%,
-                    rgba(43,50,60,0.42) 0 13%,
+                    rgba(43,50,60,0.30) 0 13%,
                     transparent 31%
                 ),
                 repeating-linear-gradient(
@@ -210,12 +210,12 @@
             background:
                 radial-gradient(
                     ellipse at 58% 10%,
-                    rgba(30,36,46,0.72) 0 16%,
+                    rgba(30,36,46,0.58) 0 16%,
                     transparent 35%
                 ),
                 radial-gradient(
                     ellipse at 28% 13%,
-                    rgba(28,34,44,0.48) 0 14%,
+                    rgba(28,34,44,0.36) 0 14%,
                     transparent 32%
                 ),
                 radial-gradient(
@@ -256,6 +256,101 @@
 
             animation:
                 mist-drift 16s ease-in-out infinite alternate;
+        }
+
+        body.weather-clear::before {
+
+            background:
+                radial-gradient(
+                    circle at 82% 8%,
+                    rgba(255,255,255,0.68),
+                    rgba(255,247,214,0.26) 24%,
+                    transparent 48%
+                ),
+                radial-gradient(
+                    circle at 64% 30%,
+                    rgba(255,255,255,0.22),
+                    transparent 34%
+                ),
+                radial-gradient(
+                    circle at 14% 0%,
+                    rgba(255,255,255,0.52),
+                    transparent 36%
+                );
+        }
+
+        body.weather-clear::after {
+
+            opacity: 0.34;
+
+            background-image:
+                radial-gradient(
+                    circle,
+                    rgba(255,255,255,0.58) 0 1px,
+                    transparent 2px
+                ),
+                radial-gradient(
+                    circle,
+                    rgba(255,246,198,0.34) 0 1px,
+                    transparent 2px
+                );
+
+            background-size:
+                86px 86px,
+                132px 132px;
+
+            background-position:
+                18px 24px,
+                72px 54px;
+
+            animation:
+                sunlight-drift 12s ease-in-out infinite alternate;
+        }
+
+        body.weather-clouds::before {
+
+            background:
+                radial-gradient(
+                    ellipse at 24% 14%,
+                    rgba(255,255,255,0.34),
+                    transparent 34%
+                ),
+                radial-gradient(
+                    ellipse at 82% 24%,
+                    rgba(255,255,255,0.24),
+                    transparent 38%
+                ),
+                linear-gradient(
+                    180deg,
+                    rgba(255,255,255,0.28),
+                    rgba(210,218,228,0.16)
+                );
+
+            filter:
+                blur(10px);
+        }
+
+        body.weather-clouds::after {
+
+            opacity: 0.26;
+
+            background:
+                linear-gradient(
+                    115deg,
+                    transparent 0%,
+                    rgba(255,255,255,0.40) 32%,
+                    rgba(206,216,226,0.26) 54%,
+                    transparent 74%
+                );
+
+            filter:
+                blur(24px);
+
+            transform:
+                translateX(-12%);
+
+            animation:
+                cloud-soften 18s ease-in-out infinite alternate;
         }
 
         @keyframes rain-fall {
@@ -314,154 +409,30 @@
             }
         }
 
-        .weather-objects {
+        @keyframes sunlight-drift {
 
-            position: fixed;
+            from {
+                background-position:
+                    18px 24px,
+                    72px 54px;
+            }
 
-            inset: 0;
-
-            z-index: 0;
-
-            overflow: hidden;
-
-            pointer-events: none;
+            to {
+                background-position:
+                    30px 40px,
+                    54px 76px;
+            }
         }
 
-        .weather-objects span {
+        @keyframes cloud-soften {
 
-            position: absolute;
+            from {
+                transform: translateX(-14%);
+            }
 
-            display: none;
-
-            opacity: 0;
-        }
-
-        .sun-object {
-
-            top: 32px;
-
-            right: -18px;
-
-            width: 150px;
-
-            height: 150px;
-
-            border-radius: 50%;
-
-            background:
-                radial-gradient(
-                    circle,
-                    rgba(255,236,151,0.62) 0 34%,
-                    rgba(255,207,86,0.28) 35% 58%,
-                    transparent 70%
-                );
-
-            filter:
-                blur(0.3px);
-        }
-
-        .cloud-object {
-
-            width: 170px;
-
-            height: 58px;
-
-            border-radius: 999px;
-
-            background:
-                rgba(255,255,255,0.42);
-
-            filter:
-                blur(0.5px);
-        }
-
-        .cloud-object::before,
-        .cloud-object::after {
-
-            content: "";
-
-            position: absolute;
-
-            border-radius: 50%;
-
-            background:
-                inherit;
-        }
-
-        .cloud-object::before {
-
-            width: 74px;
-
-            height: 74px;
-
-            left: 28px;
-
-            top: -30px;
-        }
-
-        .cloud-object::after {
-
-            width: 94px;
-
-            height: 94px;
-
-            right: 24px;
-
-            top: -44px;
-        }
-
-        .cloud-one {
-
-            top: 92px;
-
-            left: -36px;
-        }
-
-        .cloud-two {
-
-            top: 172px;
-
-            right: -54px;
-
-            transform:
-                scale(0.82);
-        }
-
-        .cloud-three {
-
-            top: 300px;
-
-            left: 54%;
-
-            transform:
-                scale(0.62);
-        }
-
-        body.weather-clear .sun-object {
-
-            display: block;
-
-            opacity: 0.58;
-        }
-
-        body.weather-clouds .cloud-object {
-
-            display: block;
-
-            opacity: 0.46;
-        }
-
-        body.weather-rain .cloud-one,
-        body.weather-rain .cloud-two,
-        body.weather-thunderstorm .cloud-one,
-        body.weather-thunderstorm .cloud-two {
-
-            display: block;
-
-            opacity: 0.30;
-
-            background:
-                rgba(48,56,68,0.48);
+            to {
+                transform: translateX(10%);
+            }
         }
 
         .container {
@@ -870,15 +841,6 @@
 </head>
 
 <body class="weather-{{ weather_main|default('default')|lower }}">
-
-<div class="weather-objects" aria-hidden="true">
-
-    <span class="sun-object"></span>
-    <span class="cloud-object cloud-one"></span>
-    <span class="cloud-object cloud-two"></span>
-    <span class="cloud-object cloud-three"></span>
-
-</div>
 
 <div class="container">
 
