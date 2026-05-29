@@ -9,6 +9,35 @@ app = Flask(__name__)
 API_KEY = "2fd339c206c2fa601c64bc589a4750e9"
 
 
+def get_location_name(lat, lon):
+
+    reverse_url = (
+        f"https://api.openweathermap.org/geo/1.0/reverse"
+        f"?lat={lat}&lon={lon}&limit=1&appid={API_KEY}"
+    )
+
+    try:
+
+        response = requests.get(reverse_url, timeout=5)
+        data = response.json()
+
+        if response.status_code != 200 or not data:
+
+            return None
+
+        location = data[0]
+        local_names = location.get("local_names", {})
+
+        return (
+            local_names.get("ko")
+            or location.get("name")
+        )
+
+    except:
+
+        return None
+
+
 @app.route("/", methods=["GET", "POST"])
 def home():
 
@@ -109,7 +138,10 @@ def home():
                 error=error
             )
 
-        city_name = data["name"]
+        city_name = (
+            get_location_name(lat, lon)
+            or data["name"]
+        )
 
         temp = round(data["main"]["temp"])
 
@@ -118,9 +150,6 @@ def home():
         icon_url = (
             f"https://openweathermap.org/img/wn/{icon}@2x.png"
         )
-
-        lat = data["coord"]["lat"]
-        lon = data["coord"]["lon"]
 
     # =========================
     # 기본 서울
@@ -479,7 +508,7 @@ def home():
 
             "folder": "rain",
 
-            "title": "Rain Mood",
+            "title": "Rainy day",
 
             "desc": "오늘은 우산과 바람막이 추천"
 
