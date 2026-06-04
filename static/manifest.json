@@ -8,13 +8,13 @@
   "theme_color": "#101216",
   "icons": [
     {
-      "src": "/static/assets/6cd0ca82-5e7b-473e-9f59-e442d0a09d68.png",
+      "src": "/static/assets/f0ec1945-e097-4ad9-966b-fff90cef7ddc.png",
       "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/static/assets/6cd0ca82-5e7b-473e-9f59-e442d0a09d68.png",
+      "src": "/static/assets/f0ec1945-e097-4ad9-966b-fff90cef7ddc.png",
       "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "maskable"
