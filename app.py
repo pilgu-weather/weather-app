@@ -56,6 +56,87 @@ def get_background_image(icon):
     )
 
 
+def fetch_json(url):
+
+    try:
+
+        response = requests.get(url, timeout=5)
+
+        if response.status_code != 200:
+
+            return None, response.status_code
+
+        return response.json(), response.status_code
+
+    except:
+
+        return None, None
+
+
+def get_first_weather(data):
+
+    weather_list = data.get("weather", [])
+
+    if weather_list:
+
+        return weather_list[0]
+
+    return {}
+
+
+def get_weather_context(data, fallback_name="Seoul"):
+
+    main = data.get("main", {})
+    weather = get_first_weather(data)
+    wind = data.get("wind", {})
+    coord = data.get("coord", {})
+
+    temp = round(main.get("temp", 0))
+    icon = weather.get("icon", "03d")
+
+    return {
+        "city_name": data.get("name") or fallback_name,
+        "temp": temp,
+        "icon": icon,
+        "weather_main": weather.get("main", "Clouds"),
+        "background_image": get_background_image(icon),
+        "feels_like": round(main.get("feels_like", temp)),
+        "humidity": main.get("humidity", 0),
+        "wind_speed": wind.get("speed", 0),
+        "lat": coord.get("lat"),
+        "lon": coord.get("lon"),
+    }
+
+
+def render_safe_template(**overrides):
+
+    context = {
+        "mode": "today",
+        "temp": None,
+        "temp_min": None,
+        "temp_max": None,
+        "feels_like": 0,
+        "humidity": 0,
+        "wind_speed": 0,
+        "pm_text": "정보 없음",
+        "today_message": "",
+        "outfits": [],
+        "icon_url": "",
+        "city_name": "",
+        "weather_main": "Default",
+        "background_image": get_background_image("03d"),
+        "hourly_forecast": [],
+        "error": None,
+    }
+
+    context.update(overrides)
+
+    return render_template(
+        "index.html",
+        **context
+    )
+
+
 def get_style_season(month, temp):
 
     if 3 <= month <= 5:
@@ -109,10 +190,9 @@ def get_location_name(lat, lon):
 
     try:
 
-        response = requests.get(reverse_url, timeout=5)
-        data = response.json()
+        data, status_code = fetch_json(reverse_url)
 
-        if response.status_code != 200 or not data:
+        if status_code != 200 or not data:
 
             return None
 
@@ -178,20 +258,20 @@ def get_tomorrow_icon(weather_items):
 
         for item in weather_items:
 
-            if item["main"] in group:
+            if item.get("main") in group:
 
-                return item["icon"]
+                return item.get("icon", "03d")
 
     clear_count = 0
     clouds_count = 0
 
     for item in weather_items:
 
-        if item["main"] == "Clear":
+        if item.get("main") == "Clear":
 
             clear_count += 1
 
-        if item["main"] == "Clouds":
+        if item.get("main") == "Clouds":
 
             clouds_count += 1
 
@@ -203,9 +283,9 @@ def get_tomorrow_icon(weather_items):
 
     for item in weather_items:
 
-        if item["main"] == target:
+        if item.get("main") == target:
 
-            return item["icon"]
+            return item.get("icon", "03d")
 
     return "03d"
 
@@ -320,42 +400,50 @@ def home():
 
     if request.method == "POST":
 
-        city = request.form["city"]
+        city = request.form.get("city", "").strip()
+
+        if not city:
+
+            error = "도시를 찾을 수 없습니다."
+
+            return render_safe_template(
+                mode=mode,
+                error=error
+            )
 
         weather_url = (
             f"https://api.openweathermap.org/data/2.5/weather"
             f"?q={city}&appid={API_KEY}&units=metric"
         )
 
-        response = requests.get(weather_url)
-        data = response.json()
+        data, status_code = fetch_json(weather_url)
 
-        if response.status_code != 200:
+        if status_code != 200 or not data:
 
             error = "도시를 찾을 수 없습니다."
 
-            return render_template(
-                "index.html",
+            return render_safe_template(
+                mode=mode,
                 error=error
             )
 
-        city_name = data["name"]
+        weather_context = get_weather_context(data, city)
 
-        temp = round(data["main"]["temp"])
-
-        icon = data["weather"][0]["icon"]
-        weather_main = data["weather"][0]["main"]
-        background_image = get_background_image(icon)
-        feels_like = round(data["main"]["feels_like"])
-        humidity = data["main"]["humidity"]
-        wind_speed = data["wind"]["speed"]
+        city_name = weather_context["city_name"]
+        temp = weather_context["temp"]
+        icon = weather_context["icon"]
+        weather_main = weather_context["weather_main"]
+        background_image = weather_context["background_image"]
+        feels_like = weather_context["feels_like"]
+        humidity = weather_context["humidity"]
+        wind_speed = weather_context["wind_speed"]
 
         icon_url = (
             f"https://openweathermap.org/img/wn/{icon}@2x.png"
         )
 
-        lat = data["coord"]["lat"]
-        lon = data["coord"]["lon"]
+        lat = weather_context["lat"]
+        lon = weather_context["lon"]
 
     # =========================
     # 현재 위치
@@ -372,8 +460,8 @@ def home():
 
             error = "위치 정보를 불러오지 못했습니다."
 
-            return render_template(
-                "index.html",
+            return render_safe_template(
+                mode=mode,
                 error=error
             )
 
@@ -382,31 +470,35 @@ def home():
             f"?lat={lat}&lon={lon}&appid={API_KEY}&units=metric"
         )
 
-        response = requests.get(weather_url)
-        data = response.json()
+        data, status_code = fetch_json(weather_url)
 
-        if response.status_code != 200:
+        if status_code != 200 or not data:
 
             error = "현재 위치 날씨를 가져오지 못했습니다."
 
-            return render_template(
-                "index.html",
+            return render_safe_template(
+                mode=mode,
                 error=error
             )
 
-        city_name = (
-            get_location_name(lat, lon)
-            or data["name"]
+        weather_context = get_weather_context(
+            data,
+            "현재 위치"
         )
 
-        temp = round(data["main"]["temp"])
+        city_name = (
+            get_location_name(lat, lon)
+            or weather_context["city_name"]
+            or "현재 위치"
+        )
 
-        icon = data["weather"][0]["icon"]
-        weather_main = data["weather"][0]["main"]
-        background_image = get_background_image(icon)
-        feels_like = round(data["main"]["feels_like"])
-        humidity = data["main"]["humidity"]
-        wind_speed = data["wind"]["speed"]
+        temp = weather_context["temp"]
+        icon = weather_context["icon"]
+        weather_main = weather_context["weather_main"]
+        background_image = weather_context["background_image"]
+        feels_like = weather_context["feels_like"]
+        humidity = weather_context["humidity"]
+        wind_speed = weather_context["wind_speed"]
 
         icon_url = (
             f"https://openweathermap.org/img/wn/{icon}@2x.png"
@@ -425,38 +517,56 @@ def home():
             f"?q={city}&appid={API_KEY}&units=metric"
         )
 
-        response = requests.get(weather_url)
-        data = response.json()
+        data, status_code = fetch_json(weather_url)
 
-        city_name = data["name"]
+        if status_code != 200 or not data:
 
-        temp = round(data["main"]["temp"])
+            error = "날씨 정보를 가져오지 못했습니다."
 
-        icon = data["weather"][0]["icon"]
-        weather_main = data["weather"][0]["main"]
-        background_image = get_background_image(icon)
-        feels_like = round(data["main"]["feels_like"])
-        humidity = data["main"]["humidity"]
-        wind_speed = data["wind"]["speed"]
+            return render_safe_template(
+                mode=mode,
+                error=error
+            )
+
+        weather_context = get_weather_context(data, city)
+
+        city_name = weather_context["city_name"]
+        temp = weather_context["temp"]
+        icon = weather_context["icon"]
+        weather_main = weather_context["weather_main"]
+        background_image = weather_context["background_image"]
+        feels_like = weather_context["feels_like"]
+        humidity = weather_context["humidity"]
+        wind_speed = weather_context["wind_speed"]
 
         icon_url = (
             f"https://openweathermap.org/img/wn/{icon}@2x.png"
         )
 
-        lat = data["coord"]["lat"]
-        lon = data["coord"]["lon"]
+        lat = weather_context["lat"]
+        lon = weather_context["lon"]
 
     # =========================
     # Forecast API
     # =========================
 
-    forecast_url = (
-        f"https://api.openweathermap.org/data/2.5/forecast"
-        f"?lat={lat}&lon={lon}&appid={API_KEY}&units=metric"
-    )
+    if lat is not None and lon is not None:
 
-    forecast_response = requests.get(forecast_url)
-    forecast_data = forecast_response.json()
+        forecast_url = (
+            f"https://api.openweathermap.org/data/2.5/forecast"
+            f"?lat={lat}&lon={lon}&appid={API_KEY}&units=metric"
+        )
+
+        forecast_data, forecast_status_code = fetch_json(forecast_url)
+
+    else:
+
+        forecast_data = {}
+        forecast_status_code = None
+
+    if forecast_status_code != 200 or not forecast_data:
+
+        forecast_data = {}
 
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -487,17 +597,31 @@ def home():
     # HOURLY FORECAST
     # =========================
 
-    if "list" in forecast_data:
+    if isinstance(forecast_data.get("list"), list):
 
-        for item in forecast_data["list"]:
+        for item in forecast_data.get("list", []):
 
-            dt_txt = item["dt_txt"]
+            if not isinstance(item, dict):
 
-            utc_date = dt_txt.split(" ")[0]
+                continue
 
-            raw_hour = int(
-                dt_txt.split(" ")[1].split(":")[0]
-            )
+            dt_txt = item.get("dt_txt")
+
+            if not dt_txt:
+
+                continue
+
+            try:
+
+                utc_date = dt_txt.split(" ")[0]
+
+                raw_hour = int(
+                    dt_txt.split(" ")[1].split(":")[0]
+                )
+
+            except:
+
+                continue
 
             # UTC → KST
             kst_hour = (raw_hour + 9) % 24
@@ -514,11 +638,14 @@ def home():
                     ) + timedelta(days=1)
                 ).strftime("%Y-%m-%d")
 
-            current_temp = item["main"]["temp"]
+            item_main = item.get("main", {})
+            item_weather = get_first_weather(item)
 
-            weather_type = item["weather"][0]["main"]
+            current_temp = item_main.get("temp", temp)
 
-            weather_icon = item["weather"][0]["icon"]
+            weather_type = item_weather.get("main", "Clouds")
+
+            weather_icon = item_weather.get("icon", "03d")
 
             # =========================
             # TODAY → 현재 이후 + 내일 전체
@@ -559,7 +686,7 @@ def home():
 
                     "icon": weather_icon,
 
-                    "temp": round(current_temp)
+                        "temp": round(current_temp)
 
                 })
 
@@ -609,10 +736,10 @@ def home():
 
                     tomorrow_daytime.append(current_temp)
                     tomorrow_feels_like.append(
-                        item["main"].get("feels_like", current_temp)
+                        item_main.get("feels_like", current_temp)
                     )
                     tomorrow_humidity.append(
-                        item["main"].get("humidity", humidity)
+                        item_main.get("humidity", humidity)
                     )
                     tomorrow_wind_speed.append(
                         item.get("wind", {}).get("speed", wind_speed)
@@ -716,16 +843,28 @@ def home():
     # 미세먼지
     # =========================
 
-    air_url = (
-        f"https://api.openweathermap.org/data/2.5/air_pollution"
-        f"?lat={lat}&lon={lon}&appid={API_KEY}"
-    )
+    if lat is not None and lon is not None:
 
-    air_data = requests.get(air_url).json()
+        air_url = (
+            f"https://api.openweathermap.org/data/2.5/air_pollution"
+            f"?lat={lat}&lon={lon}&appid={API_KEY}"
+        )
+
+        air_data, air_status_code = fetch_json(air_url)
+
+    else:
+
+        air_data = None
+        air_status_code = None
 
     try:
 
-        pm25 = air_data["list"][0]["components"]["pm2_5"]
+        pm25 = (
+            air_data
+            .get("list", [{}])[0]
+            .get("components", {})
+            .get("pm2_5", 0)
+        )
 
     except:
 
@@ -735,7 +874,11 @@ def home():
     # PM2.5 기준
     # =========================
 
-    if pm25 <= 59:
+    if air_status_code != 200 or not air_data:
+
+        pm_text = "정보 없음"
+
+    elif pm25 <= 59:
 
         pm_text = "좋음"
 

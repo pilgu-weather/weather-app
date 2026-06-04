@@ -674,6 +674,14 @@
 
     </script>
 
+    {% if error %}
+
+    <div class="sub">
+        {{ error }}
+    </div>
+
+    {% endif %}
+
     {% if temp %}
 
     <section class="hero-weather">
