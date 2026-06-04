@@ -6,7 +6,13 @@ import os
 
 app = Flask(__name__)
 
-API_KEY = "2fd339c206c2fa601c64bc589a4750e9"
+API_KEY = os.getenv("OPENWEATHER_API_KEY")
+
+if not API_KEY:
+
+    raise ValueError(
+        "OPENWEATHER_API_KEY environment variable is missing."
+    )
 
 
 BACKGROUND_MAP = {

@@ -561,12 +561,51 @@
             font-weight: 600;
         }
 
+        .splash-screen {
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 9999;
+
+            background: #050505;
+
+            opacity: 1;
+
+            transition:
+                opacity 0.7s ease;
+        }
+
+        .splash-screen.fade-out {
+
+            opacity: 0;
+
+            pointer-events: none;
+        }
+
+        .splash-screen img {
+
+            width: 100%;
+
+            height: 100%;
+
+            object-fit: cover;
+
+            display: block;
+        }
+
     </style>
 
 </head>
 
 <body class="weather-{{ weather_main|default('default')|lower }}"
       style="--weather-bg: url('{{ background_image }}');">
+
+<div class="splash-screen" id="splashScreen" aria-hidden="true">
+    <img src="/static/assets/splash-screen.png"
+         alt="">
+</div>
 
 <div class="container">
 
@@ -807,6 +846,33 @@
         });
 
     }
+
+</script>
+
+<script>
+
+    window.addEventListener("load", () => {
+
+        const splash =
+            document.getElementById("splashScreen");
+
+        if (!splash) {
+
+            return;
+        }
+
+        setTimeout(() => {
+
+            splash.classList.add("fade-out");
+
+            setTimeout(() => {
+
+                splash.remove();
+
+            }, 800);
+
+        }, 2000);
+    });
 
 </script>
 
