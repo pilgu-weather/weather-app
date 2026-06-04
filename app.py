@@ -31,6 +31,14 @@ BACKGROUND_MAP = {
 }
 
 
+STYLE_SEASON_FALLBACK = {
+    "spring_warm": "spring",
+    "spring_cool": "spring",
+    "fall_warm": "fall",
+    "fall_cool": "fall",
+}
+
+
 def get_background_image(icon):
 
     return (
@@ -40,6 +48,50 @@ def get_background_image(icon):
             "background/cloudy_day.png"
         )
     )
+
+
+def get_style_season(month, temp):
+
+    if 3 <= month <= 5:
+
+        if temp >= 17:
+
+            return "spring_warm"
+
+        return "spring_cool"
+
+    if 6 <= month <= 8:
+
+        return "summer"
+
+    if 9 <= month <= 11:
+
+        if temp >= 17:
+
+            return "fall_warm"
+
+        return "fall_cool"
+
+    return "winter"
+
+
+def get_style_folder_candidates(season, style_folder):
+
+    seasons = [season]
+
+    fallback_season = STYLE_SEASON_FALLBACK.get(season)
+
+    if fallback_season:
+
+        seasons.append(fallback_season)
+
+    return [
+        (
+            current_season,
+            f"static/styles/{current_season}/{style_folder}"
+        )
+        for current_season in seasons
+    ]
 
 
 def get_location_name(lat, lon):
@@ -706,21 +758,21 @@ def home():
     # 계절 판단
     # =========================
 
-    if day_temp >= 26:
+    selected_date = today
 
-        season = "summer"
+    if mode != "today":
 
-    elif day_temp >= 17:
+        selected_date = tomorrow
 
-        season = "spring"
+    season_month = datetime.strptime(
+        selected_date,
+        "%Y-%m-%d"
+    ).month
 
-    elif day_temp >= 10:
-
-        season = "fall"
-
-    else:
-
-        season = "winter"
+    season = get_style_season(
+        season_month,
+        day_temp
+    )
 
     # =========================
     # 스타일
@@ -786,7 +838,10 @@ def home():
 
         temp_gap = 0
 
-    if season in ["spring", "fall"] and temp_gap >= 8:
+    if (
+        season.startswith("spring")
+        or season.startswith("fall")
+    ) and temp_gap >= 8:
 
         styles.insert(0, {
 
@@ -806,31 +861,50 @@ def home():
 
     for style in styles:
 
-        folder_path = (
-            f"static/styles/{season}/{style['folder']}"
-        )
-
         try:
 
-            image_list = os.listdir(folder_path)
+            image_list = []
+            selected_season = season
 
-            image_list = [
+            for candidate_season, folder_path in (
+                get_style_folder_candidates(
+                    season,
+                    style["folder"]
+                )
+            ):
 
-                img for img in image_list
+                if not os.path.isdir(folder_path):
 
-                if img.endswith((
-                    ".png",
-                    ".jpg",
-                    ".jpeg",
-                    ".webp"
-                ))
-            ]
+                    continue
+
+                image_list = os.listdir(folder_path)
+
+                image_list = [
+
+                    img for img in image_list
+
+                    if img.endswith((
+                        ".png",
+                        ".jpg",
+                        ".jpeg",
+                        ".webp"
+                    ))
+                ]
+
+                if image_list:
+
+                    selected_season = candidate_season
+                    break
+
+            if not image_list:
+
+                raise FileNotFoundError
 
             random_image = random.choice(image_list)
 
             img_path = (
                 f"/static/styles/"
-                f"{season}/"
+                f"{selected_season}/"
                 f"{style['folder']}/"
                 f"{random_image}"
             )
