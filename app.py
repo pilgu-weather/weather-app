@@ -84,6 +84,15 @@ def get_first_weather(data):
     return {}
 
 
+def round_temp(value):
+
+    if value is None:
+
+        return None
+
+    return round(value)
+
+
 def get_weather_context(data, fallback_name="Seoul"):
 
     main = data.get("main", {})
@@ -97,6 +106,8 @@ def get_weather_context(data, fallback_name="Seoul"):
     return {
         "city_name": data.get("name") or fallback_name,
         "temp": temp,
+        "temp_min": round_temp(main.get("temp_min")),
+        "temp_max": round_temp(main.get("temp_max")),
         "icon": icon,
         "weather_main": weather.get("main", "Clouds"),
         "background_image": get_background_image(icon),
@@ -774,8 +785,8 @@ def home():
 
         else:
 
-            temp_min = 0
-            temp_max = 0
+            temp_min = weather_context["temp_min"]
+            temp_max = weather_context["temp_max"]
 
         if today_daytime:
 
@@ -814,8 +825,8 @@ def home():
         else:
 
             temp = 0
-            temp_min = 0
-            temp_max = 0
+            temp_min = None
+            temp_max = None
 
         if tomorrow_daytime:
 

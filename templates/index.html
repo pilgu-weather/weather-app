@@ -703,11 +703,15 @@
             {{ temp }}°
         </div>
 
+        {% if temp_min is not none and temp_max is not none %}
+
         <div class="sub">
             최저 {{ temp_min }}°
             /
             최고 {{ temp_max }}°
         </div>
+
+        {% endif %}
 
         <div class="sub">
             미세먼지 {{ pm_text }}
