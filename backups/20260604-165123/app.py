@@ -9,39 +9,6 @@ app = Flask(__name__)
 API_KEY = "2fd339c206c2fa601c64bc589a4750e9"
 
 
-BACKGROUND_MAP = {
-    "01d": "background/clear_day.png",
-    "01n": "background/clear_night.png",
-    "02d": "background/cloudy_day.png",
-    "03d": "background/cloudy_day.png",
-    "04d": "background/cloudy_day.png",
-    "02n": "background/cloudy_night.png",
-    "03n": "background/cloudy_night.png",
-    "04n": "background/cloudy_night.png",
-    "09d": "background/rain_day.png",
-    "10d": "background/rain_day.png",
-    "09n": "background/rain_night.png",
-    "10n": "background/rain_night.png",
-    "13d": "background/snowy_day.png",
-    "13n": "background/snowy_night.png",
-    "50d": "background/mist_day.png",
-    "50n": "background/mist_night.png",
-    "11d": "background/thunder_day.png",
-    "11n": "background/thunder_night.png",
-}
-
-
-def get_background_image(icon):
-
-    return (
-        "/static/"
-        + BACKGROUND_MAP.get(
-            icon,
-            "background/cloudy_day.png"
-        )
-    )
-
-
 def get_location_name(lat, lon):
 
     reverse_url = (
@@ -107,125 +74,6 @@ def get_tomorrow_weather_main(weather_types):
     return "Clouds"
 
 
-def get_tomorrow_icon(weather_items):
-
-    priority_groups = [
-        ["Thunderstorm"],
-        ["Snow"],
-        ["Rain", "Drizzle"],
-        ["Mist", "Fog", "Haze"],
-    ]
-
-    for group in priority_groups:
-
-        for item in weather_items:
-
-            if item["main"] in group:
-
-                return item["icon"]
-
-    clear_count = 0
-    clouds_count = 0
-
-    for item in weather_items:
-
-        if item["main"] == "Clear":
-
-            clear_count += 1
-
-        if item["main"] == "Clouds":
-
-            clouds_count += 1
-
-    target = "Clouds"
-
-    if clear_count > clouds_count:
-
-        target = "Clear"
-
-    for item in weather_items:
-
-        if item["main"] == target:
-
-            return item["icon"]
-
-    return "03d"
-
-
-def get_today_message(
-    weather_main,
-    temp,
-    pm,
-    wind_speed
-):
-
-    if weather_main == "Thunderstorm":
-
-        return (
-            "천둥과 강한 비가 예상돼요. "
-            "외출 시 안전에 주의하세요."
-        )
-
-    if weather_main in ["Rain", "Drizzle"]:
-
-        return (
-            "우산은 필수예요. "
-            "방수 가능한 신발을 추천해요."
-        )
-
-    if weather_main == "Snow":
-
-        return (
-            "미끄러운 길을 조심하세요. "
-            "보온성과 방수성을 함께 챙겨보세요."
-        )
-
-    if pm >= 4:
-
-        return (
-            "미세먼지가 짙어요. "
-            "마스크와 아우터를 챙겨주세요."
-        )
-
-    if wind_speed >= 8:
-
-        return (
-            "바람이 강하게 불어요. "
-            "가벼운 아우터를 추천해요."
-        )
-
-    if temp >= 30:
-
-        return (
-            "무더운 날씨예요. "
-            "밝고 통기성 좋은 룩을 추천해요."
-        )
-
-    if temp >= 26:
-
-        return (
-            "가볍고 시원한 스타일이 잘 어울리는 날이에요."
-        )
-
-    if temp >= 17:
-
-        return (
-            "가벼운 레이어드 스타일이 잘 어울려요."
-        )
-
-    if temp >= 10:
-
-        return (
-            "아침 저녁은 선선해요. "
-            "얇은 아우터를 챙겨보세요."
-        )
-
-    return (
-        "보온이 중요한 날씨예요. "
-        "따뜻한 아우터를 추천해요."
-    )
-
-
 @app.route("/", methods=["GET", "POST"])
 def home():
 
@@ -244,10 +92,6 @@ def home():
     icon_url = None
     city_name = None
     weather_main = "Default"
-    background_image = get_background_image("03d")
-    feels_like = 0
-    humidity = 0
-    wind_speed = 0
 
     lat = None
     lon = None
@@ -287,10 +131,6 @@ def home():
 
         icon = data["weather"][0]["icon"]
         weather_main = data["weather"][0]["main"]
-        background_image = get_background_image(icon)
-        feels_like = round(data["main"]["feels_like"])
-        humidity = data["main"]["humidity"]
-        wind_speed = data["wind"]["speed"]
 
         icon_url = (
             f"https://openweathermap.org/img/wn/{icon}@2x.png"
@@ -345,10 +185,6 @@ def home():
 
         icon = data["weather"][0]["icon"]
         weather_main = data["weather"][0]["main"]
-        background_image = get_background_image(icon)
-        feels_like = round(data["main"]["feels_like"])
-        humidity = data["main"]["humidity"]
-        wind_speed = data["wind"]["speed"]
 
         icon_url = (
             f"https://openweathermap.org/img/wn/{icon}@2x.png"
@@ -376,10 +212,6 @@ def home():
 
         icon = data["weather"][0]["icon"]
         weather_main = data["weather"][0]["main"]
-        background_image = get_background_image(icon)
-        feels_like = round(data["main"]["feels_like"])
-        humidity = data["main"]["humidity"]
-        wind_speed = data["wind"]["speed"]
 
         icon_url = (
             f"https://openweathermap.org/img/wn/{icon}@2x.png"
@@ -418,12 +250,7 @@ def home():
     rain_tomorrow = False
 
     tomorrow_icon = icon_url
-    tomorrow_icon_code = icon
     tomorrow_weather_types = []
-    tomorrow_weather_items = []
-    tomorrow_feels_like = []
-    tomorrow_humidity = []
-    tomorrow_wind_speed = []
 
     # =========================
     # HOURLY FORECAST
@@ -511,10 +338,6 @@ def home():
             ):
 
                 tomorrow_weather_types.append(weather_type)
-                tomorrow_weather_items.append({
-                    "main": weather_type,
-                    "icon": weather_icon
-                })
 
             # =========================
             # TODAY DATA
@@ -550,16 +373,6 @@ def home():
                 if 12 <= kst_hour <= 15:
 
                     tomorrow_daytime.append(current_temp)
-                    tomorrow_feels_like.append(
-                        item["main"].get("feels_like", current_temp)
-                    )
-                    tomorrow_humidity.append(
-                        item["main"].get("humidity", humidity)
-                    )
-                    tomorrow_wind_speed.append(
-                        item.get("wind", {}).get("speed", wind_speed)
-                    )
-                    tomorrow_icon_code = weather_icon
 
                     tomorrow_icon = (
                         f"https://openweathermap.org/img/wn/{weather_icon}@2x.png"
@@ -611,10 +424,6 @@ def home():
     else:
 
         icon_url = tomorrow_icon
-        tomorrow_icon_code = get_tomorrow_icon(
-            tomorrow_weather_items
-        )
-        background_image = get_background_image(tomorrow_icon_code)
         weather_main = get_tomorrow_weather_main(
             tomorrow_weather_types
         )
@@ -636,16 +445,6 @@ def home():
 
             day_temp = round(
                 sum(tomorrow_daytime) / len(tomorrow_daytime)
-            )
-            feels_like = round(
-                sum(tomorrow_feels_like) / len(tomorrow_feels_like)
-            )
-            humidity = round(
-                sum(tomorrow_humidity) / len(tomorrow_humidity)
-            )
-            wind_speed = round(
-                sum(tomorrow_wind_speed) / len(tomorrow_wind_speed),
-                1
             )
 
         else:
@@ -847,13 +646,6 @@ def home():
 
         })
 
-    today_message = get_today_message(
-        weather_main,
-        temp,
-        pm,
-        wind_speed
-    )
-
     return render_template(
 
         "index.html",
@@ -863,19 +655,14 @@ def home():
         temp=temp,
         temp_min=temp_min,
         temp_max=temp_max,
-        feels_like=feels_like,
-        humidity=humidity,
-        wind_speed=wind_speed,
 
         pm_text=pm_text,
-        today_message=today_message,
 
         outfits=outfits,
 
         icon_url=icon_url,
         city_name=city_name,
         weather_main=weather_main,
-        background_image=background_image,
 
         hourly_forecast=hourly_forecast,
 

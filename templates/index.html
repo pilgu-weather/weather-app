@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko" translate="no">
 
 <head>
@@ -25,14 +25,9 @@
                 BlinkMacSystemFont,
                 sans-serif;
 
-            background:
-                linear-gradient(
-                    180deg,
-                    #edf2f7,
-                    #f8f9fb
-                );
+            background: #101216;
 
-            color: #1d1d1f;
+            color: white;
 
             position: relative;
 
@@ -40,76 +35,6 @@
 
             min-height: 100vh;
 
-            transition:
-                background 0.45s ease;
-        }
-
-        body.weather-clear {
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #ece9e4,
-                    #f4f2ee 50%,
-                    #faf9f7
-                );
-        }
-
-        body.weather-clouds {
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #d9dee7,
-                    #eef1f5 52%,
-                    #f9fafb
-                );
-        }
-
-        body.weather-rain {
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #4d5560,
-                    #727b87 54%,
-                    #a7afb8
-                );
-        }
-
-        body.weather-snow {
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #e7e8ea,
-                    #f2f3f5 52%,
-                    #fafafa
-                );
-        }
-
-        body.weather-thunderstorm {
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #202632,
-                    #3e4654 56%,
-                    #6d7480
-                );
-        }
-
-        body.weather-mist,
-        body.weather-fog,
-        body.weather-haze {
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #c8d1da,
-                    #e1e6eb 50%,
-                    #f7f8fa
-                );
         }
 
         body::before {
@@ -121,11 +46,22 @@
             inset: 0;
 
             background:
+                linear-gradient(
+                    180deg,
+                    rgba(4,6,10,0.18),
+                    rgba(4,6,10,0.14) 45%,
+                    rgba(4,6,10,0.82)
+                ),
                 radial-gradient(
-                    circle at 14% 0%,
-                    rgba(255,255,255,0.74),
-                    transparent 36%
-                );
+                    circle at 50% 0%,
+                    rgba(255,255,255,0.20),
+                    transparent 34%
+                ),
+                var(--weather-bg);
+
+            background-size: cover;
+
+            background-position: center;
 
             z-index: 0;
 
@@ -140,299 +76,17 @@
 
             inset: 0;
 
+            background:
+                linear-gradient(
+                    180deg,
+                    transparent 0%,
+                    rgba(9,10,14,0.16) 50%,
+                    rgba(9,10,14,0.56) 100%
+                );
+
             z-index: 0;
 
             pointer-events: none;
-
-            opacity: 0;
-        }
-
-        body.weather-rain::after {
-
-            opacity: 0.52;
-
-            background:
-                radial-gradient(
-                    ellipse at 58% 10%,
-                    rgba(38,45,55,0.42) 0 15%,
-                    transparent 34%
-                ),
-                radial-gradient(
-                    ellipse at 32% 13%,
-                    rgba(43,50,60,0.30) 0 13%,
-                    transparent 31%
-                ),
-                repeating-linear-gradient(
-                    112deg,
-                    transparent 0 18px,
-                    rgba(255,255,255,0.36) 19px 21px,
-                    transparent 22px 38px
-                );
-
-            background-size: 120px 120px;
-
-            animation:
-                rain-fall 0.72s linear infinite;
-        }
-
-        body.weather-snow::after {
-
-            opacity: 0.86;
-
-            background-image:
-                radial-gradient(
-                    circle,
-                    rgba(255,255,255,0.92) 0 2px,
-                    transparent 3px
-                ),
-                radial-gradient(
-                    circle,
-                    rgba(255,255,255,0.72) 0 1px,
-                    transparent 2px
-                );
-
-            background-size:
-                92px 92px,
-                148px 148px;
-
-            background-position:
-                0 0,
-                42px 28px;
-
-            animation:
-                snow-fall 9s linear infinite;
-        }
-
-        body.weather-thunderstorm::after {
-
-            opacity: 0;
-
-            background:
-                radial-gradient(
-                    ellipse at 58% 10%,
-                    rgba(30,36,46,0.58) 0 16%,
-                    transparent 35%
-                ),
-                radial-gradient(
-                    ellipse at 28% 13%,
-                    rgba(28,34,44,0.36) 0 14%,
-                    transparent 32%
-                ),
-                radial-gradient(
-                    circle at 72% 18%,
-                    rgba(255,255,255,0.95),
-                    rgba(180,210,255,0.38) 18%,
-                    transparent 42%
-                );
-
-            animation:
-                lightning-flash 5.8s linear infinite;
-        }
-
-        body.weather-mist::after,
-        body.weather-fog::after,
-        body.weather-haze::after {
-
-            opacity: 0.62;
-
-            background:
-                linear-gradient(
-                    90deg,
-                    transparent,
-                    rgba(255,255,255,0.58),
-                    transparent
-                ),
-                linear-gradient(
-                    90deg,
-                    rgba(255,255,255,0.22),
-                    transparent,
-                    rgba(255,255,255,0.42)
-                );
-
-            filter: blur(18px);
-
-            transform:
-                translateX(-20%);
-
-            animation:
-                mist-drift 16s ease-in-out infinite alternate;
-        }
-
-        body.weather-clear::before {
-
-            background:
-                radial-gradient(
-                    circle at 82% 8%,
-                    rgba(255,255,255,0.68),
-                    rgba(255,255,255,0.18) 24%,
-                    transparent 48%
-                ),
-                radial-gradient(
-                    circle at 64% 30%,
-                    rgba(255,255,255,0.22),
-                    transparent 34%
-                ),
-                radial-gradient(
-                    circle at 14% 0%,
-                    rgba(255,255,255,0.52),
-                    transparent 36%
-                );
-        }
-
-        body.weather-clear::after {
-
-            opacity: 0.34;
-
-            background-image:
-                radial-gradient(
-                    circle,
-                    rgba(255,255,255,0.58) 0 1px,
-                    transparent 2px
-                ),
-                radial-gradient(
-                    circle,
-                    rgba(255,255,255,0.22) 0 1px,
-                    transparent 2px
-                );
-
-            background-size:
-                86px 86px,
-                132px 132px;
-
-            background-position:
-                18px 24px,
-                72px 54px;
-
-            animation:
-                sunlight-drift 12s ease-in-out infinite alternate;
-        }
-
-        body.weather-clouds::before {
-
-            background:
-                radial-gradient(
-                    ellipse at 24% 14%,
-                    rgba(255,255,255,0.34),
-                    transparent 34%
-                ),
-                radial-gradient(
-                    ellipse at 82% 24%,
-                    rgba(255,255,255,0.24),
-                    transparent 38%
-                ),
-                linear-gradient(
-                    180deg,
-                    rgba(255,255,255,0.28),
-                    rgba(210,218,228,0.16)
-                );
-
-            filter:
-                blur(10px);
-        }
-
-        body.weather-clouds::after {
-
-            opacity: 0.26;
-
-            background:
-                linear-gradient(
-                    115deg,
-                    transparent 0%,
-                    rgba(255,255,255,0.40) 32%,
-                    rgba(206,216,226,0.26) 54%,
-                    transparent 74%
-                );
-
-            filter:
-                blur(24px);
-
-            transform:
-                translateX(-12%);
-
-            animation:
-                cloud-soften 18s ease-in-out infinite alternate;
-        }
-
-        @keyframes rain-fall {
-
-            from {
-                background-position: 0 0;
-            }
-
-            to {
-                background-position: -48px 120px;
-            }
-        }
-
-        @keyframes snow-fall {
-
-            from {
-                background-position:
-                    0 -100px,
-                    42px -160px;
-            }
-
-            to {
-                background-position:
-                    0 100vh,
-                    42px 100vh;
-            }
-        }
-
-        @keyframes lightning-flash {
-
-            0%,
-            83%,
-            88%,
-            100% {
-                opacity: 0;
-            }
-
-            84%,
-            86% {
-                opacity: 0.72;
-            }
-
-            87% {
-                opacity: 0.24;
-            }
-        }
-
-        @keyframes mist-drift {
-
-            from {
-                transform: translateX(-24%);
-            }
-
-            to {
-                transform: translateX(18%);
-            }
-        }
-
-        @keyframes sunlight-drift {
-
-            from {
-                background-position:
-                    18px 24px,
-                    72px 54px;
-            }
-
-            to {
-                background-position:
-                    30px 40px,
-                    54px 76px;
-            }
-        }
-
-        @keyframes cloud-soften {
-
-            from {
-                transform: translateX(-14%);
-            }
-
-            to {
-                transform: translateX(10%);
-            }
         }
 
         .container {
@@ -517,53 +171,40 @@
                 0 3px 10px rgba(0,0,0,0.06);
         }
 
-        .card {
+        .hero-weather {
 
-            margin-top: 20px;
+            min-height: 430px;
 
-            padding: 22px;
+            display: flex;
 
-            border-radius: 36px;
+            flex-direction: column;
 
-            background:
-                rgba(255,255,255,0.58);
+            justify-content: flex-end;
 
-            backdrop-filter: blur(24px);
+            padding: 44px 0 22px;
 
-            border:
-                1px solid rgba(255,255,255,0.45);
-
-            box-shadow:
-                0 18px 50px rgba(0,0,0,0.10),
-                inset 0 1px 1px rgba(255,255,255,0.85);
-        }
-
-        .weather-card {
-
-            text-align: center;
+            text-shadow:
+                0 2px 18px rgba(0,0,0,0.38);
         }
 
         .city {
 
-            font-size: 28px;
+            font-size: 20px;
 
-            font-weight: 800;
+            font-weight: 700;
 
-            margin-bottom: 4px;
-        }
+            margin-bottom: 8px;
 
-        .weather-icon {
-
-            width: 72px;
+            opacity: 0.92;
         }
 
         .temp {
 
-            font-size: 72px;
+            font-size: 88px;
 
-            font-weight: 800;
+            font-weight: 700;
 
-            letter-spacing: -4px;
+            letter-spacing: -5px;
 
             margin-top: 0;
 
@@ -572,13 +213,64 @@
 
         .sub {
 
-            font-size: 16px;
+            font-size: 15px;
 
-            color: #6e6e73;
+            color: rgba(255,255,255,0.82);
 
             margin-top: 4px;
 
             line-height: 1.5;
+        }
+
+        .weather-main {
+
+            font-size: 18px;
+
+            font-weight: 700;
+
+            margin-bottom: 4px;
+        }
+
+        .weather-meta {
+
+            display: grid;
+
+            grid-template-columns: repeat(3, 1fr);
+
+            gap: 10px;
+
+            margin-top: 18px;
+        }
+
+        .weather-meta-item {
+
+            padding: 12px 10px;
+
+            border-radius: 22px;
+
+            background:
+                rgba(255,255,255,0.14);
+
+            border:
+                1px solid rgba(255,255,255,0.18);
+
+            backdrop-filter: blur(20px);
+        }
+
+        .weather-meta-label {
+
+            font-size: 11px;
+
+            color: rgba(255,255,255,0.62);
+
+            margin-bottom: 4px;
+        }
+
+        .weather-meta-value {
+
+            font-size: 15px;
+
+            font-weight: 700;
         }
 
         .hourly-strip {
@@ -661,9 +353,9 @@
 
             scroll-behavior: smooth;
 
-            padding: 10px;
+            padding: 10px 0 10px 10px;
 
-            margin-top: 20px;
+            margin-top: 12px;
 
             cursor: grab;
         }
@@ -679,21 +371,17 @@
 
             scroll-snap-align: center;
 
-            padding: 22px;
+            position: relative;
+
+            overflow: hidden;
 
             border-radius: 36px;
 
-            background:
-                rgba(255,255,255,0.58);
-
-            backdrop-filter: blur(24px);
-
             border:
-                1px solid rgba(255,255,255,0.45);
+                1px solid rgba(255,255,255,0.18);
 
             box-shadow:
-                0 18px 50px rgba(0,0,0,0.12),
-                inset 0 1px 1px rgba(255,255,255,0.85);
+                0 18px 50px rgba(0,0,0,0.24);
 
             flex-shrink: 0;
 
@@ -717,15 +405,13 @@
 
             width: 100%;
 
-            height: 520px;
+            height: 500px;
 
             object-fit: cover;
 
             object-position: center top;
 
-            border-radius: 28px;
-
-            margin-bottom: 22px;
+            display: block;
 
             transition:
                 transform 0.5s ease;
@@ -736,71 +422,64 @@
             transform: scale(1.03);
         }
 
-        .style-info {
+        .style-card::after {
 
-            margin-top: 10px;
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(0,0,0,0.58) 0%,
+                    rgba(0,0,0,0.26) 34%,
+                    rgba(0,0,0,0.06) 58%,
+                    rgba(0,0,0,0.42) 100%
+                );
+
+            z-index: 1;
+        }
+
+        .style-overlay {
+
+            position: absolute;
+
+            top: 24px;
+
+            left: 24px;
+
+            right: 24px;
+
+            color: white;
+
+            z-index: 2;
+
+            text-shadow:
+                0 2px 12px rgba(0,0,0,0.62);
         }
 
         .style-title {
 
-            font-size: 31px;
+            font-size: 30px;
 
             font-weight: 800;
 
-            margin-bottom: 10px;
+            margin-bottom: 8px;
 
             letter-spacing: -1px;
         }
 
         .style-desc {
 
-            font-size: 16px;
+            font-size: 14px;
 
-            color: #8e8e93;
+            color: rgba(255,255,255,0.86);
 
-            line-height: 1.7;
+            line-height: 1.55;
 
-            margin-bottom: 24px;
-        }
-
-        .shop-btn {
-
-            display: inline-block;
-
-            width: 100%;
-
-            text-align: center;
-
-            padding: 17px;
-
-            border-radius: 24px;
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #2c2c2e,
-                    #111111
-                );
-
-            color: white;
-
-            text-decoration: none;
-
-            font-size: 16px;
-
-            font-weight: 700;
-
-            transition: 0.3s;
-
-            box-shadow:
-                0 10px 24px rgba(0,0,0,0.20);
-        }
-
-        .shop-btn:hover {
-
-            transform: translateY(-3px);
-
-            opacity: 0.94;
+            max-width: 82%;
         }
 
         .dots {
@@ -836,11 +515,58 @@
             background: #1d1d1f;
         }
 
+        .message-card {
+
+            margin-top: 18px;
+
+            padding: 18px 20px;
+
+            border-radius: 28px;
+
+            background:
+                rgba(255,255,255,0.18);
+
+            backdrop-filter: blur(24px);
+
+            border:
+                1px solid rgba(255,255,255,0.22);
+
+            box-shadow:
+                0 16px 40px rgba(0,0,0,0.16),
+                inset 0 1px 1px rgba(255,255,255,0.24);
+
+            color: white;
+
+            text-shadow:
+                0 2px 12px rgba(0,0,0,0.36);
+        }
+
+        .message-title {
+
+            font-size: 13px;
+
+            font-weight: 800;
+
+            margin-bottom: 8px;
+
+            opacity: 0.72;
+        }
+
+        .message-body {
+
+            font-size: 15px;
+
+            line-height: 1.55;
+
+            font-weight: 600;
+        }
+
     </style>
 
 </head>
 
-<body class="weather-{{ weather_main|default('default')|lower }}">
+<body class="weather-{{ weather_main|default('default')|lower }}"
+      style="--weather-bg: url('{{ background_image }}');">
 
 <div class="container">
 
@@ -911,27 +637,59 @@
 
     {% if temp %}
 
-    <div class="card weather-card">
+    <section class="hero-weather">
 
         <div class="city">
             {{ city_name }}
         </div>
 
-        <img src="{{ icon_url }}"
-             class="weather-icon">
+        <div class="weather-main">
+            {{ weather_main }}
+        </div>
 
         <div class="temp">
-            {{ temp }}°
+            {{ temp }}째
         </div>
 
         <div class="sub">
-            최저 {{ temp_min }}°
+            理쒖? {{ temp_min }}째
             /
-            최고 {{ temp_max }}°
+            理쒓퀬 {{ temp_max }}째
         </div>
 
         <div class="sub">
-            미세먼지 {{ pm_text }}
+            誘몄꽭癒쇱? {{ pm_text }}
+        </div>
+
+        <div class="weather-meta">
+
+            <div class="weather-meta-item">
+                <div class="weather-meta-label">
+                    Feels
+                </div>
+                <div class="weather-meta-value">
+                    {{ feels_like }}째
+                </div>
+            </div>
+
+            <div class="weather-meta-item">
+                <div class="weather-meta-label">
+                    Humidity
+                </div>
+                <div class="weather-meta-value">
+                    {{ humidity }}%
+                </div>
+            </div>
+
+            <div class="weather-meta-item">
+                <div class="weather-meta-label">
+                    Wind
+                </div>
+                <div class="weather-meta-value">
+                    {{ wind_speed }}m/s
+                </div>
+            </div>
+
         </div>
 
         {% if hourly_forecast %}
@@ -950,7 +708,7 @@
                      class="hour-icon">
 
                 <div class="hour-temp">
-                    {{ item.temp }}°
+                    {{ item.temp }}째
                 </div>
 
             </div>
@@ -961,7 +719,7 @@
 
         {% endif %}
 
-    </div>
+    </section>
 
     <div class="carousel">
 
@@ -972,7 +730,7 @@
             <img src="{{ outfit.img }}"
                  class="style-image">
 
-            <div class="style-info">
+            <div class="style-overlay">
 
                 <div class="style-title">
                     {{ outfit.title }}
@@ -982,12 +740,6 @@
                     {{ outfit.desc }}
                 </div>
 
-                <a href="#"
-                   class="shop-btn">
-
-                   상세 보기
-
-                </a>
 
             </div>
 
@@ -1004,6 +756,18 @@
         <span class="dot {% if loop.first %}active{% endif %}"></span>
 
         {% endfor %}
+
+    </div>
+
+    <div class="message-card">
+
+        <div class="message-title">
+            Today's Message
+        </div>
+
+        <div class="message-body">
+            {{ today_message }}
+        </div>
 
     </div>
 
