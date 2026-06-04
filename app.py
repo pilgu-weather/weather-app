@@ -579,13 +579,15 @@ def home():
 
         forecast_data = {}
 
-    today = datetime.now().strftime("%Y-%m-%d")
+    kst_now = datetime.utcnow() + timedelta(hours=9)
+
+    today = kst_now.strftime("%Y-%m-%d")
 
     tomorrow = (
-        datetime.now() + timedelta(days=1)
+        kst_now + timedelta(days=1)
     ).strftime("%Y-%m-%d")
 
-    now_hour = datetime.now().hour
+    now_hour = kst_now.hour
 
     today_temps = []
     tomorrow_temps = []
