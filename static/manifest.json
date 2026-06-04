@@ -1,0 +1,23 @@
+{
+  "name": "Weather Fit",
+  "short_name": "Weather Fit",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/",
+  "background_color": "#101216",
+  "theme_color": "#101216",
+  "icons": [
+    {
+      "src": "/static/assets/6cd0ca82-5e7b-473e-9f59-e442d0a09d68.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/assets/6cd0ca82-5e7b-473e-9f59-e442d0a09d68.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

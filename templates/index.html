@@ -8,6 +8,10 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
+    <meta name="theme-color" content="#101216">
+
+    <link rel="manifest" href="/static/manifest.json">
+
     <title>Weather Fit</title>
 
     <style>
@@ -882,6 +886,22 @@
 
         }, 2000);
     });
+
+</script>
+
+<script>
+
+    if ("serviceWorker" in navigator) {
+
+        window.addEventListener("load", () => {
+
+            navigator.serviceWorker.register(
+                "/static/service-worker.js"
+            );
+
+        });
+
+    }
 
 </script>
 
