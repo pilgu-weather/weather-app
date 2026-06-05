@@ -40,6 +40,7 @@ BACKGROUND_MAP = {
 STYLE_SEASON_FALLBACK = {
     "spring_warm": "spring",
     "spring_cool": "spring",
+    "summer_cool": "summer",
     "fall_warm": "fall",
     "fall_cool": "fall",
 }
@@ -159,6 +160,10 @@ def get_style_season(month, temp):
         return "spring_cool"
 
     if 6 <= month <= 8:
+
+        if temp <= 23:
+
+            return "summer_cool"
 
         return "summer"
 
