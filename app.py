@@ -8,11 +8,22 @@ app = Flask(__name__)
 
 API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
+print(
+    "OPENWEATHER_API_KEY exists:",
+    bool(API_KEY)
+)
+
 if not API_KEY:
 
     raise ValueError(
         "OPENWEATHER_API_KEY environment variable is missing."
     )
+
+
+@app.route("/health")
+def health():
+
+    return "ok", 200
 
 
 BACKGROUND_MAP = {
