@@ -325,7 +325,12 @@
 
             font-size: 13px;
 
-            color: #8e8e93;
+            color: rgba(255,255,255,0.92);
+
+            font-weight: 700;
+
+            text-shadow:
+                0 1px 8px rgba(0,0,0,0.45);
 
             margin-bottom: 4px;
         }
@@ -757,7 +762,12 @@
             <div class="hour-item">
 
                 <div class="hour-time">
-                    {{ item.time[:2] }}
+                    {% set hour = item.time[:2] | int %}
+                    {% if hour < 12 %}
+                    오전 {{ 12 if hour == 0 else hour }}시
+                    {% else %}
+                    오후 {{ 12 if hour == 12 else hour - 12 }}시
+                    {% endif %}
                 </div>
 
                 <img src="https://openweathermap.org/img/wn/{{ item.icon }}@2x.png"
