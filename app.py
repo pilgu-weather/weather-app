@@ -1011,7 +1011,7 @@ def home():
         {
             "folder": "street",
             "title": "Street",
-            "desc": "트렌디한 스트릿 무드"
+            "desc": "트렌디한 스트릿"
         },
 
         {
