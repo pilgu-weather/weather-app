@@ -920,6 +920,44 @@ def home():
     # 계절 판단
     # =========================
 
+    if temp_min is not None and temp_max is not None:
+
+        temp_gap = temp_max - temp_min
+
+    else:
+
+        temp_gap = 0
+
+    effective_temp = day_temp
+
+    if effective_temp is None:
+
+        effective_temp = temp
+
+    if feels_like is not None:
+
+        effective_temp = min(effective_temp, feels_like)
+
+    if wind_speed >= 8:
+
+        effective_temp -= 3
+
+    elif wind_speed >= 6:
+
+        effective_temp -= 2
+
+    elif wind_speed >= 4:
+
+        effective_temp -= 1
+
+    if temp_gap >= 10:
+
+        effective_temp -= 2
+
+    elif temp_gap >= 6:
+
+        effective_temp -= 1
+
     selected_date = today
 
     if mode != "today":
@@ -933,7 +971,7 @@ def home():
 
     season = get_style_season(
         season_month,
-        day_temp
+        effective_temp
     )
 
     # =========================
@@ -992,18 +1030,10 @@ def home():
 
         })
 
-    if temp_min is not None and temp_max is not None:
-
-        temp_gap = temp_max - temp_min
-
-    else:
-
-        temp_gap = 0
-
     if (
         season.startswith("spring")
         or season.startswith("fall")
-    ) and temp_gap >= 8:
+    ) and temp_gap >= 6:
 
         styles.insert(0, {
 
