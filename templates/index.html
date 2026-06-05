@@ -868,7 +868,7 @@
 
 <script>
 
-    window.addEventListener("load", () => {
+    (() => {
 
         const splash =
             document.getElementById("splashScreen");
@@ -878,18 +878,34 @@
             return;
         }
 
-        setTimeout(() => {
+        if (sessionStorage.getItem("weatherFitSplashShown")) {
 
-            splash.classList.add("fade-out");
+            splash.remove();
+
+            return;
+        }
+
+        sessionStorage.setItem(
+            "weatherFitSplashShown",
+            "true"
+        );
+
+        window.addEventListener("load", () => {
 
             setTimeout(() => {
 
-                splash.remove();
+                splash.classList.add("fade-out");
 
-            }, 800);
+                setTimeout(() => {
 
-        }, 2000);
-    });
+                    splash.remove();
+
+                }, 800);
+
+            }, 2000);
+
+        });
+    })();
 
 </script>
 
