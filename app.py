@@ -613,6 +613,8 @@ def home():
 
     rain_today = False
     rain_tomorrow = False
+    rain_probability_today = 0
+    rain_probability_tomorrow = 0
 
     tomorrow_icon = icon_url
     tomorrow_icon_code = icon
@@ -675,6 +677,7 @@ def home():
             weather_type = item_weather.get("main", "Clouds")
 
             weather_icon = item_weather.get("icon", "03d")
+            forecast_pop = round((item.get("pop") or 0) * 100)
 
             # =========================
             # TODAY → 현재 이후 + 내일 전체
@@ -742,6 +745,13 @@ def home():
 
                     today_daytime.append(current_temp)
 
+                if 6 <= kst_hour <= 21:
+
+                    rain_probability_today = max(
+                        rain_probability_today,
+                        forecast_pop
+                    )
+
                 if (
                     6 <= kst_hour <= 21
                     and weather_type in [
@@ -777,6 +787,13 @@ def home():
 
                     tomorrow_icon = (
                         f"https://openweathermap.org/img/wn/{weather_icon}@2x.png"
+                    )
+
+                if 6 <= kst_hour <= 21:
+
+                    rain_probability_tomorrow = max(
+                        rain_probability_tomorrow,
+                        forecast_pop
                     )
 
                 if (
@@ -817,6 +834,7 @@ def home():
             day_temp = temp
 
         rain_mode = rain_today
+        rain_probability = rain_probability_today
 
     # =========================
     # TOMORROW MODE
@@ -867,6 +885,7 @@ def home():
             day_temp = temp
 
         rain_mode = rain_tomorrow
+        rain_probability = rain_probability_tomorrow
 
     # =========================
     # 미세먼지
@@ -1030,7 +1049,7 @@ def home():
 
             "title": "Rainy day",
 
-            "desc": "오늘은 우산과 바람막이 추천"
+            "desc": f"강수확률 {rain_probability}% · 우산 추천"
 
         })
 
