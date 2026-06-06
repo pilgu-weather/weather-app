@@ -698,7 +698,13 @@ def home():
 
                         "icon": weather_icon,
 
-                        "temp": round(current_temp)
+                        "temp": round(current_temp),
+
+                        "is_rain": weather_type in [
+                            "Rain",
+                            "Drizzle",
+                            "Thunderstorm"
+                        ]
 
                     })
 
@@ -718,7 +724,13 @@ def home():
 
                     "icon": weather_icon,
 
-                        "temp": round(current_temp)
+                        "temp": round(current_temp),
+
+                        "is_rain": weather_type in [
+                            "Rain",
+                            "Drizzle",
+                            "Thunderstorm"
+                        ]
 
                 })
 
