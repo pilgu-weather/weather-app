@@ -613,8 +613,8 @@ def home():
 
     rain_today = False
     rain_tomorrow = False
-    rain_probability_today = 0
-    rain_probability_tomorrow = 0
+    rain_pops_today = []
+    rain_pops_tomorrow = []
 
     tomorrow_icon = icon_url
     tomorrow_icon_code = icon
@@ -755,10 +755,7 @@ def home():
                 ):
 
                     rain_today = True
-                    rain_probability_today = max(
-                        rain_probability_today,
-                        forecast_pop
-                    )
+                    rain_pops_today.append(forecast_pop)
 
             # =========================
             # TOMORROW DATA
@@ -796,10 +793,7 @@ def home():
                 ):
 
                     rain_tomorrow = True
-                    rain_probability_tomorrow = max(
-                        rain_probability_tomorrow,
-                        forecast_pop
-                    )
+                    rain_pops_tomorrow.append(forecast_pop)
 
     # =========================
     # TODAY MODE
@@ -828,7 +822,9 @@ def home():
             day_temp = temp
 
         rain_mode = rain_today
-        rain_probability = rain_probability_today
+        rain_probability = round(
+            sum(rain_pops_today) / len(rain_pops_today)
+        ) if rain_pops_today else 0
 
     # =========================
     # TOMORROW MODE
@@ -879,7 +875,9 @@ def home():
             day_temp = temp
 
         rain_mode = rain_tomorrow
-        rain_probability = rain_probability_tomorrow
+        rain_probability = round(
+            sum(rain_pops_tomorrow) / len(rain_pops_tomorrow)
+        ) if rain_pops_tomorrow else 0
 
     # =========================
     # 미세먼지
@@ -1043,7 +1041,7 @@ def home():
 
             "title": "Rainy day",
 
-            "desc": f"강수확률 {rain_probability}% · 우산 추천"
+            "desc": f"비 예보 {rain_probability}% · 우산 추천"
 
         })
 
