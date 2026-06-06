@@ -361,6 +361,8 @@
             width: 34px;
 
             height: 34px;
+
+            object-fit: contain;
         }
 
         .hour-temp {
@@ -755,7 +757,7 @@
                     </div>
 
                     {% if item.is_rain %}
-                    <img src="https://openweathermap.org/img/wn/10d@2x.png"
+                    <img src="/static/icons/rain2.png"
                          class="hour-icon">
                     {% else %}
                         <img src="https://openweathermap.org/img/wn/{{ item.icon }}@2x.png"
