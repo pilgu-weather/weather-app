@@ -363,35 +363,6 @@
             height: 34px;
         }
 
-        .hour-icon-wrap {
-
-            position: relative;
-
-            display: inline-block;
-
-            width: 34px;
-
-            height: 34px;
-        }
-
-        .rain-badge {
-
-            position: absolute;
-
-            top: 0;
-
-            right: -3px;
-
-            font-size: 10px;
-
-            line-height: 1;
-
-            opacity: 0.86;
-
-            filter:
-                drop-shadow(0 1px 4px rgba(0,0,0,0.35));
-        }
-
         .hour-temp {
 
             font-size: 15px;
@@ -783,13 +754,21 @@
                         {% endif %}
                     </div>
 
-                    <span class="hour-icon-wrap">
+                    {% if item.is_rain %}
+                    <svg class="hour-icon"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="white"
+                         stroke-width="1.9"
+                         stroke-linecap="round"
+                         stroke-linejoin="round"
+                         aria-hidden="true">
+                        <path d="M12 2.8C8.9 6.5 6 10.2 6 14a6 6 0 0 0 12 0c0-3.8-2.9-7.5-6-11.2Z"></path>
+                    </svg>
+                    {% else %}
                         <img src="https://openweathermap.org/img/wn/{{ item.icon }}@2x.png"
                              class="hour-icon">
-                        {% if item.is_rain %}
-                        <span class="rain-badge">💧</span>
-                        {% endif %}
-                    </span>
+                    {% endif %}
 
                     <div class="hour-temp">
                         {{ item.temp }}°
