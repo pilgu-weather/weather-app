@@ -745,13 +745,6 @@ def home():
 
                     today_daytime.append(current_temp)
 
-                if 6 <= kst_hour <= 21:
-
-                    rain_probability_today = max(
-                        rain_probability_today,
-                        forecast_pop
-                    )
-
                 if (
                     6 <= kst_hour <= 21
                     and weather_type in [
@@ -762,6 +755,10 @@ def home():
                 ):
 
                     rain_today = True
+                    rain_probability_today = max(
+                        rain_probability_today,
+                        forecast_pop
+                    )
 
             # =========================
             # TOMORROW DATA
@@ -789,13 +786,6 @@ def home():
                         f"https://openweathermap.org/img/wn/{weather_icon}@2x.png"
                     )
 
-                if 6 <= kst_hour <= 21:
-
-                    rain_probability_tomorrow = max(
-                        rain_probability_tomorrow,
-                        forecast_pop
-                    )
-
                 if (
                     6 <= kst_hour <= 21
                     and weather_type in [
@@ -806,6 +796,10 @@ def home():
                 ):
 
                     rain_tomorrow = True
+                    rain_probability_tomorrow = max(
+                        rain_probability_tomorrow,
+                        forecast_pop
+                    )
 
     # =========================
     # TODAY MODE
