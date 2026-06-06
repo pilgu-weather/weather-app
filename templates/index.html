@@ -363,13 +363,6 @@
             height: 34px;
         }
 
-        .hour-icon-rain {
-
-            filter:
-                brightness(1.8)
-                drop-shadow(0 0 6px rgba(255,255,255,0.5));
-        }
-
         .hour-temp {
 
             font-size: 15px;
@@ -763,7 +756,7 @@
 
                     {% if item.is_rain %}
                     <img src="https://openweathermap.org/img/wn/10d@2x.png"
-                         class="hour-icon hour-icon-rain">
+                         class="hour-icon">
                     {% else %}
                         <img src="https://openweathermap.org/img/wn/{{ item.icon }}@2x.png"
                              class="hour-icon">
