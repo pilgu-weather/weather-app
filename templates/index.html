@@ -755,16 +755,8 @@
                     </div>
 
                     {% if item.is_rain %}
-                    <svg class="hour-icon"
-                         viewBox="0 0 24 24"
-                         fill="none"
-                         stroke="white"
-                         stroke-width="1.9"
-                         stroke-linecap="round"
-                         stroke-linejoin="round"
-                         aria-hidden="true">
-                        <path d="M12 2.8C8.9 6.5 6 10.2 6 14a6 6 0 0 0 12 0c0-3.8-2.9-7.5-6-11.2Z"></path>
-                    </svg>
+                    <img src="https://openweathermap.org/img/wn/10d@2x.png"
+                         class="hour-icon">
                     {% else %}
                         <img src="https://openweathermap.org/img/wn/{{ item.icon }}@2x.png"
                              class="hour-icon">
