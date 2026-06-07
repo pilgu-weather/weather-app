@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, abort
 import requests
 from datetime import datetime, timedelta
 import random
 import os
 import re
 import sqlite3
+import html
 
 app = Flask(__name__)
 
@@ -186,6 +187,204 @@ def save_report():
         )
 
     return jsonify({"ok": True})
+
+
+def fetch_feedback_rows():
+
+    init_feedback_db()
+
+    with get_feedback_db() as conn:
+
+        conn.row_factory = sqlite3.Row
+
+        feedbacks = conn.execute(
+            """
+            SELECT
+                id,
+                created_at,
+                mode,
+                city_name,
+                temp,
+                feels_like,
+                effective_temp,
+                weather_main,
+                outfit_title,
+                outfit_desc,
+                rating,
+                reason,
+                page_url,
+                user_agent
+            FROM recommendation_feedbacks
+            ORDER BY id DESC
+            LIMIT 100
+            """
+        ).fetchall()
+
+        reports = conn.execute(
+            """
+            SELECT
+                id,
+                created_at,
+                mode,
+                city_name,
+                temp,
+                weather_main,
+                outfit_title,
+                outfit_desc,
+                report_reason,
+                page_url,
+                user_agent
+            FROM outfit_reports
+            ORDER BY id DESC
+            LIMIT 100
+            """
+        ).fetchall()
+
+    return feedbacks, reports
+
+
+def render_admin_table(rows, columns):
+
+    header = "".join(
+        f"<th>{html.escape(column)}</th>"
+        for column in columns
+    )
+
+    body_rows = []
+
+    for row in rows:
+
+        cells = "".join(
+            f"<td>{html.escape(str(row[column] or ''))}</td>"
+            for column in columns
+        )
+
+        body_rows.append(f"<tr>{cells}</tr>")
+
+    if not body_rows:
+
+        body_rows.append(
+            f"<tr><td colspan=\"{len(columns)}\">No data</td></tr>"
+        )
+
+    return (
+        "<table>"
+        f"<thead><tr>{header}</tr></thead>"
+        f"<tbody>{''.join(body_rows)}</tbody>"
+        "</table>"
+    )
+
+
+@app.route("/admin/feedback")
+def admin_feedback():
+
+    admin_key = os.getenv("ADMIN_KEY")
+
+    if not admin_key or request.args.get("key") != admin_key:
+
+        abort(403)
+
+    feedback_columns = [
+        "id",
+        "created_at",
+        "mode",
+        "city_name",
+        "temp",
+        "feels_like",
+        "effective_temp",
+        "weather_main",
+        "outfit_title",
+        "outfit_desc",
+        "rating",
+        "reason",
+        "page_url",
+        "user_agent"
+    ]
+
+    report_columns = [
+        "id",
+        "created_at",
+        "mode",
+        "city_name",
+        "temp",
+        "weather_main",
+        "outfit_title",
+        "outfit_desc",
+        "report_reason",
+        "page_url",
+        "user_agent"
+    ]
+
+    feedbacks, reports = fetch_feedback_rows()
+
+    return f"""
+    <!doctype html>
+    <html lang="ko">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Weather Fit Feedback</title>
+        <style>
+            body {{
+                margin: 0;
+                padding: 24px;
+                font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                background: #101216;
+                color: #f5f5f7;
+            }}
+            h1, h2 {{
+                margin: 0 0 16px;
+            }}
+            section {{
+                margin-top: 28px;
+            }}
+            .table-wrap {{
+                overflow-x: auto;
+                border: 1px solid rgba(255,255,255,0.14);
+                border-radius: 14px;
+            }}
+            table {{
+                width: 100%;
+                border-collapse: collapse;
+                min-width: 980px;
+            }}
+            th, td {{
+                padding: 10px 12px;
+                border-bottom: 1px solid rgba(255,255,255,0.10);
+                text-align: left;
+                vertical-align: top;
+                font-size: 13px;
+            }}
+            th {{
+                position: sticky;
+                top: 0;
+                background: #1c1f24;
+                font-size: 12px;
+            }}
+            td {{
+                color: rgba(255,255,255,0.82);
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>Weather Fit Feedback</h1>
+
+        <section>
+            <h2>추천 평가 목록</h2>
+            <div class="table-wrap">
+                {render_admin_table(feedbacks, feedback_columns)}
+            </div>
+        </section>
+
+        <section>
+            <h2>신고 목록</h2>
+            <div class="table-wrap">
+                {render_admin_table(reports, report_columns)}
+            </div>
+        </section>
+    </body>
+    </html>
+    """
 
 
 BACKGROUND_MAP = {

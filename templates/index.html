@@ -948,6 +948,30 @@
             gap: 8px;
         }
 
+        .report-dialog-message {
+
+            display: none;
+
+            margin-top: 4px;
+
+            font-size: 15px;
+
+            line-height: 1.55;
+
+            font-weight: 800;
+        }
+
+        .report-dialog.completed .report-dialog-title,
+        .report-dialog.completed .report-dialog-actions {
+
+            display: none;
+        }
+
+        .report-dialog.completed .report-dialog-message {
+
+            display: block;
+        }
+
         .report-dialog-button {
 
             border: 0;
@@ -1651,6 +1675,12 @@
 
         </div>
 
+        <div class="report-dialog-message"
+             id="reportCompleteMessage">
+            신속히 처리하겠습니다.<br>
+            감사합니다.
+        </div>
+
     </div>
 
 </div>
@@ -1980,7 +2010,7 @@
             recommendationFeedback.style.display =
                 "none";
 
-        }, 1400);
+        }, 2000);
     };
 
     const getSelectedFeedbackReasons = () => {
@@ -2169,6 +2199,14 @@
 
             reportDialog.classList.add("open");
             reportDialog.setAttribute("aria-hidden", "false");
+
+            const dialog =
+                reportDialog.querySelector(".report-dialog");
+
+            if (dialog) {
+
+                dialog.classList.remove("completed");
+            }
         }
     };
 
@@ -2589,8 +2627,21 @@
                 return;
             }
 
-            closeReportDialog();
-            showCopyToast("신고가 접수되었습니다");
+            const dialog =
+                reportDialog
+                    ? reportDialog.querySelector(".report-dialog")
+                    : null;
+
+            if (dialog) {
+
+                dialog.classList.add("completed");
+            }
+
+            setTimeout(() => {
+
+                closeReportDialog();
+
+            }, 1000);
 
         });
     }
