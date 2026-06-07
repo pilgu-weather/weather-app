@@ -142,7 +142,7 @@
             backdrop-filter: blur(12px);
 
             border:
-                1px solid rgba(255,255,255,0.42);
+                1px solid rgba(255,255,255,0.12);
 
             box-shadow:
                 0 8px 24px rgba(0,0,0,0.05);
@@ -190,12 +190,6 @@
 
             text-shadow:
                 0 2px 18px rgba(0,0,0,0.38);
-        }
-
-        .weather-summary-card {
-
-            border:
-                1px solid rgba(255,255,255,0.12);
         }
 
         .city {
@@ -1035,34 +1029,30 @@
 
     <section class="hero-weather">
 
-        <div class="weather-summary-card">
+        <div class="city">
+            {{ city_name }}
+        </div>
 
-            <div class="city">
-                {{ city_name }}
-            </div>
+        <div class="weather-main">
+            {{ weather_main }}
+        </div>
 
-            <div class="weather-main">
-                {{ weather_main }}
-            </div>
+        <div class="temp">
+            {{ temp }}°
+        </div>
 
-            <div class="temp">
-                {{ temp }}°
-            </div>
+        {% if temp_min is not none and temp_max is not none %}
 
-            {% if temp_min is not none and temp_max is not none %}
+        <div class="sub">
+            최저 {{ temp_min }}°
+            /
+            최고 {{ temp_max }}°
+        </div>
 
-            <div class="sub">
-                최저 {{ temp_min }}°
-                /
-                최고 {{ temp_max }}°
-            </div>
+        {% endif %}
 
-            {% endif %}
-
-            <div class="sub">
-                미세먼지 {{ pm_text }}
-            </div>
-
+        <div class="sub">
+            미세먼지 {{ pm_text }}
         </div>
 
         <div class="hourly-weather-card">
