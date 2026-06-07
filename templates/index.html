@@ -766,11 +766,20 @@
                 rgba(255,255,255,0.08);
         }
 
+        .share-card-outfit-image {
+
+            width: 100%;
+
+            aspect-ratio: 4 / 5;
+
+            overflow: hidden;
+        }
+
         .share-card-outfit img {
 
             width: 100%;
 
-            height: 360px;
+            height: 100%;
 
             object-fit: cover;
 
@@ -800,6 +809,40 @@
             line-height: 1.45;
 
             color: rgba(255,255,255,0.84);
+        }
+
+        .share-card-branding {
+
+            margin-top: 18px;
+
+            padding-top: 16px;
+
+            border-top:
+                1px solid rgba(255,255,255,0.12);
+
+            font-size: 12px;
+
+            line-height: 1.45;
+
+            color: rgba(255,255,255,0.72);
+        }
+
+        .share-card-branding strong {
+
+            display: block;
+
+            margin-bottom: 4px;
+
+            font-size: 14px;
+
+            color: rgba(255,255,255,0.92);
+        }
+
+        .share-card-url {
+
+            margin-top: 4px;
+
+            word-break: break-all;
         }
 
         .splash-screen {
@@ -1143,9 +1186,13 @@
 
     <div class="share-card-outfit">
 
-        <img id="shareCardImage"
-             src=""
-             alt="">
+        <div class="share-card-outfit-image">
+
+            <img id="shareCardImage"
+                 src=""
+                 alt="">
+
+        </div>
 
         <div class="share-card-outfit-text">
 
@@ -1156,6 +1203,19 @@
                  id="shareCardDesc"></div>
 
         </div>
+
+    </div>
+
+    <div class="share-card-branding">
+
+        <strong>Weather Fit</strong>
+
+        <div>
+            오늘의 날씨와 코디를 확인해보세요
+        </div>
+
+        <div class="share-card-url"
+             id="shareCardUrl"></div>
 
     </div>
 
@@ -1213,6 +1273,9 @@
 
     const shareCardDesc =
         document.getElementById("shareCardDesc");
+
+    const shareCardUrl =
+        document.getElementById("shareCardUrl");
 
     const outfitMenuButtons =
         document.querySelectorAll(".outfit-menu-button");
@@ -1295,6 +1358,12 @@
         shareCardDesc.textContent =
             styleCard.dataset.shareDesc;
 
+        if (shareCardUrl) {
+
+            shareCardUrl.textContent =
+                window.location.href;
+        }
+
         return true;
     };
 
@@ -1345,7 +1414,8 @@
                 await navigator.share({
                     files: [file],
                     title: "Weather Fit",
-                    text: "오늘의 날씨와 코디를 확인해보세요"
+                    text: "오늘의 날씨와 코디를 확인해보세요",
+                    url: window.location.href
                 });
 
                 return;
