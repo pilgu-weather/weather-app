@@ -227,6 +227,25 @@
             line-height: 1.5;
         }
 
+        .weather-alert-line {
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+
+            white-space: nowrap;
+        }
+
+        .weather-alert-line.advisory {
+
+            color: #ff9f0a;
+        }
+
+        .weather-alert-line.warning {
+
+            color: #ff453a;
+        }
+
         .weather-main {
 
             font-size: 18px;
@@ -1051,9 +1070,19 @@
 
         {% endif %}
 
+        {% if weather_alert and mode == "today" %}
+
+        <div class="sub weather-alert-line {{ weather_alert.level }}">
+            {{ weather_alert.text }}
+        </div>
+
+        {% else %}
+
         <div class="sub">
             미세먼지 {{ pm_text }}
         </div>
+
+        {% endif %}
 
         <div class="hourly-weather-card">
 

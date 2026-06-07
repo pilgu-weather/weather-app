@@ -3,6 +3,7 @@ import requests
 from datetime import datetime, timedelta
 import random
 import os
+import re
 
 app = Flask(__name__)
 
@@ -131,6 +132,131 @@ def get_weather_context(data, fallback_name="Seoul"):
     }
 
 
+ALERT_EVENT_MAP = [
+    (["\\ud3ed\\uc5fc", "heat"], "\\ud3ed\\uc5fc"),
+    (["\\ud55c\\ud30c", "cold", "freeze", "frost"], "\\ud55c\\ud30c"),
+    (["\\ud638\\uc6b0", "heavy rain", "rainstorm", "flood"], "\\ud638\\uc6b0"),
+    (["\\uac15\\ud48d", "wind", "gale"], "\\uac15\\ud48d"),
+    (["\\ud0dc\\ud48d", "typhoon", "tropical cyclone"], "\\ud0dc\\ud48d"),
+    (["\\uac74\\uc870", "dry", "fire weather", "red flag"], "\\uac74\\uc870"),
+    (["\\uc624\\uc874", "ozone"], "\\uc624\\uc874"),
+    (["\\ud669\\uc0ac", "yellow dust", "dust", "sand"], "\\ud669\\uc0ac"),
+]
+
+
+def decode_alert_text(value):
+
+    return value.encode("utf-8").decode("unicode_escape")
+
+
+def normalize_alert_area(city_name):
+
+    if not city_name:
+
+        return ""
+
+    return re.sub(
+        r"\s+",
+        " ",
+        str(city_name)
+    ).strip()
+
+
+def get_alert_level(event_text):
+
+    lower_text = event_text.lower()
+    warning_text = decode_alert_text("\\uacbd\\ubcf4")
+
+    if warning_text in event_text or "warning" in lower_text:
+
+        return "warning", warning_text
+
+    return "advisory", decode_alert_text("\\uc8fc\\uc758\\ubcf4")
+
+
+def get_alert_type(event_text):
+
+    lower_text = event_text.lower()
+
+    for keywords, label in ALERT_EVENT_MAP:
+
+        for keyword in keywords:
+
+            decoded_keyword = decode_alert_text(keyword)
+
+            if (
+                decoded_keyword in event_text
+                or keyword in lower_text
+            ):
+
+                return decode_alert_text(label)
+
+    return None
+
+
+def get_weather_alert_notice(lat, lon, city_name):
+
+    if lat is None or lon is None:
+
+        return None
+
+    alert_url = (
+        f"https://api.openweathermap.org/data/3.0/onecall"
+        f"?lat={lat}&lon={lon}"
+        f"&exclude=current,minutely,hourly,daily"
+        f"&appid={API_KEY}"
+    )
+
+    alert_data, alert_status_code = fetch_json(alert_url)
+
+    if alert_status_code != 200 or not alert_data:
+
+        return None
+
+    alerts = alert_data.get("alerts", [])
+
+    if not isinstance(alerts, list):
+
+        return None
+
+    for alert in alerts:
+
+        if not isinstance(alert, dict):
+
+            continue
+
+        event_text = " ".join([
+            str(alert.get("event", "")),
+            str(alert.get("description", ""))
+        ])
+
+        alert_type = get_alert_type(event_text)
+
+        if not alert_type:
+
+            continue
+
+        level, level_text = get_alert_level(event_text)
+        area = normalize_alert_area(city_name)
+        prefix = decode_alert_text("\\u26a0\\ufe0f")
+        suffix = decode_alert_text("\\ubc1c\\ud6a8")
+
+        if area:
+
+            text = f"{prefix} {area} {alert_type}{level_text} {suffix}"
+
+        else:
+
+            text = f"{prefix} {alert_type}{level_text} {suffix}"
+
+        return {
+            "text": text,
+            "level": level
+        }
+
+    return None
+
+
 def render_safe_template(**overrides):
 
     context = {
@@ -149,6 +275,7 @@ def render_safe_template(**overrides):
         "weather_main": "Default",
         "background_image": get_background_image("03d"),
         "hourly_forecast": [],
+        "weather_alert": None,
         "error": None,
     }
 
@@ -497,6 +624,7 @@ def home():
 
     lat = None
     lon = None
+    has_gps_location = False
 
     error = None
 
@@ -563,6 +691,7 @@ def home():
 
             lat = float(request.args.get("lat"))
             lon = float(request.args.get("lon"))
+            has_gps_location = True
 
         except:
 
@@ -1036,6 +1165,21 @@ def home():
 
         pm = 1
 
+    weather_alert = None
+
+    if (
+        mode == "today"
+        and has_gps_location
+        and lat is not None
+        and lon is not None
+    ):
+
+        weather_alert = get_weather_alert_notice(
+            lat,
+            lon,
+            city_name
+        )
+
     # =========================
     # 계절 판단
     # =========================
@@ -1268,6 +1412,7 @@ def home():
         wind_speed=wind_speed,
 
         pm_text=pm_text,
+        weather_alert=weather_alert,
         today_message=today_message,
 
         outfits=outfits,
