@@ -257,6 +257,30 @@ def get_weather_alert_notice(lat, lon, city_name):
     return None
 
 
+def get_uv_index(lat, lon):
+
+    if lat is None or lon is None:
+
+        return None
+
+    uv_url = (
+        f"https://api.openweathermap.org/data/3.0/onecall"
+        f"?lat={lat}&lon={lon}"
+        f"&exclude=minutely,hourly,daily,alerts"
+        f"&appid={API_KEY}"
+    )
+
+    uv_data, uv_status_code = fetch_json(uv_url)
+
+    if uv_status_code != 200 or not uv_data:
+
+        return None
+
+    current = uv_data.get("current", {})
+
+    return current.get("uvi")
+
+
 def render_safe_template(**overrides):
 
     context = {
@@ -452,7 +476,8 @@ def get_today_message(
     temp_gap=0,
     day_temp=None,
     effective_temp=None,
-    effective_temp_reasons=None
+    effective_temp_reasons=None,
+    uv_index=None
 ):
 
     rain_messages = [
@@ -530,6 +555,17 @@ def get_today_message(
         "체감온도와 바람을 보면 얇은 옷만 입기엔 애매한 날이에요.",
         "오늘은 체감 요소가 겹쳐서 추천을 더 따뜻하게 잡았어요.",
         "바람, 체감온도, 일교차를 함께 보면 가볍게만 입기엔 조심스러운 날이에요.",
+    ]
+
+    uv_messages = [
+        "자외선이 강한 날이에요. 야외활동 시 햇볕을 주의하세요.",
+        "맑은 날씨만큼 자외선도 강해요.",
+        "기온은 높지 않아도 햇볕은 강하게 느껴질 수 있어요.",
+        "한낮 외출 시 모자나 선글라스가 도움이 될 수 있어요.",
+        "햇볕이 강한 시간대에는 그늘을 활용해보세요.",
+        "자외선이 강해 피부가 쉽게 자극받을 수 있어요.",
+        "맑고 화창하지만 자외선은 높은 편이에요.",
+        "외출이 길다면 자외선 차단을 고려해보세요.",
     ]
 
     temperature_messages = {
@@ -640,6 +676,10 @@ def get_today_message(
 
             return random.choice(effective_gap_messages)
 
+    if uv_index is not None and uv_index >= 6:
+
+        return random.choice(uv_messages)
+
     if temp >= 30:
 
         return random.choice(temperature_messages["hot"])
@@ -685,6 +725,7 @@ def home():
     feels_like = 0
     humidity = 0
     wind_speed = 0
+    uv_index = None
 
     lat = None
     lon = None
@@ -852,6 +893,11 @@ def home():
     # =========================
 
     if lat is not None and lon is not None:
+
+        uv_index = get_uv_index(
+            lat,
+            lon
+        )
 
         forecast_url = (
             f"https://api.openweathermap.org/data/2.5/forecast"
@@ -1480,7 +1526,8 @@ def home():
         temp_gap,
         day_temp,
         effective_temp,
-        effective_temp_reasons
+        effective_temp_reasons,
+        uv_index
     )
 
     return render_template(

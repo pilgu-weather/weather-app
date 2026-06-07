@@ -607,6 +607,128 @@
             font-weight: 600;
         }
 
+        .feedback-card {
+
+            margin-top: 14px;
+
+            padding: 16px 18px;
+
+            border-radius: 24px;
+
+            background:
+                rgba(255,255,255,0.06);
+
+            backdrop-filter: blur(4px);
+
+            border:
+                1px solid rgba(255,255,255,0.12);
+
+            color: white;
+
+            text-shadow:
+                0 2px 12px rgba(0,0,0,0.34);
+        }
+
+        .feedback-title {
+
+            font-size: 14px;
+
+            font-weight: 800;
+
+            margin-bottom: 12px;
+        }
+
+        .feedback-actions {
+
+            display: grid;
+
+            grid-template-columns: repeat(2, 1fr);
+
+            gap: 8px;
+        }
+
+        .feedback-button,
+        .feedback-submit {
+
+            border: 0;
+
+            border-radius: 999px;
+
+            padding: 11px 12px;
+
+            background:
+                rgba(255,255,255,0.12);
+
+            color: white;
+
+            font-size: 13px;
+
+            font-weight: 800;
+
+            cursor: pointer;
+        }
+
+        .feedback-reasons {
+
+            display: none;
+
+            margin-top: 12px;
+        }
+
+        .feedback-reasons.open {
+
+            display: block;
+        }
+
+        .feedback-reason {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            padding: 8px 0;
+
+            font-size: 13px;
+
+            font-weight: 700;
+        }
+
+        .feedback-reason input {
+
+            accent-color: white;
+        }
+
+        .feedback-submit {
+
+            width: 100%;
+
+            margin-top: 10px;
+        }
+
+        .feedback-thanks {
+
+            display: none;
+
+            font-size: 14px;
+
+            line-height: 1.55;
+
+            font-weight: 700;
+        }
+
+        .feedback-card.thanking .feedback-content,
+        .feedback-card.thanking .feedback-reasons {
+
+            display: none;
+        }
+
+        .feedback-card.thanking .feedback-thanks {
+
+            display: block;
+        }
+
         .outfit-menu-button {
 
             position: absolute;
@@ -1247,6 +1369,86 @@
 
     </div>
 
+    <div class="feedback-card"
+         id="recommendationFeedback">
+
+        <div class="feedback-content">
+
+            <div class="feedback-title">
+                오늘의 추천은 어땠나요?
+            </div>
+
+            <div class="feedback-actions">
+
+                <button class="feedback-button"
+                        id="feedbackGood"
+                        type="button">
+                    👍 딱 맞았어요
+                </button>
+
+                <button class="feedback-button"
+                        id="feedbackBad"
+                        type="button">
+                    👎 별로였어요
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="feedback-reasons"
+             id="feedbackReasons">
+
+            <div class="feedback-title">
+                어떤 점이 아쉬웠나요?
+            </div>
+
+            <label class="feedback-reason">
+                <input type="checkbox"
+                       value="너무 더웠어요">
+                너무 더웠어요
+            </label>
+
+            <label class="feedback-reason">
+                <input type="checkbox"
+                       value="너무 추웠어요">
+                너무 추웠어요
+            </label>
+
+            <label class="feedback-reason">
+                <input type="checkbox"
+                       value="비 추천이 아쉬웠어요">
+                비 추천이 아쉬웠어요
+            </label>
+
+            <label class="feedback-reason">
+                <input type="checkbox"
+                       value="코디가 아쉬웠어요">
+                코디가 아쉬웠어요
+            </label>
+
+            <label class="feedback-reason">
+                <input type="checkbox"
+                       value="기타">
+                기타
+            </label>
+
+            <button class="feedback-submit"
+                    id="feedbackSubmit"
+                    type="button">
+                제출
+            </button>
+
+        </div>
+
+        <div class="feedback-thanks"
+             id="feedbackThanks">
+            소중한 의견 감사합니다.<br>
+            추천 정확도 개선에 반영하겠습니다.
+        </div>
+
+    </div>
+
     {% endif %}
 
 </div>
@@ -1393,6 +1595,24 @@
     const outfitMenuButtons =
         document.querySelectorAll(".outfit-menu-button");
 
+    const recommendationFeedback =
+        document.getElementById("recommendationFeedback");
+
+    const feedbackGood =
+        document.getElementById("feedbackGood");
+
+    const feedbackBad =
+        document.getElementById("feedbackBad");
+
+    const feedbackReasons =
+        document.getElementById("feedbackReasons");
+
+    const feedbackSubmit =
+        document.getElementById("feedbackSubmit");
+
+    const feedbackThanks =
+        document.getElementById("feedbackThanks");
+
     const closeOutfitMenus = () => {
 
         document
@@ -1522,6 +1742,87 @@
         }
 
         showCopyToast();
+    };
+
+    let feedbackCompleted =
+        false;
+
+    const sendRecommendationFeedbackMail = (
+        result,
+        reasons = []
+    ) => {
+
+        const subject =
+            "[Weather Fit] 추천 평가";
+
+        const body = [
+            "평가:",
+            result,
+            "",
+            "아쉬웠던 점:",
+            reasons.length
+                ? reasons.join(", ")
+                : "없음",
+            "",
+            "페이지:",
+            window.location.href
+        ].join("\n");
+
+        const mailto =
+            "mailto:weatherfitteam@gmail.com"
+            + `?subject=${encodeURIComponent(subject)}`
+            + `&body=${encodeURIComponent(body)}`;
+
+        const link =
+            document.createElement("a");
+
+        link.href =
+            mailto;
+
+        link.style.display =
+            "none";
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    };
+
+    const completeRecommendationFeedback = (message) => {
+
+        if (!recommendationFeedback || feedbackCompleted) {
+
+            return;
+        }
+
+        feedbackCompleted =
+            true;
+
+        if (feedbackThanks && message) {
+
+            feedbackThanks.innerHTML =
+                message;
+        }
+
+        recommendationFeedback.classList.add("thanking");
+
+        setTimeout(() => {
+
+            recommendationFeedback.style.display =
+                "none";
+
+        }, 1400);
+    };
+
+    const getSelectedFeedbackReasons = () => {
+
+        if (!feedbackReasons) {
+
+            return [];
+        }
+
+        return Array.from(
+            feedbackReasons.querySelectorAll("input:checked")
+        ).map((input) => input.value);
     };
 
     const getOutfitMimeType = (filename) => {
@@ -2012,6 +2313,56 @@
             });
 
         });
+
+    if (feedbackGood) {
+
+        feedbackGood.addEventListener("click", () => {
+
+            sendRecommendationFeedbackMail(
+                "딱 맞았어요"
+            );
+
+            completeRecommendationFeedback(
+                "의견 감사합니다.<br>Weather Fit이 더 똑똑해질게요."
+            );
+
+        });
+    }
+
+    if (feedbackBad && feedbackReasons) {
+
+        feedbackBad.addEventListener("click", () => {
+
+            feedbackReasons.classList.add("open");
+
+        });
+    }
+
+    if (feedbackSubmit) {
+
+        feedbackSubmit.addEventListener("click", () => {
+
+            const reasons =
+                getSelectedFeedbackReasons();
+
+            if (!reasons.length) {
+
+                showCopyToast("사유를 선택해주세요");
+
+                return;
+            }
+
+            sendRecommendationFeedbackMail(
+                "별로였어요",
+                reasons
+            );
+
+            completeRecommendationFeedback(
+                "소중한 의견 감사합니다.<br>더 정확한 추천을 위해 개선하겠습니다."
+            );
+
+        });
+    }
 
     document.addEventListener("click", () => {
 
