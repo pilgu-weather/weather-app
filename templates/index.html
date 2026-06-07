@@ -652,7 +652,8 @@
             display: block;
         }
 
-        .outfit-share-action {
+        .outfit-share-action,
+        .outfit-download-action {
 
             width: 100%;
 
@@ -674,6 +675,11 @@
             text-align: left;
 
             cursor: pointer;
+        }
+
+        .outfit-download-action {
+
+            margin-top: 4px;
         }
 
         .share-card {
@@ -1085,6 +1091,11 @@
                         type="button">
                     공유하기
                 </button>
+
+                <button class="outfit-download-action"
+                        type="button">
+                    이미지 저장
+                </button>
             </div>
 
             <img src="{{ outfit.img }}"
@@ -1291,6 +1302,104 @@
         URL.revokeObjectURL(url);
     };
 
+    const getOutfitImageExtension = (imageUrl) => {
+
+        const cleanUrl =
+            (imageUrl || "").split("?")[0];
+
+        const match =
+            cleanUrl.match(/\.(jpe?g|png|webp)$/i);
+
+        if (!match) {
+
+            return ".jpg";
+        }
+
+        return `.${match[1].toLowerCase()}`;
+    };
+
+    const getOutfitDownloadName = (styleCard) => {
+
+        const cards =
+            Array.from(
+                document.querySelectorAll(".style-card")
+            );
+
+        const index =
+            cards.indexOf(styleCard) + 1;
+
+        const paddedIndex =
+            String(Math.max(index, 1)).padStart(3, "0");
+
+        return (
+            `weatherfit-outfit-${paddedIndex}`
+            + getOutfitImageExtension(
+                styleCard
+                    ? styleCard.dataset.shareImg
+                    : ""
+            )
+        );
+    };
+
+    const triggerImageDownload = (url, filename) => {
+
+        const link =
+            document.createElement("a");
+
+        link.href = url;
+        link.download = filename;
+        link.target = "_blank";
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    };
+
+    const downloadOutfitImage = async (styleCard) => {
+
+        const imageUrl =
+            styleCard
+                ? styleCard.dataset.shareImg
+                : "";
+
+        if (!imageUrl) {
+
+            return;
+        }
+
+        const filename =
+            getOutfitDownloadName(styleCard);
+
+        try {
+
+            const response =
+                await fetch(imageUrl);
+
+            if (!response.ok) {
+
+                throw new Error("Image download failed");
+            }
+
+            const blob =
+                await response.blob();
+
+            const blobUrl =
+                URL.createObjectURL(blob);
+
+            triggerImageDownload(blobUrl, filename);
+
+            setTimeout(() => {
+
+                URL.revokeObjectURL(blobUrl);
+
+            }, 1000);
+
+        } catch {
+
+            triggerImageDownload(imageUrl, filename);
+        }
+    };
+
     const waitForShareImages = async () => {
 
         if (!shareCard) {
@@ -1449,6 +1558,25 @@
                 closeOutfitMenus();
 
                 await shareOutfitCard(styleCard);
+
+            });
+
+        });
+
+    document
+        .querySelectorAll(".outfit-download-action")
+        .forEach((button) => {
+
+            button.addEventListener("click", async (event) => {
+
+                event.stopPropagation();
+
+                const styleCard =
+                    button.closest(".style-card");
+
+                closeOutfitMenus();
+
+                await downloadOutfitImage(styleCard);
 
             });
 
