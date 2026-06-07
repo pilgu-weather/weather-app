@@ -449,7 +449,10 @@ def get_today_message(
     temp,
     pm,
     wind_speed,
-    temp_gap=0
+    temp_gap=0,
+    day_temp=None,
+    effective_temp=None,
+    effective_temp_reasons=None
 ):
 
     rain_messages = [
@@ -496,6 +499,38 @@ def get_today_message(
         "아침저녁을 생각하면 한 겹 더하는 편이 안전해요.",
         "일교차가 있는 날엔 니트나 레이어드 셔츠가 잘 맞아요.",
         "큰 온도 차에 대비해 겉옷을 들고 나가면 좋아요.",
+    ]
+
+    effective_feels_like_messages = [
+        "체감온도가 낮은 날이에요. 실제 기온보다 조금 따뜻하게 입는 게 좋아요.",
+        "숫자보다 몸으로 느끼는 온도가 낮아요. 얇은 옷만 입기엔 애매한 날이에요.",
+        "체감온도를 보면 한 겹 더 챙기는 쪽이 안정적이에요.",
+        "겉기온은 괜찮아 보여도 체감은 더 서늘해요. 긴팔이나 가벼운 아우터를 추천해요.",
+        "오늘은 체감온도 기준으로 보면 살짝 보수적으로 입는 게 좋아요.",
+    ]
+
+    effective_wind_messages = [
+        "해가 있어도 바람이 강해요. 얇은 긴팔이나 가벼운 아우터를 추천해요.",
+        "바람 때문에 실제보다 쌀쌀하게 느껴질 수 있어요. 가볍게 걸칠 옷을 챙겨보세요.",
+        "바람을 생각하면 짧고 얇은 옷만으로는 애매할 수 있어요.",
+        "기온은 괜찮아도 바람이 체감을 낮춰요. 한 겹 더하는 쪽이 좋아요.",
+        "오늘은 바람 기준으로 코디를 조금 따뜻하게 잡는 게 안정적이에요.",
+    ]
+
+    effective_gap_messages = [
+        "일교차가 큰 날이에요. 낮엔 가볍게, 저녁엔 걸칠 옷을 챙겨보세요.",
+        "아침저녁 온도 차가 있어요. 레이어드하기 좋은 코디를 추천해요.",
+        "낮 기온만 보고 얇게 입으면 저녁에 쌀쌀할 수 있어요.",
+        "온도 변화가 큰 날이라 벗고 입기 쉬운 옷이 좋아요.",
+        "일교차를 보면 얇은 옷 하나보다는 가벼운 레이어드가 더 맞아요.",
+    ]
+
+    effective_mixed_messages = [
+        "바람과 일교차 때문에 실제보다 쌀쌀하게 느껴질 수 있어요.",
+        "체감온도와 바람을 보면 얇은 옷만 입기엔 애매한 날이에요.",
+        "기온만 보면 가벼워 보여도 체감 조건은 조금 더 따뜻한 코디가 좋아요.",
+        "오늘은 체감 요소가 겹쳐서 추천을 한 단계 따뜻하게 잡았어요.",
+        "바람, 체감온도, 일교차를 함께 보면 가볍게만 입기엔 조심스러운 날이에요.",
     ]
 
     temperature_messages = {
@@ -575,6 +610,36 @@ def get_today_message(
     if temp_gap >= 8:
 
         return random.choice(gap_messages)
+
+    effective_temp_reasons = effective_temp_reasons or {}
+
+    if (
+        day_temp is not None
+        and effective_temp is not None
+        and day_temp - effective_temp >= 4
+    ):
+
+        reason_count = sum(
+            1
+            for active in effective_temp_reasons.values()
+            if active
+        )
+
+        if reason_count >= 2:
+
+            return random.choice(effective_mixed_messages)
+
+        if effective_temp_reasons.get("feels_like"):
+
+            return random.choice(effective_feels_like_messages)
+
+        if effective_temp_reasons.get("wind"):
+
+            return random.choice(effective_wind_messages)
+
+        if effective_temp_reasons.get("temp_gap"):
+
+            return random.choice(effective_gap_messages)
 
     if temp >= 30:
 
@@ -1198,29 +1263,41 @@ def home():
 
         effective_temp = temp
 
-    if feels_like is not None:
+    effective_temp_reasons = {
+        "feels_like": False,
+        "wind": False,
+        "temp_gap": False
+    }
 
-        effective_temp = min(effective_temp, feels_like)
+    if feels_like is not None and feels_like < effective_temp:
+
+        effective_temp = feels_like
+        effective_temp_reasons["feels_like"] = True
 
     if wind_speed >= 8:
 
         effective_temp -= 3
+        effective_temp_reasons["wind"] = True
 
     elif wind_speed >= 6:
 
         effective_temp -= 2
+        effective_temp_reasons["wind"] = True
 
     elif wind_speed >= 4:
 
         effective_temp -= 1
+        effective_temp_reasons["wind"] = True
 
     if temp_gap >= 10:
 
         effective_temp -= 2
+        effective_temp_reasons["temp_gap"] = True
 
     elif temp_gap >= 6:
 
         effective_temp -= 1
+        effective_temp_reasons["temp_gap"] = True
 
     selected_date = today
 
@@ -1401,7 +1478,10 @@ def home():
         temp,
         pm,
         wind_speed,
-        temp_gap
+        temp_gap,
+        day_temp,
+        effective_temp,
+        effective_temp_reasons
     )
 
     return render_template(
