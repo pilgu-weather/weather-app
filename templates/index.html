@@ -653,7 +653,8 @@
         }
 
         .outfit-share-action,
-        .outfit-download-action {
+        .outfit-download-action,
+        .outfit-report-action {
 
             width: 100%;
 
@@ -678,6 +679,11 @@
         }
 
         .outfit-download-action {
+
+            margin-top: 4px;
+        }
+
+        .outfit-report-action {
 
             margin-top: 4px;
         }
@@ -1095,6 +1101,11 @@
                 <button class="outfit-download-action"
                         type="button">
                     이미지 저장
+                </button>
+
+                <button class="outfit-report-action"
+                        type="button">
+                    신고하기
                 </button>
             </div>
 
@@ -1520,6 +1531,32 @@
         }
     };
 
+    const reportOutfitCard = (styleCard) => {
+
+        const outfitTitle =
+            styleCard
+                ? styleCard.dataset.shareTitle
+                : "";
+
+        const subject =
+            "[Weather Fit] 코디 신고";
+
+        const body = [
+            "코디 제목:",
+            outfitTitle,
+            "",
+            "페이지:",
+            window.location.href,
+            "",
+            "신고 사유를 작성해주세요."
+        ].join("\n");
+
+        window.location.href =
+            "mailto:weatherfitteam@gmail.com"
+            + `?subject=${encodeURIComponent(subject)}`
+            + `&body=${encodeURIComponent(body)}`;
+    };
+
     const waitForShareImages = async () => {
 
         if (!shareCard) {
@@ -1697,6 +1734,25 @@
                 closeOutfitMenus();
 
                 await downloadOutfitImage(styleCard);
+
+            });
+
+        });
+
+    document
+        .querySelectorAll(".outfit-report-action")
+        .forEach((button) => {
+
+            button.addEventListener("click", (event) => {
+
+                event.stopPropagation();
+
+                const styleCard =
+                    button.closest(".style-card");
+
+                closeOutfitMenus();
+
+                reportOutfitCard(styleCard);
 
             });
 
