@@ -550,6 +550,8 @@
 
             border-radius: 28px;
 
+            position: relative;
+
             background:
                 rgba(255,255,255,0.06);
 
@@ -584,6 +586,162 @@
             line-height: 1.55;
 
             font-weight: 600;
+        }
+
+        .share-button {
+
+            position: absolute;
+
+            top: 14px;
+
+            right: 16px;
+
+            width: 32px;
+
+            height: 32px;
+
+            border: 1px solid rgba(255,255,255,0.18);
+
+            border-radius: 50%;
+
+            background:
+                rgba(255,255,255,0.08);
+
+            color: white;
+
+            font-size: 15px;
+
+            font-weight: 800;
+
+            cursor: pointer;
+
+            backdrop-filter: blur(10px);
+        }
+
+        .share-card {
+
+            position: fixed;
+
+            left: -9999px;
+
+            top: 0;
+
+            width: 390px;
+
+            padding: 26px;
+
+            border-radius: 34px;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    rgba(16,18,22,0.62),
+                    rgba(16,18,22,0.92)
+                ),
+                var(--weather-bg);
+
+            background-size: cover;
+
+            background-position: center;
+
+            color: white;
+
+            overflow: hidden;
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                sans-serif;
+        }
+
+        .share-card-logo {
+
+            font-size: 22px;
+
+            font-weight: 800;
+
+            margin-bottom: 24px;
+        }
+
+        .share-card-city {
+
+            font-size: 20px;
+
+            font-weight: 800;
+        }
+
+        .share-card-weather {
+
+            margin-top: 4px;
+
+            font-size: 14px;
+
+            color: rgba(255,255,255,0.82);
+        }
+
+        .share-card-temp {
+
+            margin-top: 8px;
+
+            font-size: 64px;
+
+            font-weight: 800;
+        }
+
+        .share-card-range,
+        .share-card-rain {
+
+            font-size: 14px;
+
+            color: rgba(255,255,255,0.84);
+        }
+
+        .share-card-outfit {
+
+            margin-top: 24px;
+
+            border-radius: 26px;
+
+            overflow: hidden;
+
+            background:
+                rgba(255,255,255,0.08);
+        }
+
+        .share-card-outfit img {
+
+            width: 100%;
+
+            height: 360px;
+
+            object-fit: cover;
+
+            object-position: center top;
+
+            display: block;
+        }
+
+        .share-card-outfit-text {
+
+            padding: 18px;
+        }
+
+        .share-card-outfit-title {
+
+            font-size: 24px;
+
+            font-weight: 800;
+
+            margin-bottom: 6px;
+        }
+
+        .share-card-outfit-desc {
+
+            font-size: 14px;
+
+            line-height: 1.45;
+
+            color: rgba(255,255,255,0.84);
         }
 
         .splash-screen {
@@ -853,6 +1011,13 @@
 
     <div class="message-card">
 
+        <button class="share-button"
+                id="shareWeatherButton"
+                type="button"
+                aria-label="공유">
+            ↗
+        </button>
+
         <div class="message-title">
             Today's Message
         </div>
@@ -866,6 +1031,75 @@
     {% endif %}
 
 </div>
+
+{% if temp and outfits %}
+
+{% set share_outfit = outfits[0] %}
+
+<div class="share-card"
+     id="shareCard"
+     aria-hidden="true">
+
+    <div class="share-card-logo">
+        Weather Fit
+    </div>
+
+    <div class="share-card-city">
+        {{ city_name }}
+    </div>
+
+    <div class="share-card-weather">
+        {{ weather_main }}
+    </div>
+
+    <div class="share-card-temp">
+        {{ temp }}°
+    </div>
+
+    {% if temp_min is not none and temp_max is not none %}
+
+    <div class="share-card-range">
+        최저 {{ temp_min }}° / 최고 {{ temp_max }}°
+    </div>
+
+    {% endif %}
+
+    {% for outfit in outfits %}
+
+    {% if outfit.title == "Rainy day" %}
+
+    <div class="share-card-rain">
+        {{ outfit.desc }}
+    </div>
+
+    {% endif %}
+
+    {% endfor %}
+
+    <div class="share-card-outfit">
+
+        <img src="{{ share_outfit.img }}"
+             alt="">
+
+        <div class="share-card-outfit-text">
+
+            <div class="share-card-outfit-title">
+                {{ share_outfit.title }}
+            </div>
+
+            <div class="share-card-outfit-desc">
+                {{ share_outfit.desc }}
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
 
@@ -895,6 +1129,120 @@
             if (dots[index]) {
                 dots[index].classList.add("active");
             }
+
+        });
+
+    }
+
+</script>
+
+<script>
+
+    const shareButton =
+        document.getElementById("shareWeatherButton");
+
+    const shareCard =
+        document.getElementById("shareCard");
+
+    const downloadShareImage = (blob) => {
+
+        const url =
+            URL.createObjectURL(blob);
+
+        const link =
+            document.createElement("a");
+
+        link.href = url;
+        link.download = "weather-fit.png";
+        link.click();
+
+        URL.revokeObjectURL(url);
+    };
+
+    const waitForShareImages = async () => {
+
+        if (!shareCard) {
+
+            return;
+        }
+
+        const images =
+            Array.from(
+                shareCard.querySelectorAll("img")
+            );
+
+        await Promise.all(
+            images.map((image) => {
+
+                if (image.complete) {
+
+                    return Promise.resolve();
+                }
+
+                return new Promise((resolve) => {
+
+                    image.onload = resolve;
+                    image.onerror = resolve;
+
+                });
+
+            })
+        );
+    };
+
+    if (shareButton && shareCard) {
+
+        shareButton.addEventListener("click", async () => {
+
+            if (!window.html2canvas) {
+
+                await navigator.clipboard?.writeText(
+                    window.location.href
+                );
+
+                return;
+            }
+
+            await waitForShareImages();
+
+            const canvas =
+                await html2canvas(shareCard, {
+                    backgroundColor: null,
+                    scale: 2,
+                    useCORS: true
+                });
+
+            canvas.toBlob(async (blob) => {
+
+                if (!blob) {
+
+                    return;
+                }
+
+                const file =
+                    new File(
+                        [blob],
+                        "weather-fit.png",
+                        { type: "image/png" }
+                    );
+
+                if (
+                    navigator.canShare
+                    && navigator.canShare({ files: [file] })
+                ) {
+
+                    await navigator.share({
+                        files: [file],
+                        title: "Weather Fit",
+                        text: "오늘의 날씨와 코디를 확인해보세요"
+                    });
+
+                    return;
+                }
+
+                downloadShareImage(blob);
+
+            }, "image/png");
 
         });
 
