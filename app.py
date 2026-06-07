@@ -1272,13 +1272,19 @@ def home():
 
     if rain_mode:
 
+        rain_recommendation = "우산 추천"
+
+        if rain_probability < 50:
+
+            rain_recommendation = "접이식 우산 추천"
+
         styles.insert(0, {
 
             "folder": "rain",
 
             "title": "Rainy day",
 
-            "desc": f"비 예보 {rain_probability}% · 우산 추천"
+            "desc": f"비 예보 {rain_probability}% · {rain_recommendation}"
 
         })
 
