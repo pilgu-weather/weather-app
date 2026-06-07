@@ -655,8 +655,10 @@
         }
 
         .outfit-share-action,
+        .outfit-copy-action,
         .outfit-download-action,
-        .outfit-report-action {
+        .outfit-report-action,
+        .outfit-hide-action {
 
             width: 100%;
 
@@ -682,14 +684,67 @@
             cursor: pointer;
         }
 
-        .outfit-download-action {
+        .outfit-copy-action,
+        .outfit-download-action,
+        .outfit-report-action,
+        .outfit-hide-action {
 
             margin-top: 4px;
         }
 
-        .outfit-report-action {
+        .style-card.outfit-hidden {
 
-            margin-top: 4px;
+            display: none;
+        }
+
+        .copy-toast {
+
+            position: fixed;
+
+            left: 50%;
+
+            bottom: 28px;
+
+            z-index: 30;
+
+            opacity: 0;
+
+            pointer-events: none;
+
+            transform:
+                translate(-50%, 12px);
+
+            padding: 11px 16px;
+
+            border-radius: 999px;
+
+            background:
+                rgba(18,20,24,0.86);
+
+            border:
+                1px solid rgba(255,255,255,0.16);
+
+            color: white;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            white-space: nowrap;
+
+            backdrop-filter: blur(14px);
+
+            transition:
+                opacity 0.22s ease,
+                transform 0.22s ease;
+        }
+
+        .copy-toast.show {
+
+            opacity: 1;
+
+            transform:
+                translate(-50%, 0);
         }
 
         .share-card {
@@ -1102,6 +1157,11 @@
                     공유하기
                 </button>
 
+                <button class="outfit-copy-action"
+                        type="button">
+                    링크 복사
+                </button>
+
                 <button class="outfit-download-action"
                         type="button">
                     이미지 저장
@@ -1110,6 +1170,11 @@
                 <button class="outfit-report-action"
                         type="button">
                     신고하기
+                </button>
+
+                <button class="outfit-hide-action"
+                        type="button">
+                    이 코디 숨기기
                 </button>
             </div>
 
@@ -1239,6 +1304,13 @@
 
 {% endif %}
 
+<div class="copy-toast"
+     id="copyToast"
+     role="status"
+     aria-live="polite">
+    링크가 복사되었습니다
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
@@ -1289,6 +1361,9 @@
 
     const shareCardDesc =
         document.getElementById("shareCardDesc");
+
+    const copyToast =
+        document.getElementById("copyToast");
 
     const outfitMenuButtons =
         document.querySelectorAll(".outfit-menu-button");
@@ -1368,6 +1443,57 @@
         document.body.appendChild(link);
         link.click();
         link.remove();
+    };
+
+    let copyToastTimer;
+
+    const showCopyToast = () => {
+
+        if (!copyToast) {
+
+            return;
+        }
+
+        copyToast.classList.add("show");
+
+        clearTimeout(copyToastTimer);
+
+        copyToastTimer =
+            setTimeout(() => {
+
+                copyToast.classList.remove("show");
+
+            }, 1800);
+    };
+
+    const copyCurrentPageLink = async () => {
+
+        try {
+
+            await navigator.clipboard.writeText(
+                window.location.href
+            );
+
+        } catch {
+
+            const input =
+                document.createElement("textarea");
+
+            input.value =
+                window.location.href;
+
+            input.setAttribute("readonly", "");
+
+            input.style.position = "fixed";
+            input.style.left = "-9999px";
+
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand("copy");
+            input.remove();
+        }
+
+        showCopyToast();
     };
 
     const getOutfitMimeType = (filename) => {
@@ -1561,6 +1687,16 @@
             + `&body=${encodeURIComponent(body)}`;
     };
 
+    const hideOutfitCard = (styleCard) => {
+
+        if (!styleCard) {
+
+            return;
+        }
+
+        styleCard.classList.add("outfit-hidden");
+    };
+
     const waitForShareImages = async () => {
 
         if (!shareCard) {
@@ -1725,6 +1861,22 @@
         });
 
     document
+        .querySelectorAll(".outfit-copy-action")
+        .forEach((button) => {
+
+            button.addEventListener("click", async (event) => {
+
+                event.stopPropagation();
+
+                closeOutfitMenus();
+
+                await copyCurrentPageLink();
+
+            });
+
+        });
+
+    document
         .querySelectorAll(".outfit-download-action")
         .forEach((button) => {
 
@@ -1757,6 +1909,25 @@
                 closeOutfitMenus();
 
                 reportOutfitCard(styleCard);
+
+            });
+
+        });
+
+    document
+        .querySelectorAll(".outfit-hide-action")
+        .forEach((button) => {
+
+            button.addEventListener("click", (event) => {
+
+                event.stopPropagation();
+
+                const styleCard =
+                    button.closest(".style-card");
+
+                closeOutfitMenus();
+
+                hideOutfitCard(styleCard);
 
             });
 
