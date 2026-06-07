@@ -692,11 +692,6 @@
             margin-top: 4px;
         }
 
-        .style-card.outfit-hidden {
-
-            display: none;
-        }
-
         .copy-toast {
 
             position: fixed;
@@ -1143,7 +1138,8 @@
         <div class="style-card"
              data-share-img="{{ outfit.img }}"
              data-share-title="{{ outfit.title }}"
-             data-share-desc="{{ outfit.desc }}">
+             data-share-desc="{{ outfit.desc }}"
+             data-outfit-images='{{ outfit.images | tojson }}'>
 
             <button class="outfit-menu-button"
                     type="button"
@@ -1447,12 +1443,15 @@
 
     let copyToastTimer;
 
-    const showCopyToast = () => {
+    const showCopyToast = (message = "링크가 복사되었습니다") => {
 
         if (!copyToast) {
 
             return;
         }
+
+        copyToast.textContent =
+            message;
 
         copyToast.classList.add("show");
 
@@ -1687,14 +1686,66 @@
             + `&body=${encodeURIComponent(body)}`;
     };
 
-    const hideOutfitCard = (styleCard) => {
+    const getOutfitImageCandidates = (styleCard) => {
 
         if (!styleCard) {
+
+            return [];
+        }
+
+        try {
+
+            return JSON.parse(
+                styleCard.dataset.outfitImages || "[]"
+            );
+
+        } catch {
+
+            return [];
+        }
+    };
+
+    const hideOutfitCard = (styleCard) => {
+
+        const candidates =
+            getOutfitImageCandidates(styleCard);
+
+        const currentImage =
+            styleCard
+                ? styleCard.dataset.shareImg
+                : "";
+
+        const nextCandidates =
+            candidates.filter((image) => {
+
+                return image !== currentImage;
+            });
+
+        if (!styleCard || !nextCandidates.length) {
+
+            showCopyToast("다른 코디가 없습니다");
 
             return;
         }
 
-        styleCard.classList.add("outfit-hidden");
+        const nextImage =
+            nextCandidates[
+                Math.floor(
+                    Math.random() * nextCandidates.length
+                )
+            ];
+
+        const styleImage =
+            styleCard.querySelector(".style-image");
+
+        if (styleImage) {
+
+            styleImage.src =
+                nextImage;
+        }
+
+        styleCard.dataset.shareImg =
+            nextImage;
     };
 
     const waitForShareImages = async () => {

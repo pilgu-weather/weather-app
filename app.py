@@ -1214,6 +1214,17 @@ def home():
 
             random_image = random.choice(image_list)
 
+            image_candidates = [
+
+                (
+                    f"/static/styles/"
+                    f"{selected_season}/"
+                    f"{style['folder']}/"
+                    f"{image}"
+                )
+                for image in image_list
+            ]
+
             img_path = (
                 f"/static/styles/"
                 f"{selected_season}/"
@@ -1224,12 +1235,14 @@ def home():
         except:
 
             img_path = "/static/styles/default.png"
+            image_candidates = [img_path]
 
         outfits.append({
 
             "title": style["title"],
             "desc": style["desc"],
-            "img": img_path
+            "img": img_path,
+            "images": image_candidates
 
         })
 
