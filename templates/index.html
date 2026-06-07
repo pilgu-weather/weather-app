@@ -883,6 +883,91 @@
                 translate(-50%, 0);
         }
 
+        .report-dialog-backdrop {
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 40;
+
+            display: none;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 24px;
+
+            background:
+                rgba(0,0,0,0.42);
+
+            backdrop-filter: blur(10px);
+        }
+
+        .report-dialog-backdrop.open {
+
+            display: flex;
+        }
+
+        .report-dialog {
+
+            width: min(100%, 320px);
+
+            padding: 20px;
+
+            border-radius: 24px;
+
+            background:
+                rgba(24,26,30,0.92);
+
+            border:
+                1px solid rgba(255,255,255,0.16);
+
+            color: white;
+
+            box-shadow:
+                0 18px 48px rgba(0,0,0,0.28);
+        }
+
+        .report-dialog-title {
+
+            font-size: 17px;
+
+            font-weight: 800;
+
+            margin-bottom: 14px;
+        }
+
+        .report-dialog-actions {
+
+            display: grid;
+
+            grid-template-columns: repeat(2, 1fr);
+
+            gap: 8px;
+        }
+
+        .report-dialog-button {
+
+            border: 0;
+
+            border-radius: 999px;
+
+            padding: 11px 12px;
+
+            background:
+                rgba(255,255,255,0.12);
+
+            color: white;
+
+            font-size: 13px;
+
+            font-weight: 800;
+
+            cursor: pointer;
+        }
+
         .share-card {
 
             position: fixed;
@@ -1383,13 +1468,13 @@
                 <button class="feedback-button"
                         id="feedbackGood"
                         type="button">
-                    👍 딱 맞았어요
+                    딱 맞았어요
                 </button>
 
                 <button class="feedback-button"
                         id="feedbackBad"
                         type="button">
-                    👎 별로였어요
+                    별로였어요
                 </button>
 
             </div>
@@ -1538,6 +1623,38 @@
     링크가 복사되었습니다
 </div>
 
+<div class="report-dialog-backdrop"
+     id="reportDialog"
+     aria-hidden="true">
+
+    <div class="report-dialog"
+         role="dialog"
+         aria-modal="true">
+
+        <div class="report-dialog-title">
+            이 코디를 신고하시겠어요?
+        </div>
+
+        <div class="report-dialog-actions">
+
+            <button class="report-dialog-button"
+                    id="reportConfirm"
+                    type="button">
+                신고하기
+            </button>
+
+            <button class="report-dialog-button"
+                    id="reportCancel"
+                    type="button">
+                취소
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
@@ -1612,6 +1729,27 @@
 
     const feedbackThanks =
         document.getElementById("feedbackThanks");
+
+    const reportDialog =
+        document.getElementById("reportDialog");
+
+    const reportConfirm =
+        document.getElementById("reportConfirm");
+
+    const reportCancel =
+        document.getElementById("reportCancel");
+
+    const pageContext = {
+        mode: {{ mode|tojson }},
+        city_name: {{ city_name|tojson }},
+        temp: {{ temp|tojson }},
+        feels_like: {{ feels_like|tojson }},
+        effective_temp: {{ effective_temp|tojson }},
+        weather_main: {{ weather_main|tojson }}
+    };
+
+    let pendingReportCard =
+        null;
 
     const closeOutfitMenus = () => {
 
@@ -1747,44 +1885,76 @@
     let feedbackCompleted =
         false;
 
-    const sendRecommendationFeedbackMail = (
+    const postJson = async (url, payload) => {
+
+        const response =
+            await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+        if (!response.ok) {
+
+            throw new Error("Request failed");
+        }
+
+        return response.json();
+    };
+
+    const getCurrentStyleCard = () => {
+
+        const cards =
+            Array.from(
+                document.querySelectorAll(".style-card")
+            );
+
+        if (!cards.length) {
+
+            return null;
+        }
+
+        if (!carousel) {
+
+            return cards[0];
+        }
+
+        const cardWidth =
+            cards[0].offsetWidth + 22;
+
+        const index =
+            Math.round(
+                carousel.scrollLeft / cardWidth
+            );
+
+        return cards[index] || cards[0];
+    };
+
+    const saveRecommendationFeedback = async (
         result,
         reasons = []
     ) => {
 
-        const subject =
-            "[Weather Fit] 추천 평가";
+        const styleCard =
+            getCurrentStyleCard();
 
-        const body = [
-            "평가:",
-            result,
-            "",
-            "아쉬웠던 점:",
-            reasons.length
-                ? reasons.join(", ")
-                : "없음",
-            "",
-            "페이지:",
-            window.location.href
-        ].join("\n");
-
-        const mailto =
-            "mailto:weatherfitteam@gmail.com"
-            + `?subject=${encodeURIComponent(subject)}`
-            + `&body=${encodeURIComponent(body)}`;
-
-        const link =
-            document.createElement("a");
-
-        link.href =
-            mailto;
-
-        link.style.display =
-            "none";
-
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+        await postJson(
+            "/feedback",
+            {
+                ...pageContext,
+                outfit_title: styleCard
+                    ? styleCard.dataset.shareTitle
+                    : "",
+                outfit_desc: styleCard
+                    ? styleCard.dataset.shareDesc
+                    : "",
+                rating: result,
+                reason: reasons.join(", "),
+                page_url: window.location.href
+            }
+        );
     };
 
     const completeRecommendationFeedback = (message) => {
@@ -1990,30 +2160,50 @@
         }
     };
 
-    const reportOutfitCard = (styleCard) => {
+    const openReportDialog = (styleCard) => {
 
-        const outfitTitle =
-            styleCard
-                ? styleCard.dataset.shareTitle
-                : "";
+        pendingReportCard =
+            styleCard;
 
-        const subject =
-            "[Weather Fit] 코디 신고";
+        if (reportDialog) {
 
-        const body = [
-            "코디 제목:",
-            outfitTitle,
-            "",
-            "페이지:",
-            window.location.href,
-            "",
-            "신고 사유를 작성해주세요."
-        ].join("\n");
+            reportDialog.classList.add("open");
+            reportDialog.setAttribute("aria-hidden", "false");
+        }
+    };
 
-        window.location.href =
-            "mailto:weatherfitteam@gmail.com"
-            + `?subject=${encodeURIComponent(subject)}`
-            + `&body=${encodeURIComponent(body)}`;
+    const closeReportDialog = () => {
+
+        pendingReportCard =
+            null;
+
+        if (reportDialog) {
+
+            reportDialog.classList.remove("open");
+            reportDialog.setAttribute("aria-hidden", "true");
+        }
+    };
+
+    const saveOutfitReport = async () => {
+
+        const styleCard =
+            pendingReportCard;
+
+        if (!styleCard) {
+
+            return;
+        }
+
+        await postJson(
+            "/report",
+            {
+                ...pageContext,
+                outfit_title: styleCard.dataset.shareTitle || "",
+                outfit_desc: styleCard.dataset.shareDesc || "",
+                report_reason: "사용자 신고",
+                page_url: window.location.href
+            }
+        );
     };
 
     const getOutfitImageCandidates = (styleCard) => {
@@ -2289,7 +2479,7 @@
 
                 closeOutfitMenus();
 
-                reportOutfitCard(styleCard);
+                openReportDialog(styleCard);
 
             });
 
@@ -2316,11 +2506,20 @@
 
     if (feedbackGood) {
 
-        feedbackGood.addEventListener("click", () => {
+        feedbackGood.addEventListener("click", async () => {
 
-            sendRecommendationFeedbackMail(
-                "딱 맞았어요"
-            );
+            try {
+
+                await saveRecommendationFeedback(
+                    "딱 맞았어요"
+                );
+
+            } catch {
+
+                showCopyToast("저장에 실패했습니다");
+
+                return;
+            }
 
             completeRecommendationFeedback(
                 "의견 감사합니다.<br>Weather Fit이 더 똑똑해질게요."
@@ -2340,7 +2539,7 @@
 
     if (feedbackSubmit) {
 
-        feedbackSubmit.addEventListener("click", () => {
+        feedbackSubmit.addEventListener("click", async () => {
 
             const reasons =
                 getSelectedFeedbackReasons();
@@ -2352,14 +2551,69 @@
                 return;
             }
 
-            sendRecommendationFeedbackMail(
-                "별로였어요",
-                reasons
-            );
+            try {
+
+                await saveRecommendationFeedback(
+                    "별로였어요",
+                    reasons
+                );
+
+            } catch {
+
+                showCopyToast("저장에 실패했습니다");
+
+                return;
+            }
 
             completeRecommendationFeedback(
                 "소중한 의견 감사합니다.<br>더 정확한 추천을 위해 개선하겠습니다."
             );
+
+        });
+    }
+
+    if (reportConfirm) {
+
+        reportConfirm.addEventListener("click", async (event) => {
+
+            event.stopPropagation();
+
+            try {
+
+                await saveOutfitReport();
+
+            } catch {
+
+                showCopyToast("신고 저장에 실패했습니다");
+
+                return;
+            }
+
+            closeReportDialog();
+            showCopyToast("신고가 접수되었습니다");
+
+        });
+    }
+
+    if (reportCancel) {
+
+        reportCancel.addEventListener("click", (event) => {
+
+            event.stopPropagation();
+
+            closeReportDialog();
+
+        });
+    }
+
+    if (reportDialog) {
+
+        reportDialog.addEventListener("click", (event) => {
+
+            if (event.target === reportDialog) {
+
+                closeReportDialog();
+            }
 
         });
     }

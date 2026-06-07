@@ -1,11 +1,18 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import requests
 from datetime import datetime, timedelta
 import random
 import os
 import re
+import sqlite3
 
 app = Flask(__name__)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FEEDBACK_DB_PATH = os.path.join(
+    BASE_DIR,
+    "weatherfit_feedback.db"
+)
 
 API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
@@ -25,6 +32,160 @@ if not API_KEY:
 def health():
 
     return "ok", 200
+
+
+def get_feedback_db():
+
+    return sqlite3.connect(
+        FEEDBACK_DB_PATH,
+        timeout=10
+    )
+
+
+def init_feedback_db():
+
+    with get_feedback_db() as conn:
+
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS recommendation_feedbacks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                created_at TEXT NOT NULL,
+                mode TEXT,
+                city_name TEXT,
+                temp REAL,
+                feels_like REAL,
+                effective_temp REAL,
+                weather_main TEXT,
+                outfit_title TEXT,
+                outfit_desc TEXT,
+                rating TEXT,
+                reason TEXT,
+                page_url TEXT,
+                user_agent TEXT
+            )
+            """
+        )
+
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS outfit_reports (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                created_at TEXT NOT NULL,
+                mode TEXT,
+                city_name TEXT,
+                temp REAL,
+                weather_main TEXT,
+                outfit_title TEXT,
+                outfit_desc TEXT,
+                report_reason TEXT,
+                page_url TEXT,
+                user_agent TEXT
+            )
+            """
+        )
+
+
+def now_timestamp():
+
+    return datetime.utcnow().isoformat(timespec="seconds") + "Z"
+
+
+def get_request_payload():
+
+    payload = request.get_json(silent=True) or {}
+
+    if not isinstance(payload, dict):
+
+        return {}
+
+    return payload
+
+
+@app.route("/feedback", methods=["POST"])
+def save_feedback():
+
+    payload = get_request_payload()
+    init_feedback_db()
+
+    with get_feedback_db() as conn:
+
+        conn.execute(
+            """
+            INSERT INTO recommendation_feedbacks (
+                created_at,
+                mode,
+                city_name,
+                temp,
+                feels_like,
+                effective_temp,
+                weather_main,
+                outfit_title,
+                outfit_desc,
+                rating,
+                reason,
+                page_url,
+                user_agent
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                now_timestamp(),
+                payload.get("mode"),
+                payload.get("city_name"),
+                payload.get("temp"),
+                payload.get("feels_like"),
+                payload.get("effective_temp"),
+                payload.get("weather_main"),
+                payload.get("outfit_title"),
+                payload.get("outfit_desc"),
+                payload.get("rating"),
+                payload.get("reason"),
+                payload.get("page_url"),
+                request.headers.get("User-Agent", "")
+            )
+        )
+
+    return jsonify({"ok": True})
+
+
+@app.route("/report", methods=["POST"])
+def save_report():
+
+    payload = get_request_payload()
+    init_feedback_db()
+
+    with get_feedback_db() as conn:
+
+        conn.execute(
+            """
+            INSERT INTO outfit_reports (
+                created_at,
+                mode,
+                city_name,
+                temp,
+                weather_main,
+                outfit_title,
+                outfit_desc,
+                report_reason,
+                page_url,
+                user_agent
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                now_timestamp(),
+                payload.get("mode"),
+                payload.get("city_name"),
+                payload.get("temp"),
+                payload.get("weather_main"),
+                payload.get("outfit_title"),
+                payload.get("outfit_desc"),
+                payload.get("report_reason"),
+                payload.get("page_url"),
+                request.headers.get("User-Agent", "")
+            )
+        )
+
+    return jsonify({"ok": True})
 
 
 BACKGROUND_MAP = {
@@ -289,6 +450,7 @@ def render_safe_template(**overrides):
         "temp_min": None,
         "temp_max": None,
         "feels_like": 0,
+        "effective_temp": None,
         "humidity": 0,
         "wind_speed": 0,
         "pm_text": "정보 없음",
@@ -1540,6 +1702,7 @@ def home():
         temp_min=temp_min,
         temp_max=temp_max,
         feels_like=feels_like,
+        effective_temp=effective_temp,
         humidity=humidity,
         wind_speed=wind_speed,
 
