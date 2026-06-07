@@ -588,13 +588,13 @@
             font-weight: 600;
         }
 
-        .share-button {
+        .outfit-menu-button {
 
             position: absolute;
 
             top: 14px;
 
-            right: 16px;
+            right: 14px;
 
             width: 32px;
 
@@ -616,6 +616,64 @@
             cursor: pointer;
 
             backdrop-filter: blur(10px);
+
+            z-index: 3;
+        }
+
+        .outfit-menu {
+
+            position: absolute;
+
+            top: 52px;
+
+            right: 14px;
+
+            z-index: 4;
+
+            display: none;
+
+            min-width: 104px;
+
+            padding: 6px;
+
+            border-radius: 14px;
+
+            background:
+                rgba(20,22,26,0.82);
+
+            border:
+                1px solid rgba(255,255,255,0.16);
+
+            backdrop-filter: blur(16px);
+        }
+
+        .outfit-menu.open {
+
+            display: block;
+        }
+
+        .outfit-share-action {
+
+            width: 100%;
+
+            border: 0;
+
+            border-radius: 10px;
+
+            padding: 9px 10px;
+
+            background:
+                rgba(255,255,255,0.08);
+
+            color: white;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            text-align: left;
+
+            cursor: pointer;
         }
 
         .share-card {
@@ -975,7 +1033,23 @@
 
         {% for outfit in outfits %}
 
-        <div class="style-card">
+        <div class="style-card"
+             data-share-img="{{ outfit.img }}"
+             data-share-title="{{ outfit.title }}"
+             data-share-desc="{{ outfit.desc }}">
+
+            <button class="outfit-menu-button"
+                    type="button"
+                    aria-label="코디 메뉴">
+                ...
+            </button>
+
+            <div class="outfit-menu">
+                <button class="outfit-share-action"
+                        type="button">
+                    공유하기
+                </button>
+            </div>
 
             <img src="{{ outfit.img }}"
                  class="style-image">
@@ -1011,13 +1085,6 @@
 
     <div class="message-card">
 
-        <button class="share-button"
-                id="shareWeatherButton"
-                type="button"
-                aria-label="공유">
-            ↗
-        </button>
-
         <div class="message-title">
             Today's Message
         </div>
@@ -1033,8 +1100,6 @@
 </div>
 
 {% if temp and outfits %}
-
-{% set share_outfit = outfits[0] %}
 
 <div class="share-card"
      id="shareCard"
@@ -1078,18 +1143,17 @@
 
     <div class="share-card-outfit">
 
-        <img src="{{ share_outfit.img }}"
+        <img id="shareCardImage"
+             src=""
              alt="">
 
         <div class="share-card-outfit-text">
 
-            <div class="share-card-outfit-title">
-                {{ share_outfit.title }}
-            </div>
+            <div class="share-card-outfit-title"
+                 id="shareCardTitle"></div>
 
-            <div class="share-card-outfit-desc">
-                {{ share_outfit.desc }}
-            </div>
+            <div class="share-card-outfit-desc"
+                 id="shareCardDesc"></div>
 
         </div>
 
@@ -1138,11 +1202,29 @@
 
 <script>
 
-    const shareButton =
-        document.getElementById("shareWeatherButton");
-
     const shareCard =
         document.getElementById("shareCard");
+
+    const shareCardImage =
+        document.getElementById("shareCardImage");
+
+    const shareCardTitle =
+        document.getElementById("shareCardTitle");
+
+    const shareCardDesc =
+        document.getElementById("shareCardDesc");
+
+    const outfitMenuButtons =
+        document.querySelectorAll(".outfit-menu-button");
+
+    const closeOutfitMenus = () => {
+
+        document
+            .querySelectorAll(".outfit-menu.open")
+            .forEach((menu) => {
+                menu.classList.remove("open");
+            });
+    };
 
     const downloadShareImage = (blob) => {
 
@@ -1190,63 +1272,142 @@
         );
     };
 
-    if (shareButton && shareCard) {
+    const prepareShareCard = (styleCard) => {
 
-        shareButton.addEventListener("click", async () => {
+        if (
+            !styleCard
+            ||
+            !shareCard
+            || !shareCardImage
+            || !shareCardTitle
+            || !shareCardDesc
+        ) {
 
-            if (!window.html2canvas) {
+            return false;
+        }
 
-                await navigator.clipboard?.writeText(
-                    window.location.href
-                );
+        shareCardImage.src =
+            styleCard.dataset.shareImg;
+
+        shareCardTitle.textContent =
+            styleCard.dataset.shareTitle;
+
+        shareCardDesc.textContent =
+            styleCard.dataset.shareDesc;
+
+        return true;
+    };
+
+    const shareOutfitCard = async (styleCard) => {
+
+        if (!prepareShareCard(styleCard)) {
+
+            return;
+        }
+
+        if (!window.html2canvas) {
+
+            await navigator.clipboard?.writeText(
+                window.location.href
+            );
+
+            return;
+        }
+
+        await waitForShareImages();
+
+        const canvas =
+            await html2canvas(shareCard, {
+                backgroundColor: null,
+                scale: 2,
+                useCORS: true
+            });
+
+        canvas.toBlob(async (blob) => {
+
+            if (!blob) {
 
                 return;
             }
 
-            await waitForShareImages();
+            const file =
+                new File(
+                    [blob],
+                    "weather-fit.png",
+                    { type: "image/png" }
+                );
 
-            const canvas =
-                await html2canvas(shareCard, {
-                    backgroundColor: null,
-                    scale: 2,
-                    useCORS: true
+            if (
+                navigator.canShare
+                && navigator.canShare({ files: [file] })
+            ) {
+
+                await navigator.share({
+                    files: [file],
+                    title: "Weather Fit",
+                    text: "오늘의 날씨와 코디를 확인해보세요"
                 });
 
-            canvas.toBlob(async (blob) => {
+                return;
+            }
 
-                if (!blob) {
+            downloadShareImage(blob);
 
-                    return;
-                }
+        }, "image/png");
+    };
 
-                const file =
-                    new File(
-                        [blob],
-                        "weather-fit.png",
-                        { type: "image/png" }
-                    );
+    outfitMenuButtons.forEach((button) => {
 
-                if (
-                    navigator.canShare
-                    && navigator.canShare({ files: [file] })
-                ) {
+        button.addEventListener("click", (event) => {
 
-                    await navigator.share({
-                        files: [file],
-                        title: "Weather Fit",
-                        text: "오늘의 날씨와 코디를 확인해보세요"
-                    });
+            event.stopPropagation();
 
-                    return;
-                }
+            const menu =
+                button.nextElementSibling;
 
-                downloadShareImage(blob);
+            if (!menu) {
 
-            }, "image/png");
+                return;
+            }
+
+            const shouldOpen =
+                !menu.classList.contains("open");
+
+            closeOutfitMenus();
+
+            if (shouldOpen) {
+
+                menu.classList.add("open");
+            }
 
         });
 
-    }
+    });
+
+    document
+        .querySelectorAll(".outfit-share-action")
+        .forEach((button) => {
+
+            button.addEventListener("click", async (event) => {
+
+                event.stopPropagation();
+
+                const styleCard =
+                    button.closest(".style-card");
+
+                closeOutfitMenus();
+
+                await shareOutfitCard(styleCard);
+
+            });
+
+        });
+
+    document.addEventListener("click", () => {
+
+        closeOutfitMenus();
+
+    });
 
 </script>
 
