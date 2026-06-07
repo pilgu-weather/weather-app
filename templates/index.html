@@ -838,13 +838,6 @@
             color: rgba(255,255,255,0.92);
         }
 
-        .share-card-url {
-
-            margin-top: 4px;
-
-            word-break: break-all;
-        }
-
         .splash-screen {
 
             position: fixed;
@@ -1214,9 +1207,6 @@
             오늘의 날씨와 코디를 확인해보세요
         </div>
 
-        <div class="share-card-url"
-             id="shareCardUrl"></div>
-
     </div>
 
 </div>
@@ -1273,9 +1263,6 @@
 
     const shareCardDesc =
         document.getElementById("shareCardDesc");
-
-    const shareCardUrl =
-        document.getElementById("shareCardUrl");
 
     const outfitMenuButtons =
         document.querySelectorAll(".outfit-menu-button");
@@ -1357,12 +1344,6 @@
 
         shareCardDesc.textContent =
             styleCard.dataset.shareDesc;
-
-        if (shareCardUrl) {
-
-            shareCardUrl.textContent =
-                window.location.href;
-        }
 
         return true;
     };
