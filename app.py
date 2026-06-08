@@ -10,9 +10,12 @@ import html
 app = Flask(__name__)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-FEEDBACK_DB_PATH = os.path.join(
-    BASE_DIR,
-    "weatherfit_feedback.db"
+FEEDBACK_DB_PATH = os.getenv(
+    "FEEDBACK_DB_PATH",
+    os.path.join(
+        BASE_DIR,
+        "weatherfit_feedback.db"
+    )
 )
 
 API_KEY = os.getenv("OPENWEATHER_API_KEY")
@@ -36,6 +39,12 @@ def health():
 
 
 def get_feedback_db():
+
+    db_dir = os.path.dirname(FEEDBACK_DB_PATH)
+
+    if db_dir:
+
+        os.makedirs(db_dir, exist_ok=True)
 
     return sqlite3.connect(
         FEEDBACK_DB_PATH,
@@ -107,44 +116,53 @@ def get_request_payload():
 def save_feedback():
 
     payload = get_request_payload()
-    init_feedback_db()
 
-    with get_feedback_db() as conn:
+    try:
 
-        conn.execute(
-            """
-            INSERT INTO recommendation_feedbacks (
-                created_at,
-                mode,
-                city_name,
-                temp,
-                feels_like,
-                effective_temp,
-                weather_main,
-                outfit_title,
-                outfit_desc,
-                rating,
-                reason,
-                page_url,
-                user_agent
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                now_timestamp(),
-                payload.get("mode"),
-                payload.get("city_name"),
-                payload.get("temp"),
-                payload.get("feels_like"),
-                payload.get("effective_temp"),
-                payload.get("weather_main"),
-                payload.get("outfit_title"),
-                payload.get("outfit_desc"),
-                payload.get("rating"),
-                payload.get("reason"),
-                payload.get("page_url"),
-                request.headers.get("User-Agent", "")
+        init_feedback_db()
+
+        with get_feedback_db() as conn:
+
+            conn.execute(
+                """
+                INSERT INTO recommendation_feedbacks (
+                    created_at,
+                    mode,
+                    city_name,
+                    temp,
+                    feels_like,
+                    effective_temp,
+                    weather_main,
+                    outfit_title,
+                    outfit_desc,
+                    rating,
+                    reason,
+                    page_url,
+                    user_agent
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    now_timestamp(),
+                    payload.get("mode"),
+                    payload.get("city_name"),
+                    payload.get("temp"),
+                    payload.get("feels_like"),
+                    payload.get("effective_temp"),
+                    payload.get("weather_main"),
+                    payload.get("outfit_title"),
+                    payload.get("outfit_desc"),
+                    payload.get("rating"),
+                    payload.get("reason"),
+                    payload.get("page_url"),
+                    request.headers.get("User-Agent", "")
+                )
             )
-        )
+
+    except Exception as error:
+
+        print("SQLite feedback insert failed:", error)
+
+        return jsonify({"ok": False}), 500
 
     return jsonify({"ok": True})
 
@@ -153,38 +171,47 @@ def save_feedback():
 def save_report():
 
     payload = get_request_payload()
-    init_feedback_db()
 
-    with get_feedback_db() as conn:
+    try:
 
-        conn.execute(
-            """
-            INSERT INTO outfit_reports (
-                created_at,
-                mode,
-                city_name,
-                temp,
-                weather_main,
-                outfit_title,
-                outfit_desc,
-                report_reason,
-                page_url,
-                user_agent
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                now_timestamp(),
-                payload.get("mode"),
-                payload.get("city_name"),
-                payload.get("temp"),
-                payload.get("weather_main"),
-                payload.get("outfit_title"),
-                payload.get("outfit_desc"),
-                payload.get("report_reason"),
-                payload.get("page_url"),
-                request.headers.get("User-Agent", "")
+        init_feedback_db()
+
+        with get_feedback_db() as conn:
+
+            conn.execute(
+                """
+                INSERT INTO outfit_reports (
+                    created_at,
+                    mode,
+                    city_name,
+                    temp,
+                    weather_main,
+                    outfit_title,
+                    outfit_desc,
+                    report_reason,
+                    page_url,
+                    user_agent
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    now_timestamp(),
+                    payload.get("mode"),
+                    payload.get("city_name"),
+                    payload.get("temp"),
+                    payload.get("weather_main"),
+                    payload.get("outfit_title"),
+                    payload.get("outfit_desc"),
+                    payload.get("report_reason"),
+                    payload.get("page_url"),
+                    request.headers.get("User-Agent", "")
+                )
             )
-        )
+
+    except Exception as error:
+
+        print("SQLite report insert failed:", error)
+
+        return jsonify({"ok": False}), 500
 
     return jsonify({"ok": True})
 
