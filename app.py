@@ -19,6 +19,7 @@ FEEDBACK_DB_PATH = os.getenv(
 )
 
 API_KEY = os.getenv("OPENWEATHER_API_KEY")
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
 
 print(
     "OPENWEATHER_API_KEY exists:",
@@ -137,6 +138,25 @@ def now_timestamp():
     return datetime.utcnow().isoformat(timespec="seconds") + "Z"
 
 
+def send_discord_message(message):
+
+    if not DISCORD_WEBHOOK_URL:
+
+        return
+
+    try:
+
+        requests.post(
+            DISCORD_WEBHOOK_URL,
+            json={"content": message},
+            timeout=5
+        )
+
+    except Exception as error:
+
+        print("Discord webhook send failed:", error)
+
+
 def get_request_payload():
 
     payload = request.get_json(silent=True) or {}
@@ -152,6 +172,7 @@ def get_request_payload():
 def save_feedback():
 
     payload = get_request_payload()
+    created_at = now_timestamp()
 
     try:
 
@@ -179,7 +200,7 @@ def save_feedback():
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
-                    now_timestamp(),
+                    created_at,
                     payload.get("mode"),
                     payload.get("city_name"),
                     payload.get("temp"),
@@ -196,6 +217,18 @@ def save_feedback():
                 )
             )
 
+        send_discord_message(
+            "\n".join([
+                "[Weather Fit] 추천 평가 저장",
+                f"타입: {payload.get('rating') or ''}",
+                f"사유: {payload.get('reason') or ''}",
+                f"상세 사유: {payload.get('reason_detail') or ''}",
+                f"outfit_id: {payload.get('outfit_id') or ''}",
+                f"outfit_image_url: {payload.get('outfit_image_url') or ''}",
+                f"생성 시간: {created_at}"
+            ])
+        )
+
     except Exception as error:
 
         print("SQLite feedback insert failed:", error)
@@ -209,6 +242,7 @@ def save_feedback():
 def save_report():
 
     payload = get_request_payload()
+    created_at = now_timestamp()
 
     try:
 
@@ -234,7 +268,7 @@ def save_report():
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
-                    now_timestamp(),
+                    created_at,
                     payload.get("mode"),
                     payload.get("city_name"),
                     payload.get("temp"),
@@ -248,6 +282,17 @@ def save_report():
                     request.headers.get("User-Agent", "")
                 )
             )
+
+        send_discord_message(
+            "\n".join([
+                "[Weather Fit] 코디 신고 저장",
+                f"타입: 신고",
+                f"사유: {payload.get('report_reason') or ''}",
+                f"outfit_id: {payload.get('outfit_id') or ''}",
+                f"outfit_image_url: {payload.get('outfit_image_url') or ''}",
+                f"생성 시간: {created_at}"
+            ])
+        )
 
     except Exception as error:
 
