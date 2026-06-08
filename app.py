@@ -2017,6 +2017,25 @@ def home():
 
             })
 
+    if selected_rain:
+
+        if rain_recommendation:
+
+            background_image = get_background_image("10d")
+            weather_main = "Rain"
+
+        else:
+
+            background_image = get_background_image("03d")
+
+            if weather_main in [
+                "Rain",
+                "Drizzle",
+                "Thunderstorm"
+            ]:
+
+                weather_main = "Clouds"
+
     if pm >= 4:
 
         styles.insert(0, {
