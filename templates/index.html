@@ -2590,6 +2590,15 @@
 
             feedbackReasons.classList.add("open");
 
+            requestAnimationFrame(() => {
+
+                feedbackReasons.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+            });
+
         });
     }
 
