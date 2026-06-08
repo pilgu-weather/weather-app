@@ -771,6 +771,11 @@ def render_safe_template(**overrides):
         "background_image": get_background_image("03d"),
         "hourly_forecast": [],
         "weather_alert": None,
+        "selected_date": "",
+        "today_date": "",
+        "available_dates": [],
+        "calendar_weeks": [],
+        "calendar_month_label": "",
         "error": None,
     }
 
@@ -937,6 +942,60 @@ def get_tomorrow_icon(weather_items):
             return item.get("icon", "03d")
 
     return "03d"
+
+
+def build_calendar_days(selected_date, available_dates):
+
+    selected_dt = datetime.strptime(
+        selected_date,
+        "%Y-%m-%d"
+    )
+
+    first_day = selected_dt.replace(day=1)
+    first_offset = (first_day.weekday() + 1) % 7
+
+    if selected_dt.month == 12:
+
+        next_month = selected_dt.replace(
+            year=selected_dt.year + 1,
+            month=1,
+            day=1
+        )
+
+    else:
+
+        next_month = selected_dt.replace(
+            month=selected_dt.month + 1,
+            day=1
+        )
+
+    days_in_month = (next_month - timedelta(days=1)).day
+    cells = []
+
+    for _ in range(first_offset):
+
+        cells.append(None)
+
+    for day in range(1, days_in_month + 1):
+
+        cell_date = selected_dt.replace(day=day).strftime("%Y-%m-%d")
+
+        cells.append({
+            "date": cell_date,
+            "day": day,
+            "selectable": cell_date in available_dates,
+            "selected": cell_date == selected_date,
+            "is_sunday": len(cells) % 7 == 0
+        })
+
+    while len(cells) % 7 != 0:
+
+        cells.append(None)
+
+    return [
+        cells[index:index + 7]
+        for index in range(0, len(cells), 7)
+    ]
 
 
 def get_today_message(
@@ -1178,6 +1237,36 @@ def get_today_message(
 def home():
 
     mode = request.args.get("mode", "today")
+    kst_now = datetime.utcnow() + timedelta(hours=9)
+    today = kst_now.strftime("%Y-%m-%d")
+    now_hour = kst_now.hour
+
+    available_dates = [
+        (
+            kst_now + timedelta(days=offset)
+        ).strftime("%Y-%m-%d")
+        for offset in range(5)
+    ]
+
+    selected_date = request.args.get("date")
+
+    if not selected_date and mode == "tomorrow":
+
+        selected_date = available_dates[1]
+
+    if selected_date not in available_dates:
+
+        selected_date = today
+
+    mode = "today" if selected_date == today else "forecast"
+    calendar_weeks = build_calendar_days(
+        selected_date,
+        available_dates
+    )
+    calendar_month_label = datetime.strptime(
+        selected_date,
+        "%Y-%m-%d"
+    ).strftime("%Y.%m")
 
     temp = None
     temp_min = None
@@ -1386,34 +1475,18 @@ def home():
 
         forecast_data = {}
 
-    kst_now = datetime.utcnow() + timedelta(hours=9)
-
-    today = kst_now.strftime("%Y-%m-%d")
-
-    tomorrow = (
-        kst_now + timedelta(days=1)
-    ).strftime("%Y-%m-%d")
-
-    now_hour = kst_now.hour
-
-    today_temps = []
-    tomorrow_temps = []
-
-    today_daytime = []
-    tomorrow_daytime = []
-
-    rain_today = False
-    rain_tomorrow = False
-    rain_pops_today = []
-    rain_pops_tomorrow = []
-
-    tomorrow_icon = icon_url
-    tomorrow_icon_code = icon
-    tomorrow_weather_types = []
-    tomorrow_weather_items = []
-    tomorrow_feels_like = []
-    tomorrow_humidity = []
-    tomorrow_wind_speed = []
+    selected_temps = []
+    selected_daytime = []
+    selected_weather_types = []
+    selected_weather_items = []
+    selected_feels_like = []
+    selected_humidity = []
+    selected_wind_speed = []
+    selected_rain = False
+    selected_rain_pops = []
+    selected_icon = icon_url
+    selected_icon_code = icon
+    target_hours = [6, 9, 12, 15, 18, 21]
 
     # =========================
     # HOURLY FORECAST
@@ -1474,40 +1547,17 @@ def home():
             # TODAY → 현재 이후 + 내일 전체
             # =========================
 
-            if mode == "today":
+            if forecast_date != selected_date:
 
-                if (
-                    forecast_date == today
-                    and kst_hour >= now_hour
-                ) or (
-                    forecast_date == tomorrow
-                ):
+                continue
 
-                    hourly_forecast.append({
-
-                        "time": f"{kst_hour:02d}",
-
-                        "icon": weather_icon,
-
-                        "temp": round(current_temp),
-
-                        "is_rain": weather_type in [
-                            "Rain",
-                            "Drizzle",
-                            "Thunderstorm"
-                        ]
-
-                    })
+            selected_temps.append(current_temp)
 
             # =========================
             # TOMORROW → 06~21 고정
             # =========================
 
-            if (
-                mode == "tomorrow"
-                and forecast_date == tomorrow
-                and kst_hour in [6, 9, 12, 15, 18, 21]
-            ):
+            if kst_hour in target_hours:
 
                 hourly_forecast.append({
 
@@ -1515,172 +1565,119 @@ def home():
 
                     "icon": weather_icon,
 
-                        "temp": round(current_temp),
+                    "temp": round(current_temp),
 
-                        "is_rain": weather_type in [
-                            "Rain",
-                            "Drizzle",
-                            "Thunderstorm"
-                        ]
+                    "pop": forecast_pop,
+
+                    "is_rain": weather_type in [
+                        "Rain",
+                        "Drizzle",
+                        "Thunderstorm"
+                    ]
 
                 })
 
-            if (
-                forecast_date == tomorrow
-                and kst_hour in [6, 9, 12, 15, 18, 21]
-            ):
-
-                tomorrow_weather_types.append(weather_type)
-                tomorrow_weather_items.append({
+                selected_weather_types.append(weather_type)
+                selected_weather_items.append({
                     "main": weather_type,
                     "icon": weather_icon
                 })
 
-            # =========================
-            # TODAY DATA
-            # =========================
+            if 12 <= kst_hour <= 15:
 
-            if forecast_date == today:
+                selected_daytime.append(current_temp)
+                selected_feels_like.append(
+                    item_main.get("feels_like", current_temp)
+                )
+                selected_humidity.append(
+                    item_main.get("humidity", humidity)
+                )
+                selected_wind_speed.append(
+                    item.get("wind", {}).get("speed", wind_speed)
+                )
+                selected_icon_code = weather_icon
+                selected_icon = (
+                    f"https://openweathermap.org/img/wn/{weather_icon}@2x.png"
+                )
 
-                today_temps.append(current_temp)
+            if (
+                6 <= kst_hour <= 21
+                and weather_type in [
+                    "Rain",
+                    "Drizzle",
+                    "Thunderstorm"
+                ]
+            ):
 
-                if 12 <= kst_hour <= 15:
-
-                    today_daytime.append(current_temp)
-
-                if (
-                    6 <= kst_hour <= 21
-                    and weather_type in [
-                        "Rain",
-                        "Drizzle",
-                        "Thunderstorm"
-                    ]
-                ):
-
-                    rain_today = True
-                    rain_pops_today.append(forecast_pop)
-
-            # =========================
-            # TOMORROW DATA
-            # =========================
-
-            if forecast_date == tomorrow:
-
-                tomorrow_temps.append(current_temp)
-
-                if 12 <= kst_hour <= 15:
-
-                    tomorrow_daytime.append(current_temp)
-                    tomorrow_feels_like.append(
-                        item_main.get("feels_like", current_temp)
-                    )
-                    tomorrow_humidity.append(
-                        item_main.get("humidity", humidity)
-                    )
-                    tomorrow_wind_speed.append(
-                        item.get("wind", {}).get("speed", wind_speed)
-                    )
-                    tomorrow_icon_code = weather_icon
-
-                    tomorrow_icon = (
-                        f"https://openweathermap.org/img/wn/{weather_icon}@2x.png"
-                    )
-
-                if (
-                    6 <= kst_hour <= 21
-                    and weather_type in [
-                        "Rain",
-                        "Drizzle",
-                        "Thunderstorm"
-                    ]
-                ):
-
-                    rain_tomorrow = True
-                    rain_pops_tomorrow.append(forecast_pop)
+                selected_rain = True
+                selected_rain_pops.append(forecast_pop)
 
     # =========================
     # TODAY MODE
     # =========================
 
-    if mode == "today":
+    if selected_temps:
 
-        if today_temps:
+        temp_min = round(min(selected_temps))
+        temp_max = round(max(selected_temps))
 
-            temp_min = round(min(today_temps))
-            temp_max = round(max(today_temps))
+    else:
 
-        else:
+        if selected_date == today:
 
             temp_min = weather_context["temp_min"]
             temp_max = weather_context["temp_max"]
 
-        if today_daytime:
-
-            day_temp = round(
-                sum(today_daytime) / len(today_daytime)
-            )
-
         else:
 
-            day_temp = temp
+            temp_min = None
+            temp_max = None
 
-        rain_mode = rain_today
-        rain_probability = round(
-            sum(rain_pops_today) / len(rain_pops_today)
-        ) if rain_pops_today else 0
+    if selected_date != today:
 
-    # =========================
-    # TOMORROW MODE
-    # =========================
+        if selected_weather_items:
 
-    else:
+            icon_url = selected_icon
+            selected_icon_code = get_tomorrow_icon(
+                selected_weather_items
+            )
+            background_image = get_background_image(selected_icon_code)
+            weather_main = get_tomorrow_weather_main(
+                selected_weather_types
+            )
 
-        icon_url = tomorrow_icon
-        tomorrow_icon_code = get_tomorrow_icon(
-            tomorrow_weather_items
-        )
-        background_image = get_background_image(tomorrow_icon_code)
-        weather_main = get_tomorrow_weather_main(
-            tomorrow_weather_types
-        )
-
-        if tomorrow_temps:
-
-            temp_min = round(min(tomorrow_temps))
-            temp_max = round(max(tomorrow_temps))
+        if temp_max is not None:
 
             temp = temp_max
 
         else:
 
-            temp = 0
-            temp_min = None
-            temp_max = None
+            temp = None
 
-        if tomorrow_daytime:
+    if selected_daytime:
 
-            day_temp = round(
-                sum(tomorrow_daytime) / len(tomorrow_daytime)
-            )
-            feels_like = round(
-                sum(tomorrow_feels_like) / len(tomorrow_feels_like)
-            )
-            humidity = round(
-                sum(tomorrow_humidity) / len(tomorrow_humidity)
-            )
-            wind_speed = round(
-                sum(tomorrow_wind_speed) / len(tomorrow_wind_speed),
-                1
-            )
+        day_temp = round(
+            sum(selected_daytime) / len(selected_daytime)
+        )
+        feels_like = round(
+            sum(selected_feels_like) / len(selected_feels_like)
+        )
+        humidity = round(
+            sum(selected_humidity) / len(selected_humidity)
+        )
+        wind_speed = round(
+            sum(selected_wind_speed) / len(selected_wind_speed),
+            1
+        )
 
-        else:
+    else:
 
-            day_temp = temp
+        day_temp = temp
 
-        rain_mode = rain_tomorrow
-        rain_probability = round(
-            sum(rain_pops_tomorrow) / len(rain_pops_tomorrow)
-        ) if rain_pops_tomorrow else 0
+    rain_mode = selected_rain
+    rain_probability = round(
+        sum(selected_rain_pops) / len(selected_rain_pops)
+    ) if selected_rain_pops else 0
 
     # =========================
     # 미세먼지
@@ -1749,7 +1746,7 @@ def home():
     weather_alert = None
 
     if (
-        mode == "today"
+        selected_date == today
         and has_gps_location
         and lat is not None
         and lon is not None
@@ -1778,6 +1775,10 @@ def home():
     if effective_temp is None:
 
         effective_temp = temp
+
+    if effective_temp is None:
+
+        effective_temp = 0
 
     effective_temp_reasons = {
         "feels_like": False,
@@ -1814,12 +1815,6 @@ def home():
 
         effective_temp -= 1
         effective_temp_reasons["temp_gap"] = True
-
-    selected_date = today
-
-    if mode != "today":
-
-        selected_date = tomorrow
 
     season_month = datetime.strptime(
         selected_date,
@@ -1989,9 +1984,15 @@ def home():
 
         })
 
+    message_temp = temp
+
+    if message_temp is None:
+
+        message_temp = effective_temp
+
     today_message = get_today_message(
         weather_main,
-        temp,
+        message_temp,
         pm,
         wind_speed,
         temp_gap,
@@ -2018,6 +2019,11 @@ def home():
         pm_text=pm_text,
         weather_alert=weather_alert,
         today_message=today_message,
+        selected_date=selected_date,
+        today_date=today,
+        available_dates=available_dates,
+        calendar_weeks=calendar_weeks,
+        calendar_month_label=calendar_month_label,
 
         outfits=outfits,
 

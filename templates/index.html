@@ -126,54 +126,193 @@
             letter-spacing: -1.5px;
         }
 
-        .mode-switch {
+        .date-picker {
+
+            position: relative;
+        }
+
+        .calendar-button {
+
+            width: 34px;
+
+            height: 34px;
 
             display: flex;
 
             align-items: center;
 
-            padding: 3px;
+            justify-content: center;
 
             border-radius: 999px;
 
-            background:
-                rgba(255,255,255,0.12);
+            background: transparent;
 
-            backdrop-filter: blur(12px);
+            border: none;
 
-            border:
-                1px solid rgba(255,255,255,0.12);
+            box-shadow: none;
 
-            box-shadow:
-                0 8px 24px rgba(0,0,0,0.05);
+            color: rgba(255,255,255,0.92);
+
+            cursor: pointer;
+
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .mode-btn {
+        .calendar-button svg {
 
-            padding: 5px 9px;
+            width: 21px;
 
-            border-radius: 999px;
+            height: 21px;
 
-            text-decoration: none;
+            stroke-width: 1.8;
+        }
 
-            font-size: 11px;
+        .calendar-popover {
+
+            position: absolute;
+
+            top: 42px;
+
+            right: 0;
+
+            width: 286px;
+
+            background:
+                rgba(18,20,24,0.72);
+
+            backdrop-filter: blur(22px);
+
+            border:
+                1px solid rgba(255,255,255,0.14);
+
+            border-radius: 24px;
+
+            box-shadow:
+                0 18px 46px rgba(0,0,0,0.24);
+
+            padding: 16px;
+
+            z-index: 20;
+
+            opacity: 0;
+
+            visibility: hidden;
+
+            transform: translateY(-6px);
+
+            transition:
+                opacity 0.18s ease,
+                transform 0.18s ease,
+                visibility 0.18s ease;
+        }
+
+        .calendar-popover.open {
+
+            opacity: 1;
+
+            visibility: visible;
+
+            transform: translateY(0);
+        }
+
+        .calendar-month {
+
+            font-size: 13px;
+
+            font-weight: 800;
+
+            color: rgba(255,255,255,0.9);
+
+            margin-bottom: 12px;
+        }
+
+        .calendar-weekdays,
+        .calendar-week {
+
+            display: grid;
+
+            grid-template-columns: repeat(7, 1fr);
+
+            gap: 6px;
+        }
+
+        .calendar-weekdays {
+
+            margin-bottom: 8px;
+        }
+
+        .calendar-weekday {
+
+            font-size: 10px;
 
             font-weight: 700;
 
-            color: #8e8e93;
+            color: rgba(255,255,255,0.46);
 
-            transition: 0.25s;
+            text-align: center;
         }
 
-        .mode-btn.active {
+        .calendar-weekday.sunday {
+
+            color: rgba(255,100,100,0.86);
+        }
+
+        .calendar-day,
+        .calendar-empty {
+
+            width: 30px;
+
+            height: 30px;
+        }
+
+        .calendar-day {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border-radius: 999px;
+
+            font-size: 12px;
+
+            font-weight: 800;
+
+            margin: 0 auto;
+
+            text-decoration: none;
+        }
+
+        .calendar-day.selectable {
+
+            color: #101216;
 
             background:
-                rgba(255,255,255,0.30);
+                rgba(255,255,255,0.78);
+        }
 
-            color: #111;
+        .calendar-day.selected {
 
-            box-shadow:
-                0 3px 10px rgba(0,0,0,0.07);
+            background:
+                rgba(255,255,255,0.96);
+        }
+
+        .calendar-day.disabled {
+
+            color: rgba(255,255,255,0.28);
+
+            pointer-events: none;
+        }
+
+        .calendar-day.sunday:not(.selectable) {
+
+            color: rgba(255,100,100,0.34);
+        }
+
+        .calendar-day.sunday.selectable {
+
+            color: #a81818;
         }
 
         .hero-weather {
@@ -322,17 +461,9 @@
 
             -webkit-overflow-scrolling: touch;
 
-            {% if mode == "today" %}
-
-            gap: 10px;
-
-            {% else %}
-
             justify-content: space-between;
 
             gap: 0;
-
-            {% endif %}
         }
 
         .hourly-strip::-webkit-scrollbar {
@@ -910,6 +1041,20 @@
             margin-top: 4px;
         }
 
+        .hour-pop {
+
+            font-size: 10px;
+
+            font-weight: 700;
+
+            color: rgba(255,255,255,0.62);
+
+            margin-top: 2px;
+
+            text-shadow:
+                0 1px 6px rgba(0,0,0,0.36);
+        }
+
         .copy-toast {
 
             position: fixed;
@@ -1364,21 +1509,83 @@
             Weather Fit
         </div>
 
-        <div class="mode-switch">
+        <div class="date-picker">
 
-            <a href="/?lat={{ request.args.get('lat') }}&lon={{ request.args.get('lon') }}&mode=today"
-               class="mode-btn {% if mode == 'today' %}active{% endif %}">
+            <button class="calendar-button"
+                    id="calendarButton"
+                    type="button"
+                    aria-label="날짜 선택"
+                    aria-expanded="false">
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-linecap="round"
+                     stroke-linejoin="round"
+                     aria-hidden="true">
+                    <rect x="4"
+                          y="5"
+                          width="16"
+                          height="15"
+                          rx="3"></rect>
+                    <path d="M8 3v4"></path>
+                    <path d="M16 3v4"></path>
+                    <path d="M4 10h16"></path>
+                </svg>
+            </button>
 
-                Today
+            <div class="calendar-popover"
+                 id="calendarPopover">
 
-            </a>
+                <div class="calendar-month">
+                    {{ calendar_month_label }}
+                </div>
 
-            <a href="/?lat={{ request.args.get('lat') }}&lon={{ request.args.get('lon') }}&mode=tomorrow"
-               class="mode-btn {% if mode == 'tomorrow' %}active{% endif %}">
+                <div class="calendar-weekdays">
+                    <div class="calendar-weekday sunday">일</div>
+                    <div class="calendar-weekday">월</div>
+                    <div class="calendar-weekday">화</div>
+                    <div class="calendar-weekday">수</div>
+                    <div class="calendar-weekday">목</div>
+                    <div class="calendar-weekday">금</div>
+                    <div class="calendar-weekday">토</div>
+                </div>
 
-                Tomorrow
+                {% for week in calendar_weeks %}
 
-            </a>
+                <div class="calendar-week">
+
+                    {% for cell in week %}
+
+                    {% if cell %}
+
+                    {% if cell.selectable %}
+
+                    <a class="calendar-day selectable{% if cell.selected %} selected{% endif %}{% if cell.is_sunday %} sunday{% endif %}"
+                       href="/?date={{ cell.date }}{% if request.args.get('lat') and request.args.get('lon') %}&lat={{ request.args.get('lat') }}&lon={{ request.args.get('lon') }}{% endif %}">
+                        {{ cell.day }}
+                    </a>
+
+                    {% else %}
+
+                    <span class="calendar-day disabled{% if cell.is_sunday %} sunday{% endif %}">
+                        {{ cell.day }}
+                    </span>
+
+                    {% endif %}
+
+                    {% else %}
+
+                    <span class="calendar-empty"></span>
+
+                    {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+                {% endfor %}
+
+            </div>
 
         </div>
 
@@ -1405,12 +1612,12 @@
                         const lon =
                             pos.coords.longitude;
 
-                        const mode =
-                            params.get("mode")
-                            || "today";
+                        const selectedDate =
+                            params.get("date")
+                            || {{ selected_date|tojson }};
 
                         window.location.href =
-                            `/?lat=${lat}&lon=${lon}&mode=${mode}`;
+                            `/?lat=${lat}&lon=${lon}&date=${selectedDate}`;
                     },
 
                     () => {
@@ -1457,7 +1664,7 @@
 
         {% endif %}
 
-        {% if weather_alert and mode == "today" %}
+        {% if weather_alert and selected_date == today_date %}
 
         <div class="sub weather-alert-line {{ weather_alert.level }}">
             {{ weather_alert.text }}
@@ -1500,6 +1707,10 @@
 
                     <div class="hour-temp">
                         {{ item.temp }}°
+                    </div>
+
+                    <div class="hour-pop">
+                        {{ item.pop }}%
                     </div>
 
                 </div>
@@ -1926,6 +2137,12 @@
     const copyToast =
         document.getElementById("copyToast");
 
+    const calendarButton =
+        document.getElementById("calendarButton");
+
+    const calendarPopover =
+        document.getElementById("calendarPopover");
+
     const outfitMenuButtons =
         document.querySelectorAll(".outfit-menu-button");
 
@@ -1985,6 +2202,48 @@
         effective_temp: {{ effective_temp|tojson }},
         weather_main: {{ weather_main|tojson }}
     };
+
+    const closeCalendar = () => {
+
+        if (!calendarButton || !calendarPopover) {
+
+            return;
+        }
+
+        calendarPopover.classList.remove("open");
+        calendarButton.setAttribute("aria-expanded", "false");
+    };
+
+    if (calendarButton && calendarPopover) {
+
+        calendarButton.addEventListener("click", (event) => {
+
+            event.stopPropagation();
+
+            const isOpen =
+                calendarPopover.classList.toggle("open");
+
+            calendarButton.setAttribute(
+                "aria-expanded",
+                isOpen ? "true" : "false"
+            );
+        });
+
+        calendarPopover.addEventListener("click", (event) => {
+
+            event.stopPropagation();
+        });
+
+        document.addEventListener("click", closeCalendar);
+
+        document.addEventListener("keydown", (event) => {
+
+            if (event.key === "Escape") {
+
+                closeCalendar();
+            }
+        });
+    }
 
     let pendingReportCard =
         null;
