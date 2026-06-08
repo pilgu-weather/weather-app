@@ -1553,21 +1553,23 @@ def home():
                     )
                 ):
 
-                    hourly_forecast.append({
+                    if len(hourly_forecast) < 12:
 
-                        "time": f"{kst_hour:02d}",
+                        hourly_forecast.append({
 
-                        "icon": weather_icon,
+                            "time": f"{kst_hour:02d}",
 
-                        "temp": round(current_temp),
+                            "icon": weather_icon,
 
-                        "is_rain": weather_type in [
-                            "Rain",
-                            "Drizzle",
-                            "Thunderstorm"
-                        ]
+                            "temp": round(current_temp),
 
-                    })
+                            "is_rain": weather_type in [
+                                "Rain",
+                                "Drizzle",
+                                "Thunderstorm"
+                            ]
+
+                        })
 
             # =========================
             # TODAY → 현재 이후 + 내일 전체
