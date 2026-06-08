@@ -88,12 +88,33 @@ def init_feedback_db():
                 weather_main TEXT,
                 outfit_title TEXT,
                 outfit_desc TEXT,
+                outfit_id TEXT,
+                outfit_image_url TEXT,
                 report_reason TEXT,
                 page_url TEXT,
                 user_agent TEXT
             )
             """
         )
+
+        report_columns = [
+            column[1]
+            for column in conn.execute(
+                "PRAGMA table_info(outfit_reports)"
+            ).fetchall()
+        ]
+
+        if "outfit_id" not in report_columns:
+
+            conn.execute(
+                "ALTER TABLE outfit_reports ADD COLUMN outfit_id TEXT"
+            )
+
+        if "outfit_image_url" not in report_columns:
+
+            conn.execute(
+                "ALTER TABLE outfit_reports ADD COLUMN outfit_image_url TEXT"
+            )
 
 
 def now_timestamp():
@@ -188,10 +209,12 @@ def save_report():
                     weather_main,
                     outfit_title,
                     outfit_desc,
+                    outfit_id,
+                    outfit_image_url,
                     report_reason,
                     page_url,
                     user_agent
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     now_timestamp(),
@@ -201,6 +224,8 @@ def save_report():
                     payload.get("weather_main"),
                     payload.get("outfit_title"),
                     payload.get("outfit_desc"),
+                    payload.get("outfit_id"),
+                    payload.get("outfit_image_url"),
                     payload.get("report_reason"),
                     payload.get("page_url"),
                     request.headers.get("User-Agent", "")
@@ -258,6 +283,8 @@ def fetch_feedback_rows():
                 weather_main,
                 outfit_title,
                 outfit_desc,
+                outfit_id,
+                outfit_image_url,
                 report_reason,
                 page_url,
                 user_agent
@@ -281,10 +308,30 @@ def render_admin_table(rows, columns):
 
     for row in rows:
 
-        cells = "".join(
-            f"<td>{html.escape(str(row[column] or ''))}</td>"
-            for column in columns
-        )
+        cells = []
+
+        for column in columns:
+
+            value = str(row[column] or "")
+            escaped_value = html.escape(value)
+
+            if column == "outfit_image_url" and value:
+
+                cells.append(
+                    "<td>"
+                    f"<a href=\"{escaped_value}\" target=\"_blank\">"
+                    f"<img class=\"admin-thumb\" src=\"{escaped_value}\" "
+                    "alt=\"신고 이미지\">"
+                    "</a>"
+                    f"<div class=\"admin-image-link\">{escaped_value}</div>"
+                    "</td>"
+                )
+
+            else:
+
+                cells.append(f"<td>{escaped_value}</td>")
+
+        cells = "".join(cells)
 
         body_rows.append(f"<tr>{cells}</tr>")
 
@@ -337,6 +384,8 @@ def admin_feedback():
         "weather_main",
         "outfit_title",
         "outfit_desc",
+        "outfit_id",
+        "outfit_image_url",
         "report_reason",
         "page_url",
         "user_agent"
@@ -390,6 +439,21 @@ def admin_feedback():
             }}
             td {{
                 color: rgba(255,255,255,0.82);
+            }}
+            .admin-thumb {{
+                width: 72px;
+                height: 96px;
+                object-fit: cover;
+                object-position: center top;
+                border-radius: 10px;
+                display: block;
+                margin-bottom: 8px;
+            }}
+            .admin-image-link {{
+                max-width: 220px;
+                word-break: break-all;
+                color: rgba(255,255,255,0.62);
+                font-size: 11px;
             }}
         </style>
     </head>

@@ -1844,6 +1844,22 @@
         );
     };
 
+    const getOutfitCardId = (styleCard) => {
+
+        const cards =
+            Array.from(
+                document.querySelectorAll(".style-card")
+            );
+
+        const index =
+            cards.indexOf(styleCard) + 1;
+
+        const paddedIndex =
+            String(Math.max(index, 1)).padStart(3, "0");
+
+        return `outfit-${paddedIndex}`;
+    };
+
     const triggerImageDownload = (url, filename) => {
 
         const link =
@@ -2236,6 +2252,8 @@
             "/report",
             {
                 ...pageContext,
+                outfit_id: getOutfitCardId(styleCard),
+                outfit_image_url: styleCard.dataset.shareImg || "",
                 outfit_title: styleCard.dataset.shareTitle || "",
                 outfit_desc: styleCard.dataset.shareDesc || "",
                 report_reason: "사용자 신고",
