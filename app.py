@@ -1543,6 +1543,32 @@ def home():
             weather_icon = item_weather.get("icon", "03d")
             forecast_pop = round((item.get("pop") or 0) * 100)
 
+            if selected_date == today:
+
+                if (
+                    forecast_date > today
+                    or (
+                        forecast_date == today
+                        and kst_hour >= now_hour
+                    )
+                ):
+
+                    hourly_forecast.append({
+
+                        "time": f"{kst_hour:02d}",
+
+                        "icon": weather_icon,
+
+                        "temp": round(current_temp),
+
+                        "is_rain": weather_type in [
+                            "Rain",
+                            "Drizzle",
+                            "Thunderstorm"
+                        ]
+
+                    })
+
             # =========================
             # TODAY → 현재 이후 + 내일 전체
             # =========================
@@ -1557,7 +1583,7 @@ def home():
             # TOMORROW → 06~21 고정
             # =========================
 
-            if kst_hour in target_hours:
+            if selected_date != today and kst_hour in target_hours:
 
                 hourly_forecast.append({
 
@@ -1566,8 +1592,6 @@ def home():
                     "icon": weather_icon,
 
                     "temp": round(current_temp),
-
-                    "pop": forecast_pop,
 
                     "is_rain": weather_type in [
                         "Rain",
