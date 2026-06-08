@@ -1579,6 +1579,7 @@ def home():
     selected_wind_speed = []
     selected_rain = False
     selected_rain_pops = []
+    selected_rain_total_mm = 0
     selected_icon = icon_url
     selected_icon_code = icon
     target_hours = [6, 9, 12, 15, 18, 21]
@@ -1675,6 +1676,9 @@ def home():
                 continue
 
             selected_temps.append(current_temp)
+            selected_rain_total_mm += (
+                item.get("rain", {}) or {}
+            ).get("3h", 0) or 0
 
             # =========================
             # TOMORROW → 06~21 고정
@@ -1799,6 +1803,8 @@ def home():
     rain_probability = round(
         sum(selected_rain_pops) / len(selected_rain_pops)
     ) if selected_rain_pops else 0
+    rain_total_mm = round(selected_rain_total_mm, 1)
+    rain_score = rain_total_mm * (rain_probability / 100)
 
     # =========================
     # 미세먼지
@@ -1979,23 +1985,37 @@ def home():
 
     ]
 
+    rain_recommendation = None
+
     if rain_mode:
 
-        rain_recommendation = "우산 추천"
+        if rain_total_mm >= 30 or rain_score >= 8:
 
-        if rain_probability < 50:
+            rain_recommendation = "우산 필수"
+
+        elif rain_total_mm >= 15 or rain_score >= 3:
+
+            rain_recommendation = "우산 추천"
+
+        elif rain_score >= 1:
 
             rain_recommendation = "접이식 우산 추천"
 
-        styles.insert(0, {
+        if rain_recommendation:
 
-            "folder": "rain",
+            styles.insert(0, {
 
-            "title": "Rainy day",
+                "folder": "rain",
 
-            "desc": f"비 예보 {rain_probability}% · {rain_recommendation}"
+                "title": "Rainy day",
 
-        })
+                "desc": (
+                    f"강수 확률 {rain_probability}%\n"
+                    f"예상 누적 강수량 {rain_total_mm:.1f}mm\n"
+                    f"{rain_recommendation}"
+                )
+
+            })
 
     if pm >= 4:
 
