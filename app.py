@@ -168,6 +168,31 @@ def get_request_payload():
     return payload
 
 
+def get_report_reason(payload):
+
+    for key in [
+        "report_reason",
+        "reason",
+        "message",
+        "reportText",
+        "detail"
+    ]:
+
+        value = payload.get(key)
+
+        if value is None:
+
+            continue
+
+        value = str(value).strip()
+
+        if value:
+
+            return value
+
+    return "내용 없음"
+
+
 @app.route("/feedback", methods=["POST"])
 def save_feedback():
 
@@ -243,6 +268,7 @@ def save_report():
 
     payload = get_request_payload()
     created_at = now_timestamp()
+    report_reason = get_report_reason(payload)
 
     try:
 
@@ -277,7 +303,7 @@ def save_report():
                     payload.get("outfit_desc"),
                     payload.get("outfit_id"),
                     payload.get("outfit_image_url"),
-                    payload.get("report_reason"),
+                    report_reason,
                     payload.get("page_url"),
                     request.headers.get("User-Agent", "")
                 )
@@ -287,7 +313,7 @@ def save_report():
             "\n".join([
                 "[Weather Fit] 코디 신고 저장",
                 f"타입: 신고",
-                f"사유: {payload.get('report_reason') or ''}",
+                f"사유: {report_reason}",
                 f"outfit_id: {payload.get('outfit_id') or ''}",
                 f"outfit_image_url: {payload.get('outfit_image_url') or ''}",
                 f"생성 시간: {created_at}"
