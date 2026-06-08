@@ -734,6 +734,43 @@
             accent-color: white;
         }
 
+        .feedback-detail-input {
+
+            display: none;
+
+            width: 100%;
+
+            margin-top: 4px;
+
+            padding: 11px 13px;
+
+            border:
+                1px solid rgba(255,255,255,0.14);
+
+            border-radius: 14px;
+
+            background:
+                rgba(255,255,255,0.08);
+
+            color: white;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            outline: none;
+        }
+
+        .feedback-detail-input.open {
+
+            display: block;
+        }
+
+        .feedback-detail-input::placeholder {
+
+            color: rgba(255,255,255,0.52);
+        }
+
         .feedback-submit {
 
             width: 100%;
@@ -1579,9 +1616,16 @@
 
             <label class="feedback-reason">
                 <input type="checkbox"
+                       id="feedbackOtherReason"
                        value="기타">
                 기타
             </label>
+
+            <input class="feedback-detail-input"
+                   id="feedbackReasonDetail"
+                   type="text"
+                   maxlength="160"
+                   placeholder="아쉬웠던 점을 적어주세요">
 
             <button class="feedback-submit"
                     id="feedbackSubmit"
@@ -1797,6 +1841,12 @@
 
     const feedbackClose =
         document.getElementById("feedbackClose");
+
+    const feedbackOtherReason =
+        document.getElementById("feedbackOtherReason");
+
+    const feedbackReasonDetail =
+        document.getElementById("feedbackReasonDetail");
 
     const feedbackSubmit =
         document.getElementById("feedbackSubmit");
@@ -2024,7 +2074,8 @@
 
     const saveRecommendationFeedback = async (
         result,
-        reasons = []
+        reasons = [],
+        reasonDetail = ""
     ) => {
 
         const styleCard =
@@ -2042,6 +2093,7 @@
                     : "",
                 rating: result,
                 reason: reasons.join(", "),
+                reason_detail: reasonDetail,
                 page_url: window.location.href
             }
         );
@@ -2085,6 +2137,24 @@
         ).map((input) => input.value);
     };
 
+    const updateFeedbackDetailVisibility = () => {
+
+        if (!feedbackOtherReason || !feedbackReasonDetail) {
+
+            return;
+        }
+
+        if (feedbackOtherReason.checked) {
+
+            feedbackReasonDetail.classList.add("open");
+
+            return;
+        }
+
+        feedbackReasonDetail.classList.remove("open");
+        feedbackReasonDetail.value = "";
+    };
+
     const closeFeedbackReasons = () => {
 
         if (!feedbackReasons) {
@@ -2099,6 +2169,8 @@
             .forEach((input) => {
                 input.checked = false;
             });
+
+        updateFeedbackDetailVisibility();
     };
 
     const getOutfitMimeType = (filename) => {
@@ -2671,6 +2743,15 @@
         });
     }
 
+    if (feedbackOtherReason) {
+
+        feedbackOtherReason.addEventListener("change", () => {
+
+            updateFeedbackDetailVisibility();
+
+        });
+    }
+
     if (feedbackSubmit) {
 
         feedbackSubmit.addEventListener("click", async () => {
@@ -2689,7 +2770,11 @@
 
                 await saveRecommendationFeedback(
                     "별로였어요",
-                    reasons
+                    reasons,
+                    feedbackOtherReason && feedbackOtherReason.checked
+                        && feedbackReasonDetail
+                        ? feedbackReasonDetail.value.trim()
+                        : ""
                 );
 
             } catch {

@@ -71,11 +71,26 @@ def init_feedback_db():
                 outfit_desc TEXT,
                 rating TEXT,
                 reason TEXT,
+                reason_detail TEXT,
                 page_url TEXT,
                 user_agent TEXT
             )
             """
         )
+
+        feedback_columns = [
+            column[1]
+            for column in conn.execute(
+                "PRAGMA table_info(recommendation_feedbacks)"
+            ).fetchall()
+        ]
+
+        if "reason_detail" not in feedback_columns:
+
+            conn.execute(
+                "ALTER TABLE recommendation_feedbacks "
+                "ADD COLUMN reason_detail TEXT"
+            )
 
         conn.execute(
             """
@@ -158,9 +173,10 @@ def save_feedback():
                     outfit_desc,
                     rating,
                     reason,
+                    reason_detail,
                     page_url,
                     user_agent
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     now_timestamp(),
@@ -174,6 +190,7 @@ def save_feedback():
                     payload.get("outfit_desc"),
                     payload.get("rating"),
                     payload.get("reason"),
+                    payload.get("reason_detail"),
                     payload.get("page_url"),
                     request.headers.get("User-Agent", "")
                 )
@@ -264,6 +281,7 @@ def fetch_feedback_rows():
                 outfit_desc,
                 rating,
                 reason,
+                reason_detail,
                 page_url,
                 user_agent
             FROM recommendation_feedbacks
@@ -371,6 +389,7 @@ def admin_feedback():
         "outfit_desc",
         "rating",
         "reason",
+        "reason_detail",
         "page_url",
         "user_agent"
     ]
