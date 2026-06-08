@@ -285,8 +285,12 @@
                 </button>
             </div>
 
-            <img src="{{ outfit.img }}"
-                 class="style-image">
+            <img src="{% if loop.first %}{{ outfit.img }}{% else %}data:image/gif;base64,R0lGODlhAQABAAAAACw={% endif %}"
+                 data-src="{{ outfit.img }}"
+                 class="style-image"
+                 loading="lazy"
+                 decoding="async"
+                 alt="{{ outfit.title }}">
 
             <div class="style-overlay">
 

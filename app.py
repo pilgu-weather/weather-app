@@ -8,6 +8,7 @@ import sqlite3
 import html
 
 app = Flask(__name__)
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 60 * 60 * 24 * 30
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FEEDBACK_DB_PATH = os.getenv(
@@ -622,15 +623,67 @@ STYLE_SEASON_FALLBACK = {
     "fall_cool": "fall",
 }
 
+IMAGE_EXTENSIONS = (
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".webp"
+)
+
 
 def get_background_image(icon):
 
-    return (
-        "/static/"
-        + BACKGROUND_MAP.get(
+    return get_optimized_static_url(
+        BACKGROUND_MAP.get(
             icon,
             "background/cloudy_day.png"
         )
+    )
+
+
+def get_optimized_static_url(relative_path):
+
+    root, ext = os.path.splitext(relative_path)
+
+    if ext.lower() != ".webp":
+
+        webp_path = root + ".webp"
+
+        if os.path.exists(
+            os.path.join("static", webp_path)
+        ):
+
+            relative_path = webp_path
+
+    return "/static/" + relative_path.replace("\\", "/")
+
+
+def get_style_image_files(folder_path):
+
+    image_files = [
+        image
+        for image in os.listdir(folder_path)
+        if image.lower().endswith(IMAGE_EXTENSIONS)
+    ]
+
+    unique_images = {}
+
+    for image in image_files:
+
+        stem, ext = os.path.splitext(image)
+        key = stem.lower()
+
+        if key not in unique_images or ext.lower() != ".webp":
+
+            unique_images[key] = image
+
+    return list(unique_images.values())
+
+
+def get_style_image_url(season, style_folder, image):
+
+    return get_optimized_static_url(
+        f"styles/{season}/{style_folder}/{image}"
     )
 
 
@@ -2087,19 +2140,7 @@ def home():
 
                     continue
 
-                image_list = os.listdir(folder_path)
-
-                image_list = [
-
-                    img for img in image_list
-
-                    if img.endswith((
-                        ".png",
-                        ".jpg",
-                        ".jpeg",
-                        ".webp"
-                    ))
-                ]
+                image_list = get_style_image_files(folder_path)
 
                 if image_list:
 
@@ -2115,24 +2156,28 @@ def home():
             image_candidates = [
 
                 (
-                    f"/static/styles/"
-                    f"{selected_season}/"
-                    f"{style['folder']}/"
-                    f"{image}"
+                    get_style_image_url(
+                        selected_season,
+                        style["folder"],
+                        image
+                    )
                 )
                 for image in image_list
             ]
 
             img_path = (
-                f"/static/styles/"
-                f"{selected_season}/"
-                f"{style['folder']}/"
-                f"{random_image}"
+                get_style_image_url(
+                    selected_season,
+                    style["folder"],
+                    random_image
+                )
             )
 
         except:
 
-            img_path = "/static/styles/default.png"
+            img_path = get_optimized_static_url(
+                "styles/default.png"
+            )
             image_candidates = [img_path]
 
         outfits.append({

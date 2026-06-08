@@ -140,6 +140,50 @@
 
     const pageContext = window.WEATHER_FIT_CONTEXT || {};
 
+    const loadDeferredImage = (image) => {
+
+        if (!image || !image.dataset.src) {
+
+            return;
+        }
+
+        image.src =
+            image.dataset.src;
+
+        image.removeAttribute("data-src");
+    };
+
+    if ("IntersectionObserver" in window) {
+
+        const imageObserver =
+            new IntersectionObserver((entries) => {
+
+                entries.forEach((entry) => {
+
+                    if (!entry.isIntersecting) {
+
+                        return;
+                    }
+
+                    loadDeferredImage(entry.target);
+                    imageObserver.unobserve(entry.target);
+                });
+
+            }, {
+                root: carousel || null,
+                rootMargin: "160px 240px"
+            });
+
+        styleImages.forEach((image) => {
+
+            imageObserver.observe(image);
+        });
+
+    } else {
+
+        styleImages.forEach(loadDeferredImage);
+    }
+
     const closeCalendar = () => {
 
         if (!calendarButton || !calendarPopover) {
@@ -786,8 +830,13 @@
 
         if (styleImage) {
 
+            styleImage.dataset.src =
+                nextImage;
+
             styleImage.src =
                 nextImage;
+
+            styleImage.removeAttribute("data-src");
         }
 
         styleCard.dataset.shareImg =
@@ -968,6 +1017,8 @@
                     return;
                 }
             }
+
+            loadDeferredImage(image);
 
             openImageViewer(
                 image.currentSrc || image.src
