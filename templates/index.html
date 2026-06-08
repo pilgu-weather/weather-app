@@ -672,12 +672,46 @@
 
             display: none;
 
+            position: relative;
+
             margin-top: 12px;
         }
 
         .feedback-reasons.open {
 
             display: block;
+        }
+
+        .feedback-close-button {
+
+            position: absolute;
+
+            top: -4px;
+
+            right: 0;
+
+            width: 28px;
+
+            height: 28px;
+
+            border: 0;
+
+            background:
+                transparent;
+
+            color: rgba(255,255,255,0.82);
+
+            font-size: 16px;
+
+            font-weight: 800;
+
+            line-height: 1;
+
+            cursor: pointer;
+
+            box-shadow: none;
+
+            backdrop-filter: none;
         }
 
         .feedback-reason {
@@ -1508,6 +1542,13 @@
         <div class="feedback-reasons"
              id="feedbackReasons">
 
+            <button class="feedback-close-button"
+                    id="feedbackClose"
+                    type="button"
+                    aria-label="사유 선택 닫기">
+                ×
+            </button>
+
             <div class="feedback-title">
                 어떤 점이 아쉬웠나요?
             </div>
@@ -1753,6 +1794,9 @@
 
     const feedbackReasons =
         document.getElementById("feedbackReasons");
+
+    const feedbackClose =
+        document.getElementById("feedbackClose");
 
     const feedbackSubmit =
         document.getElementById("feedbackSubmit");
@@ -2039,6 +2083,22 @@
         return Array.from(
             feedbackReasons.querySelectorAll("input:checked")
         ).map((input) => input.value);
+    };
+
+    const closeFeedbackReasons = () => {
+
+        if (!feedbackReasons) {
+
+            return;
+        }
+
+        feedbackReasons.classList.remove("open");
+
+        feedbackReasons
+            .querySelectorAll("input:checked")
+            .forEach((input) => {
+                input.checked = false;
+            });
     };
 
     const getOutfitMimeType = (filename) => {
@@ -2598,6 +2658,15 @@
                 });
 
             });
+
+        });
+    }
+
+    if (feedbackClose) {
+
+        feedbackClose.addEventListener("click", () => {
+
+            closeFeedbackReasons();
 
         });
     }
