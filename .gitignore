@@ -1,3 +1,4 @@
 .env
 backups/
 weatherfit_feedback.db
+weather_app/android/signing-key-info.txt
