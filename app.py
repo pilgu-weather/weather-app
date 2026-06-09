@@ -2110,14 +2110,13 @@ def home():
 
     if rain_score < 1:
 
-        background_image = get_background_image("03d")
-
         if weather_main in [
             "Rain",
             "Drizzle",
             "Thunderstorm"
         ]:
 
+            background_image = get_background_image("03d")
             weather_main = "Clouds"
 
     elif selected_rain:
