@@ -14,7 +14,7 @@
 
     <title>Weather Fit</title>
 
-    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/main.css?v=20260609-rain-layout">
 
 </head>
 
@@ -302,9 +302,13 @@
 
                 <div class="style-desc style-desc-rain">
                     {% for desc_line in outfit.desc.split('\n') %}
-                    <span class="{% if loop.first %}rain-recommendation{% endif %}">
+                    <div class="rain-desc-line {% if loop.first %}rain-recommendation{% endif %}">
+                        {% if loop.first %}
+                        <strong>{{ desc_line }}</strong>
+                        {% else %}
                         {{ desc_line }}
-                    </span>
+                        {% endif %}
+                    </div>
                     {% endfor %}
                 </div>
 
