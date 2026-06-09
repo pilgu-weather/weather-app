@@ -346,6 +346,17 @@
             }, 1800);
     };
 
+    const getSanitizedCurrentUrl = () => {
+
+        const url =
+            new URL(window.location.href);
+
+        url.searchParams.delete("lat");
+        url.searchParams.delete("lon");
+
+        return url.toString();
+    };
+
     const copyCurrentPageLink = async () => {
 
         try {
@@ -476,7 +487,7 @@
                 rating: result,
                 reason: reasons.join(", "),
                 reason_detail: reasonDetail,
-                page_url: window.location.href
+                page_url: getSanitizedCurrentUrl()
             }
         );
     };
@@ -771,7 +782,7 @@
                 outfit_title: styleCard.dataset.shareTitle || "",
                 outfit_desc: styleCard.dataset.shareDesc || "",
                 report_reason: "사용자 신고",
-                page_url: window.location.href
+                page_url: getSanitizedCurrentUrl()
             }
         );
     };

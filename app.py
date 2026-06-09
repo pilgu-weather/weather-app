@@ -6,6 +6,7 @@ import os
 import re
 import sqlite3
 import html
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 app = Flask(__name__)
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 60 * 60 * 24 * 30
@@ -194,11 +195,45 @@ def get_report_reason(payload):
     return "내용 없음"
 
 
+def sanitize_page_url(page_url):
+
+    if not page_url:
+
+        return ""
+
+    try:
+
+        parts = urlsplit(str(page_url))
+        query_items = [
+            (key, value)
+            for key, value in parse_qsl(
+                parts.query,
+                keep_blank_values=True
+            )
+            if key.lower() not in ("lat", "lon")
+        ]
+
+        return urlunsplit((
+            parts.scheme,
+            parts.netloc,
+            parts.path,
+            urlencode(query_items, doseq=True),
+            parts.fragment
+        ))
+
+    except Exception:
+
+        return ""
+
+
 @app.route("/feedback", methods=["POST"])
 def save_feedback():
 
     payload = get_request_payload()
     created_at = now_timestamp()
+    page_url = sanitize_page_url(
+        payload.get("page_url")
+    )
 
     try:
 
@@ -238,7 +273,7 @@ def save_feedback():
                     payload.get("rating"),
                     payload.get("reason"),
                     payload.get("reason_detail"),
-                    payload.get("page_url"),
+                    page_url,
                     request.headers.get("User-Agent", "")
                 )
             )
@@ -270,6 +305,9 @@ def save_report():
     payload = get_request_payload()
     created_at = now_timestamp()
     report_reason = get_report_reason(payload)
+    page_url = sanitize_page_url(
+        payload.get("page_url")
+    )
 
     try:
 
@@ -305,7 +343,7 @@ def save_report():
                     payload.get("outfit_id"),
                     payload.get("outfit_image_url"),
                     report_reason,
-                    payload.get("page_url"),
+                    page_url,
                     request.headers.get("User-Agent", "")
                 )
             )
