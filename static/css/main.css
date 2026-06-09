@@ -648,6 +648,31 @@
             max-width: 82%;
         }
 
+        .style-desc-rain {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 3px;
+        }
+
+        .style-desc-rain span {
+
+            display: block;
+        }
+
+        .rain-recommendation {
+
+            margin-bottom: 3px;
+
+            color: rgba(255,255,255,0.96);
+
+            font-size: 16px;
+
+            font-weight: 800;
+        }
+
         .dots {
 
             display: flex;

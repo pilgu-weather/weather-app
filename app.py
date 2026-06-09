@@ -2063,9 +2063,9 @@ def home():
                 "title": "Rainy day",
 
                 "desc": (
+                    f"{rain_recommendation}\n"
                     f"강수 확률 {rain_probability}%\n"
-                    f"예상 누적 강수량 {rain_total_mm:.1f}mm\n"
-                    f"{rain_recommendation}"
+                    f"누적 강수량 {rain_total_mm:.1f}mm"
                 )
 
             })

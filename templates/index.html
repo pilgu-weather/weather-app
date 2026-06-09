@@ -298,9 +298,23 @@
                     {{ outfit.title }}
                 </div>
 
+                {% if outfit.title == "Rainy day" %}
+
+                <div class="style-desc style-desc-rain">
+                    {% for desc_line in outfit.desc.split('\n') %}
+                    <span class="{% if loop.first %}rain-recommendation{% endif %}">
+                        {{ desc_line }}
+                    </span>
+                    {% endfor %}
+                </div>
+
+                {% else %}
+
                 <div class="style-desc">
                     {{ outfit.desc }}
                 </div>
+
+                {% endif %}
 
 
             </div>
