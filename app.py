@@ -668,7 +668,7 @@ IMAGE_EXTENSIONS = (
     ".webp"
 )
 
-OUTFIT_TEMP_ADJUSTMENT = -2
+OUTFIT_TEMP_ADJUSTMENT = -4
 
 
 def get_background_image(icon):
