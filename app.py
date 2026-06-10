@@ -668,6 +668,8 @@ IMAGE_EXTENSIONS = (
     ".webp"
 )
 
+OUTFIT_TEMP_ADJUSTMENT = -2
+
 
 def get_background_image(icon):
 
@@ -2039,9 +2041,11 @@ def home():
         "%Y-%m-%d"
     ).month
 
+    outfit_temp = effective_temp + OUTFIT_TEMP_ADJUSTMENT
+
     season = get_style_season(
         season_month,
-        effective_temp
+        outfit_temp
     )
 
     # =========================
