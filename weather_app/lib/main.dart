@@ -40,14 +40,25 @@ class _WeatherFitWebViewState extends State<WeatherFitWebView> {
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
         NavigationDelegate(
-          onNavigationRequest: (NavigationRequest request) {
+          onNavigationRequest: (NavigationRequest request) async {
+            debugPrint("[WeatherFit] navigation request: ${request.url}");
+
             final uri = Uri.parse(request.url);
 
-            if (uri.path == "/download-outfit-image") {
-              launchUrl(
-                uri,
-                mode: LaunchMode.externalApplication,
-              );
+            if (request.url.contains("/download-outfit-image")) {
+              debugPrint("[WeatherFit] download url detected");
+
+              try {
+                final result = await launchUrl(
+                  uri,
+                  mode: LaunchMode.externalApplication,
+                );
+
+                debugPrint("[WeatherFit] launchUrl result: $result");
+              } catch (error, stackTrace) {
+                debugPrint("[WeatherFit] launchUrl error: $error");
+                debugPrint("[WeatherFit] launchUrl stack: $stackTrace");
+              }
 
               return NavigationDecision.prevent;
             }
