@@ -66,18 +66,6 @@
 
     }
 
-    const shareCard =
-        document.getElementById("shareCard");
-
-    const shareCardImage =
-        document.getElementById("shareCardImage");
-
-    const shareCardTitle =
-        document.getElementById("shareCardTitle");
-
-    const shareCardDesc =
-        document.getElementById("shareCardDesc");
-
     const copyToast =
         document.getElementById("copyToast");
 
@@ -238,21 +226,6 @@
             });
     };
 
-    const downloadShareImage = (blob) => {
-
-        const url =
-            URL.createObjectURL(blob);
-
-        const link =
-            document.createElement("a");
-
-        link.href = url;
-        link.download = "weather-fit.png";
-        link.click();
-
-        URL.revokeObjectURL(url);
-    };
-
     const getOutfitCardId = (styleCard) => {
 
         const cards =
@@ -304,12 +277,12 @@
         return url.toString();
     };
 
-    const copyCurrentPageLink = async () => {
+    const copyTextToClipboard = async (text) => {
 
         try {
 
             await navigator.clipboard.writeText(
-                window.location.href
+                text
             );
 
         } catch {
@@ -318,7 +291,7 @@
                 document.createElement("textarea");
 
             input.value =
-                window.location.href;
+                text;
 
             input.setAttribute("readonly", "");
 
@@ -330,6 +303,13 @@
             document.execCommand("copy");
             input.remove();
         }
+    };
+
+    const copyCurrentPageLink = async () => {
+
+        await copyTextToClipboard(
+            window.location.href
+        );
 
         showCopyToast();
     };
@@ -637,120 +617,73 @@
 
     };
 
-    const waitForShareImages = async () => {
+    const getShareText = (styleCard) => {
 
-        if (!shareCard) {
+        const city =
+            pageContext.city_name || "Weather Fit";
 
-            return;
-        }
+        const temp =
+            pageContext.temp !== null
+            && pageContext.temp !== undefined
+                ? `${pageContext.temp}도`
+                : "";
 
-        const images =
-            Array.from(
-                shareCard.querySelectorAll("img")
-            );
+        const weather =
+            pageContext.weather_main || "";
 
-        await Promise.all(
-            images.map((image) => {
+        const outfitTitle =
+            styleCard?.dataset.shareTitle || "오늘의 코디";
 
-                if (image.complete) {
+        const outfitDesc =
+            styleCard?.dataset.shareDesc || "";
 
-                    return Promise.resolve();
-                }
+        const weatherSummary =
+            [city, weather, temp]
+                .filter(Boolean)
+                .join(" · ");
 
-                return new Promise((resolve) => {
-
-                    image.onload = resolve;
-                    image.onerror = resolve;
-
-                });
-
-            })
-        );
-    };
-
-    const prepareShareCard = (styleCard) => {
-
-        if (
-            !styleCard
-            ||
-            !shareCard
-            || !shareCardImage
-            || !shareCardTitle
-            || !shareCardDesc
-        ) {
-
-            return false;
-        }
-
-        shareCardImage.src =
-            styleCard.dataset.shareImg;
-
-        shareCardTitle.textContent =
-            styleCard.dataset.shareTitle;
-
-        shareCardDesc.textContent =
-            styleCard.dataset.shareDesc;
-
-        return true;
+        return [
+            "Weather Fit",
+            weatherSummary,
+            `${outfitTitle}${outfitDesc ? ` - ${outfitDesc}` : ""}`,
+            "오늘의 날씨와 코디를 확인해보세요"
+        ].filter(Boolean).join("\n");
     };
 
     const shareOutfitCard = async (styleCard) => {
 
-        if (!prepareShareCard(styleCard)) {
+        const shareUrl =
+            getSanitizedCurrentUrl();
 
-            return;
-        }
+        const shareText =
+            getShareText(styleCard);
 
-        if (!window.html2canvas) {
+        if (navigator.share) {
 
-            await navigator.clipboard?.writeText(
-                window.location.href
-            );
-
-            return;
-        }
-
-        await waitForShareImages();
-
-        const canvas =
-            await html2canvas(shareCard, {
-                backgroundColor: null,
-                scale: 2,
-                useCORS: true
-            });
-
-        canvas.toBlob(async (blob) => {
-
-            if (!blob) {
-
-                return;
-            }
-
-            const file =
-                new File(
-                    [blob],
-                    "weather-fit.png",
-                    { type: "image/png" }
-                );
-
-            if (
-                navigator.canShare
-                && navigator.canShare({ files: [file] })
-            ) {
+            try {
 
                 await navigator.share({
-                    files: [file],
                     title: "Weather Fit",
-                    text: "오늘의 날씨와 코디를 확인해보세요",
-                    url: window.location.href
+                    text: shareText,
+                    url: shareUrl
                 });
 
                 return;
+
+            } catch (error) {
+
+                if (error && error.name === "AbortError") {
+
+                    return;
+                }
             }
+        }
 
-            downloadShareImage(blob);
+        await copyTextToClipboard(
+            `${shareText}\n${shareUrl}`
+        );
 
-        }, "image/png");
+        showCopyToast("공유 문구가 복사되었습니다");
     };
 
     outfitMenuButtons.forEach((button) => {
@@ -878,6 +811,7 @@
 
             button.addEventListener("click", async (event) => {
 
+                event.preventDefault();
                 event.stopPropagation();
 
                 const styleCard =

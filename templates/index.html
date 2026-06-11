@@ -444,84 +444,6 @@
 
 </div>
 
-{% if temp and outfits %}
-
-<div class="share-card"
-     id="shareCard"
-     aria-hidden="true">
-
-    <div class="share-card-logo">
-        Weather Fit
-    </div>
-
-    <div class="share-card-city">
-        {{ city_name }}
-    </div>
-
-    <div class="share-card-weather">
-        {{ weather_main }}
-    </div>
-
-    <div class="share-card-temp">
-        {{ temp }}°
-    </div>
-
-    {% if temp_min is not none and temp_max is not none %}
-
-    <div class="share-card-range">
-        최저 {{ temp_min }}° / 최고 {{ temp_max }}°
-    </div>
-
-    {% endif %}
-
-    {% for outfit in outfits %}
-
-    {% if outfit.title == "Rainy day" %}
-
-    <div class="share-card-rain">
-        {{ outfit.desc }}
-    </div>
-
-    {% endif %}
-
-    {% endfor %}
-
-    <div class="share-card-outfit">
-
-        <div class="share-card-outfit-image">
-
-            <img id="shareCardImage"
-                 src=""
-                 alt="">
-
-        </div>
-
-        <div class="share-card-outfit-text">
-
-            <div class="share-card-outfit-title"
-                 id="shareCardTitle"></div>
-
-            <div class="share-card-outfit-desc"
-                 id="shareCardDesc"></div>
-
-        </div>
-
-    </div>
-
-    <div class="share-card-branding">
-
-        <strong>Weather Fit</strong>
-
-        <div>
-            오늘의 날씨와 코디를 확인해보세요
-        </div>
-
-    </div>
-
-</div>
-
-{% endif %}
-
 <div class="copy-toast"
      id="copyToast"
      role="status"
@@ -595,7 +517,6 @@
         weather_main: {{ weather_main|tojson }}
     };
 </script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="/static/js/main.js" defer></script>
 
 
