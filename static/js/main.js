@@ -701,7 +701,12 @@
                 ? styleCard.dataset.shareImg
                 : "";
 
+        console.log("[WeatherFit] downloadOutfitImage entered", styleCard);
+        console.log("[WeatherFit] imageUrl", imageUrl);
+
         if (!imageUrl) {
+
+            console.error("[WeatherFit] missing image url");
 
             return;
         }
@@ -709,10 +714,17 @@
         const filename =
             getOutfitDownloadName(styleCard);
 
-        triggerImageDownload(
-            getOutfitDownloadUrl(imageUrl, filename),
-            filename
-        );
+        const downloadUrl =
+            new URL(
+                getOutfitDownloadUrl(imageUrl, filename),
+                window.location.href
+            ).toString();
+
+        console.log("[WeatherFit] downloadUrl", downloadUrl);
+        console.log("[WeatherFit] navigating to downloadUrl");
+
+        window.location.href =
+            downloadUrl;
     };
 
     const openReportDialog = (styleCard) => {
@@ -836,6 +848,15 @@
 
         styleCard.dataset.shareImg =
             nextImage;
+
+        const downloadButton =
+            styleCard.querySelector("[data-download-outfit]");
+
+        if (downloadButton) {
+
+            downloadButton.dataset.imageUrl =
+                nextImage;
+        }
     };
 
     const waitForShareImages = async () => {
@@ -1000,6 +1021,19 @@
 
             menu.addEventListener("click", (event) => {
 
+                const target =
+                    event.target instanceof Element
+                        ? event.target
+                        : null;
+
+                if (
+                    target
+                    && target.closest("[data-download-outfit]")
+                ) {
+
+                    return;
+                }
+
                 event.stopPropagation();
             });
         });
@@ -1103,24 +1137,94 @@
 
         });
 
-    document
-        .querySelectorAll(".outfit-download-action")
-        .forEach((button) => {
+    let lastOutfitDownloadEventAt =
+        0;
 
-            button.addEventListener("click", async (event) => {
+    const handleOutfitDownloadAction = async (button, event) => {
 
-                event.stopPropagation();
+        if (!button) {
 
-                const styleCard =
-                    button.closest(".style-card");
+            return;
+        }
 
-                closeOutfitMenus();
+        const now =
+            Date.now();
 
-                await downloadOutfitImage(styleCard);
+        if (now - lastOutfitDownloadEventAt < 700) {
 
-            });
+            event.preventDefault();
+            event.stopPropagation();
 
-        });
+            return;
+        }
+
+        lastOutfitDownloadEventAt =
+            now;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (event.stopImmediatePropagation) {
+
+            event.stopImmediatePropagation();
+        }
+
+        console.log("[WeatherFit] save image clicked", event.target);
+
+        const styleCard =
+            button.closest(".style-card");
+
+        const imageUrl =
+            styleCard?.dataset.shareImg
+            || button.dataset.imageUrl
+            || "";
+
+        console.log("[WeatherFit] imageUrl", imageUrl);
+
+        closeOutfitMenus();
+
+        await downloadOutfitImage(styleCard);
+    };
+
+    document.addEventListener("click", async (event) => {
+
+        const target =
+            event.target instanceof Element
+                ? event.target
+                : null;
+
+        const downloadButton =
+            target
+                ? target.closest("[data-download-outfit]")
+                : null;
+
+        if (!downloadButton) {
+
+            return;
+        }
+
+        await handleOutfitDownloadAction(downloadButton, event);
+    });
+
+    document.addEventListener("touchend", async (event) => {
+
+        const target =
+            event.target instanceof Element
+                ? event.target
+                : null;
+
+        const downloadButton =
+            target
+                ? target.closest("[data-download-outfit]")
+                : null;
+
+        if (!downloadButton) {
+
+            return;
+        }
+
+        await handleOutfitDownloadAction(downloadButton, event);
+    }, { passive: false });
 
     document
         .querySelectorAll(".outfit-report-action")
