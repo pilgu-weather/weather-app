@@ -876,7 +876,56 @@
 
         .feedback-reason input {
 
-            accent-color: white;
+            appearance: none;
+
+            -webkit-appearance: none;
+
+            width: 18px;
+
+            height: 18px;
+
+            flex: 0 0 18px;
+
+            border:
+                1.5px solid rgba(255,255,255,0.72);
+
+            border-radius: 5px;
+
+            background:
+                rgba(255,255,255,0.10);
+
+            display: grid;
+
+            place-content: center;
+
+            cursor: pointer;
+        }
+
+        .feedback-reason input:checked {
+
+            border-color: white;
+
+            background:
+                white;
+        }
+
+        .feedback-reason input:checked::after {
+
+            content: "";
+
+            width: 9px;
+
+            height: 5px;
+
+            border-left:
+                2px solid #111318;
+
+            border-bottom:
+                2px solid #111318;
+
+            transform:
+                rotate(-45deg)
+                translate(1px, -1px);
         }
 
         .feedback-detail-input {
