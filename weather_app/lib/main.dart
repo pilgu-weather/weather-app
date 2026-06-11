@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 
@@ -37,36 +36,7 @@ class _WeatherFitWebViewState extends State<WeatherFitWebView> {
     super.initState();
 
     controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onNavigationRequest: (NavigationRequest request) async {
-            debugPrint("[WeatherFit] navigation request: ${request.url}");
-
-            final uri = Uri.parse(request.url);
-
-            if (request.url.contains("/download-outfit-image")) {
-              debugPrint("[WeatherFit] download url detected");
-
-              try {
-                final result = await launchUrl(
-                  uri,
-                  mode: LaunchMode.externalApplication,
-                );
-
-                debugPrint("[WeatherFit] launchUrl result: $result");
-              } catch (error, stackTrace) {
-                debugPrint("[WeatherFit] launchUrl error: $error");
-                debugPrint("[WeatherFit] launchUrl stack: $stackTrace");
-              }
-
-              return NavigationDecision.prevent;
-            }
-
-            return NavigationDecision.navigate;
-          },
-        ),
-      );
+      ..setJavaScriptMode(JavaScriptMode.unrestricted);
 
     _configureWebView();
   }

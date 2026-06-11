@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, abort, send_file
+from flask import Flask, render_template, request, jsonify, abort
 import requests
 from datetime import datetime, timedelta
 import random
@@ -6,7 +6,7 @@ import os
 import re
 import sqlite3
 import html
-from urllib.parse import parse_qsl, unquote, urlencode, urlsplit, urlunsplit
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 app = Flask(__name__)
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 60 * 60 * 24 * 30
@@ -39,44 +39,6 @@ if not API_KEY:
 def health():
 
     return "ok", 200
-
-
-@app.route("/download-outfit-image")
-def download_outfit_image():
-
-    image_url = request.args.get("url", "")
-    filename = request.args.get(
-        "filename",
-        "weatherfit-outfit.jpg"
-    )
-
-    parsed = urlsplit(image_url)
-    image_path = unquote(parsed.path or image_url)
-
-    if not image_path.startswith("/static/"):
-
-        abort(400)
-
-    relative_path = image_path[len("/static/"):]
-    static_root = os.path.abspath(
-        os.path.join(BASE_DIR, "static")
-    )
-    file_path = os.path.abspath(
-        os.path.join(static_root, relative_path)
-    )
-
-    if (
-        not file_path.startswith(static_root + os.sep)
-        or not os.path.isfile(file_path)
-    ):
-
-        abort(404)
-
-    return send_file(
-        file_path,
-        as_attachment=True,
-        attachment_filename=filename
-    )
 
 
 def get_feedback_db():
