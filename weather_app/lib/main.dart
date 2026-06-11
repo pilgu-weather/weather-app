@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,9 +38,52 @@ class _WeatherFitWebViewState extends State<WeatherFitWebView> {
 
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(
-        Uri.parse("https://weather-app-1-xy3b.onrender.com"),
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onNavigationRequest: (NavigationRequest request) {
+            final uri = Uri.parse(request.url);
+
+            if (uri.path == "/download-outfit-image") {
+              launchUrl(
+                uri,
+                mode: LaunchMode.externalApplication,
+              );
+
+              return NavigationDecision.prevent;
+            }
+
+            return NavigationDecision.navigate;
+          },
+        ),
       );
+
+    _configureWebView();
+  }
+
+  Future<void> _configureWebView() async {
+    if (Platform.isAndroid &&
+        controller.platform is AndroidWebViewController) {
+      final androidController =
+          controller.platform as AndroidWebViewController;
+
+      await androidController.setGeolocationEnabled(true);
+
+      await androidController.setGeolocationPermissionsPromptCallbacks(
+        onShowPrompt: (GeolocationPermissionsRequestParams request) async {
+          final status =
+              await Permission.locationWhenInUse.request();
+
+          return GeolocationPermissionsResponse(
+            allow: status.isGranted,
+            retain: true,
+          );
+        },
+      );
+    }
+
+    await controller.loadRequest(
+      Uri.parse("https://weather-app-1-xy3b.onrender.com"),
+    );
   }
 
   @override

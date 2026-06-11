@@ -322,6 +322,17 @@
         link.remove();
     };
 
+    const getOutfitDownloadUrl = (imageUrl, filename) => {
+
+        const params =
+            new URLSearchParams();
+
+        params.set("url", imageUrl);
+        params.set("filename", filename);
+
+        return `/download-outfit-image?${params.toString()}`;
+    };
+
     let copyToastTimer;
 
     const showCopyToast = (message = "링크가 복사되었습니다") => {
@@ -698,37 +709,10 @@
         const filename =
             getOutfitDownloadName(styleCard);
 
-        try {
-
-            const response =
-                await fetch(imageUrl);
-
-            if (!response.ok) {
-
-                throw new Error("Image download failed");
-            }
-
-            const blob =
-                await response.blob();
-
-            const watermarkedBlob =
-                await addWatermarkToImage(blob, filename);
-
-            const blobUrl =
-                URL.createObjectURL(watermarkedBlob);
-
-            triggerImageDownload(blobUrl, filename);
-
-            setTimeout(() => {
-
-                URL.revokeObjectURL(blobUrl);
-
-            }, 1000);
-
-        } catch {
-
-            triggerImageDownload(imageUrl, filename);
-        }
+        triggerImageDownload(
+            getOutfitDownloadUrl(imageUrl, filename),
+            filename
+        );
     };
 
     const openReportDialog = (styleCard) => {
@@ -972,8 +956,15 @@
 
     outfitMenuButtons.forEach((button) => {
 
+        button.addEventListener("pointerdown", (event) => {
+
+            event.preventDefault();
+            event.stopPropagation();
+        });
+
         button.addEventListener("click", (event) => {
 
+            event.preventDefault();
             event.stopPropagation();
 
             const menu =
@@ -997,6 +988,21 @@
         });
 
     });
+
+    document
+        .querySelectorAll(".outfit-menu")
+        .forEach((menu) => {
+
+            menu.addEventListener("pointerdown", (event) => {
+
+                event.stopPropagation();
+            });
+
+            menu.addEventListener("click", (event) => {
+
+                event.stopPropagation();
+            });
+        });
 
     styleImages.forEach((image) => {
 
