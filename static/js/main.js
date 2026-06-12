@@ -279,13 +279,16 @@
 
     const copyTextToClipboard = async (text) => {
 
-        try {
+        if (navigator.clipboard && window.isSecureContext) {
 
             await navigator.clipboard.writeText(
                 text
             );
 
-        } catch {
+            return;
+        }
+
+        return new Promise((resolve, reject) => {
 
             const input =
                 document.createElement("textarea");
@@ -297,12 +300,36 @@
 
             input.style.position = "fixed";
             input.style.left = "-9999px";
+            input.style.top = "0";
 
             document.body.appendChild(input);
+            input.focus();
             input.select();
-            document.execCommand("copy");
-            input.remove();
-        }
+
+            try {
+
+                const successful =
+                    document.execCommand("copy");
+
+                input.remove();
+
+                if (successful) {
+
+                    resolve();
+
+                    return;
+                }
+
+                reject(
+                    new Error("execCommand copy failed")
+                );
+
+            } catch (error) {
+
+                input.remove();
+                reject(error);
+            }
+        });
     };
 
     const copyCurrentPageLink = async () => {
@@ -658,9 +685,12 @@
         const shareText =
             getShareText(styleCard);
 
-        if (navigator.share) {
+        const fullText =
+            `${shareText}\n${shareUrl}`;
 
-            try {
+        try {
+
+            if (navigator.share) {
 
                 await navigator.share({
                     title: "Weather Fit",
@@ -668,22 +698,37 @@
                     url: shareUrl
                 });
 
+                showCopyToast("공유창을 열었습니다");
+
                 return;
+            }
 
-            } catch (error) {
+            await copyTextToClipboard(fullText);
 
-                if (error && error.name === "AbortError") {
+            showCopyToast("공유 문구가 복사되었습니다");
 
-                    return;
-                }
+        } catch (error) {
+
+            console.error("[WeatherFit] Share failed:", error);
+
+            try {
+
+                await copyTextToClipboard(fullText);
+
+                showCopyToast("공유 문구가 복사되었습니다");
+
+            } catch (copyError) {
+
+                console.error(
+                    "[WeatherFit] Clipboard fallback failed:",
+                    copyError
+                );
+
+                alert(
+                    `공유 문구를 복사해 주세요:\n\n${fullText}`
+                );
             }
         }
-
-        await copyTextToClipboard(
-            `${shareText}\n${shareUrl}`
-        );
-
-        showCopyToast("공유 문구가 복사되었습니다");
     };
 
     outfitMenuButtons.forEach((button) => {
@@ -819,7 +864,21 @@
 
                 closeOutfitMenus();
 
-                await shareOutfitCard(styleCard);
+                try {
+
+                    await shareOutfitCard(styleCard);
+
+                } catch (error) {
+
+                    console.error(
+                        "[WeatherFit] Share action failed:",
+                        error
+                    );
+
+                    showCopyToast(
+                        "공유를 다시 시도해주세요"
+                    );
+                }
 
             });
 
