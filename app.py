@@ -2057,13 +2057,13 @@ def home():
         {
             "folder": "casual",
             "title": "Casual",
-            "desc": "편안하고 자연스러운 감성"
+            "desc": "편안하고 자연스러운 조합"
         },
 
         {
             "folder": "urban",
             "title": "Urban",
-            "desc": "데일리 도시 감성"
+            "desc": "데일리 도시 스타일"
         },
 
         {
@@ -2075,7 +2075,7 @@ def home():
         {
             "folder": "minimal",
             "title": "Minimal",
-            "desc": "깔끔하고 미니멀한 감성"
+            "desc": "깔끔하고 미니멀한 조합"
         }
 
     ]
