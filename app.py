@@ -1360,7 +1360,11 @@ def get_today_message(
 
         return random.choice(wind_messages)
 
-    if temp_gap >= 8:
+    allow_layered_message = (
+        temp is None or temp < 27
+    )
+
+    if temp_gap >= 8 and allow_layered_message:
 
         return random.choice(gap_messages)
 
@@ -1390,7 +1394,10 @@ def get_today_message(
 
             return random.choice(effective_wind_messages)
 
-        if effective_temp_reasons.get("temp_gap"):
+        if (
+            effective_temp_reasons.get("temp_gap")
+            and allow_layered_message
+        ):
 
             return random.choice(effective_gap_messages)
 
@@ -2142,10 +2149,17 @@ def home():
 
         })
 
+    layered_temp_reference = (
+        temp_max if temp_max is not None else temp
+    )
+
     if (
         season.startswith("spring")
         or season.startswith("fall")
-    ) and temp_gap >= 6:
+    ) and temp_gap >= 6 and (
+        layered_temp_reference is None
+        or layered_temp_reference < 27
+    ):
 
         styles.insert(0, {
 
