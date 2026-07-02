@@ -1,7 +1,22 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.inputStream().use {
+        keystoreProperties.load(it)
+    }
+}
+
+fun signingProperty(name: String, envName: String): String? {
+    return keystoreProperties.getProperty(name) ?: System.getenv(envName)
 }
 
 android {
@@ -11,10 +26,22 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("../signing.keystore")
-            storePassword = "8dXqvJYR09GD"
-            keyAlias = "my-key-alias"
-            keyPassword = "8dXqvJYR09GD"
+            storeFile = file(
+                signingProperty("storeFile", "WEATHERFIT_STORE_FILE")
+                    ?: "../signing.keystore"
+            )
+            storePassword = signingProperty(
+                "storePassword",
+                "WEATHERFIT_STORE_PASSWORD"
+            )
+            keyAlias = signingProperty(
+                "keyAlias",
+                "WEATHERFIT_KEY_ALIAS"
+            )
+            keyPassword = signingProperty(
+                "keyPassword",
+                "WEATHERFIT_KEY_PASSWORD"
+            )
         }
     }
 

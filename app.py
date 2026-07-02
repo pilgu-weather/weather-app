@@ -23,11 +23,6 @@ FEEDBACK_DB_PATH = os.getenv(
 API_KEY = os.getenv("OPENWEATHER_API_KEY")
 DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
 
-print(
-    "OPENWEATHER_API_KEY exists:",
-    bool(API_KEY)
-)
-
 if not API_KEY:
 
     raise ValueError(

@@ -2,3 +2,7 @@
 backups/
 weatherfit_feedback.db
 weather_app/android/signing-key-info.txt
+api key.txt
+key.properties
+*.keystore
+*.jks

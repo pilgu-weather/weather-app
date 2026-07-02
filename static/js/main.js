@@ -25,10 +25,7 @@
                             `/?lat=${lat}&lon=${lon}&date=${selectedDate}`;
                     },
 
-                    () => {
-
-                        console.log("Location denied");
-                    }
+                    () => {}
                 );
             }
         };
