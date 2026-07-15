@@ -1283,14 +1283,14 @@ def get_today_message(
 
     temperature_messages = {
         "hot": [
-            "무더운 날이에요. 통풍 좋은 소재와 밝은 컬러를 추천해요.",
-            "햇볕이 강하게 느껴질 수 있어요. 가볍고 시원하게 입어주세요.",
-            "높은 기온엔 린넨이나 얇은 코튼이 잘 어울려요.",
+            "무더운 날이에요. 통풍 좋은 소재와 밝은 컬러가 편해요.",
+            "햇볕이 강하게 느껴질 수 있어요. 가볍고 시원한 착장이 어울려요.",
+            "높은 기온엔 린넨이나 얇은 코튼처럼 열이 덜 갇히는 소재가 좋아요.",
             "긴 외출이라면 땀 배출이 쉬운 코디가 편해요.",
-            "햇빛을 생각해 가벼운 긴소매도 좋은 선택이에요.",
-            "시원한 착장이 필요한 날이에요. 신발도 가볍게 골라주세요.",
-            "체온이 오르기 쉬워요. 몸에 붙지 않는 핏을 추천해요.",
-            "무더위엔 심플하고 통기성 좋은 옷을 추천해요.",
+            "햇빛과 열감이 모두 강한 날이에요. 짧고 가벼운 소매가 더 자연스러워요.",
+            "시원한 착장이 필요한 날이에요. 신발도 가볍게 맞추면 편해요.",
+            "체온이 오르기 쉬워요. 몸에 붙지 않는 여유 있는 핏이 좋아요.",
+            "무더위엔 심플하고 통기성 좋은 옷이 편해요.",
         ],
         "warm": [
             "따뜻한 날이에요. 가벼운 상의와 편한 하의가 잘 맞아요.",
@@ -1347,6 +1347,10 @@ def get_today_message(
 
         return random.choice(thunder_messages)
 
+    if temp is not None and temp >= 30:
+
+        return random.choice(temperature_messages["hot"])
+
     if weather_main in ["Rain", "Drizzle"]:
 
         return random.choice(rain_messages)
@@ -1399,10 +1403,6 @@ def get_today_message(
     if uv_index is not None and uv_index >= 6:
 
         return random.choice(uv_messages)
-
-    if temp >= 30:
-
-        return random.choice(temperature_messages["hot"])
 
     if temp >= 25:
 
