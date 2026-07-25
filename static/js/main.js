@@ -32,6 +32,72 @@
 
     
 
+    const reportClientError = (type, message) => {
+
+        const payload = JSON.stringify({
+            type,
+            message: String(message || "Unknown client error")
+                .slice(0, 300),
+            path: window.location.pathname
+        });
+
+        try {
+
+            if (navigator.sendBeacon) {
+
+                const sent = navigator.sendBeacon(
+                    "/client-error",
+                    new Blob(
+                        [payload],
+                        { type: "application/json" }
+                    )
+                );
+
+                if (sent) {
+
+                    return;
+                }
+            }
+
+            fetch("/client-error", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: payload,
+                keepalive: true
+            }).catch(() => {});
+
+        } catch (_) {}
+    };
+
+    window.addEventListener("error", (event) => {
+
+        reportClientError(
+            "javascript_error",
+            event.message
+        );
+    });
+
+    window.addEventListener(
+        "unhandledrejection",
+        (event) => {
+
+            reportClientError(
+                "unhandled_rejection",
+                event.reason?.message || event.reason
+            );
+        }
+    );
+
+    const errorRetryButton =
+        document.getElementById("errorRetryButton");
+
+    errorRetryButton?.addEventListener("click", () => {
+
+        window.location.reload();
+    });
+
     const carousel =
         document.querySelector(".carousel");
 

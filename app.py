@@ -36,6 +36,12 @@ def health():
     return "ok", 200
 
 
+@app.route("/privacy")
+def privacy():
+
+    return render_template("privacy.html")
+
+
 def get_feedback_db():
 
     db_dir = os.path.dirname(FEEDBACK_DB_PATH)
@@ -163,6 +169,33 @@ def get_request_payload():
         return {}
 
     return payload
+
+
+def sanitize_log_value(value, limit=300):
+
+    text = str(value or "")[:limit]
+
+    return re.sub(
+        r"([?&](?:lat|lon|appid)=)[^&\s]+",
+        r"\1[redacted]",
+        text,
+        flags=re.IGNORECASE
+    )
+
+
+@app.route("/client-error", methods=["POST"])
+def log_client_error():
+
+    payload = get_request_payload()
+
+    app.logger.warning(
+        "client_error type=%s message=%s path=%s",
+        sanitize_log_value(payload.get("type"), 40),
+        sanitize_log_value(payload.get("message")),
+        sanitize_log_value(payload.get("path"), 160)
+    )
+
+    return "", 204
 
 
 def get_report_reason(payload):
@@ -722,7 +755,37 @@ def get_style_image_url(season, style_folder, image):
     )
 
 
+def get_external_api_name(url):
+
+    parts = urlsplit(url)
+    path = parts.path.lower()
+
+    if "openweathermap.org" in parts.netloc.lower():
+
+        if "/forecast" in path:
+
+            return "openweather_forecast"
+
+        if "/air_pollution" in path:
+
+            return "openweather_air_pollution"
+
+        if "/geo/" in path:
+
+            return "openweather_geocoding"
+
+        if "/onecall" in path:
+
+            return "openweather_onecall"
+
+        return "openweather_current"
+
+    return parts.netloc or "external_api"
+
+
 def fetch_json(url):
+
+    service_name = get_external_api_name(url)
 
     try:
 
@@ -730,11 +793,34 @@ def fetch_json(url):
 
         if response.status_code != 200:
 
+            app.logger.warning(
+                "external_api_failure service=%s status=%s",
+                service_name,
+                response.status_code
+            )
+
             return None, response.status_code
 
-        return response.json(), response.status_code
+        try:
 
-    except:
+            return response.json(), response.status_code
+
+        except ValueError:
+
+            app.logger.warning(
+                "external_api_invalid_json service=%s",
+                service_name
+            )
+
+            return None, response.status_code
+
+    except requests.RequestException as error:
+
+        app.logger.warning(
+            "external_api_exception service=%s error=%s",
+            service_name,
+            type(error).__name__
+        )
 
         return None, None
 

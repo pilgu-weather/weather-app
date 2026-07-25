@@ -14,7 +14,7 @@
 
     <title>Weather Fit</title>
 
-    <link rel="stylesheet" href="/static/css/main.css?v=20260609-rain-layout">
+    <link rel="stylesheet" href="/static/css/main.css?v=20260726-privacy-errors">
 
 </head>
 
@@ -120,8 +120,16 @@
 
     {% if error %}
 
-    <div class="sub">
-        {{ error }}
+    <div class="error-state"
+         role="alert">
+        <div class="error-message">
+            {{ error }}
+        </div>
+        <button class="error-retry-button"
+                id="errorRetryButton"
+                type="button">
+            다시 시도
+        </button>
     </div>
 
     {% endif %}
@@ -442,6 +450,10 @@
 
     {% endif %}
 
+    <footer class="legal-footer">
+        <a href="/privacy">개인정보처리방침 및 위치정보 안내</a>
+    </footer>
+
 </div>
 
 <div class="copy-toast"
@@ -517,7 +529,7 @@
         weather_main: {{ weather_main|tojson }}
     };
 </script>
-<script src="/static/js/main.js" defer></script>
+<script src="/static/js/main.js?v=20260726-privacy-errors" defer></script>
 
 
 

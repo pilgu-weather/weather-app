@@ -507,6 +507,65 @@
             margin-top: 4px;
         }
 
+        .error-state {
+
+            margin: 18px 0;
+
+            padding: 18px;
+
+            border: 1px solid rgba(255,255,255,0.16);
+
+            border-radius: 16px;
+
+            background: rgba(0,0,0,0.18);
+
+            text-align: center;
+        }
+
+        .error-message {
+
+            color: rgba(255,255,255,0.92);
+
+            font-size: 14px;
+
+            line-height: 1.5;
+        }
+
+        .error-retry-button {
+
+            margin-top: 12px;
+
+            padding: 10px 18px;
+
+            border: 1px solid rgba(255,255,255,0.24);
+
+            border-radius: 10px;
+
+            background: rgba(255,255,255,0.10);
+
+            color: #fff;
+
+            font: inherit;
+
+            cursor: pointer;
+        }
+
+        .legal-footer {
+
+            padding: 22px 0 30px;
+
+            text-align: center;
+        }
+
+        .legal-footer a {
+
+            color: rgba(255,255,255,0.58);
+
+            font-size: 12px;
+
+            text-decoration: none;
+        }
+
         .carousel {
 
             display: flex;
