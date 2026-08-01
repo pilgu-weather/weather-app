@@ -28,7 +28,7 @@
 - 추천 평가·신고 데이터 유형과 목적 표시
 - 모든 수집 데이터가 전송 중 암호화되는지 확인
 - 개인정보처리방침 URL을 `https://weather-app-1-xy3b.onrender.com/privacy`로 등록
-- 데이터 삭제 요청 방법으로 `weatherfitteam@gmail.com` 안내
+- 데이터 삭제 요청 방법으로 `northstarlabshelp@gmail.com` 안내
 - Render, OpenWeather, Discord의 서비스 제공자 해당 여부와 국외 처리 내용을 최종 검토
 
 Google Play은 정확한 위치를 3제곱킬로미터보다 좁은 범위의 물리적 위치로 정의하며, `ACCESS_FINE_LOCATION`으로 얻는 위치를 예로 든다. 최종 제출 내용은 실제 배포 앱과 항상 일치해야 한다.
