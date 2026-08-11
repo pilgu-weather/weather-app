@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, abort
 import requests
 from datetime import datetime, timedelta
 import random
+import time
 import os
 import re
 import sqlite3
@@ -904,14 +905,22 @@ def normalize_alert_area(city_name):
 def get_alert_level(event_text):
 
     lower_text = event_text.lower()
-    warning_text = decode_alert_text("\\uacbd\\ubcf4")
+    warning_text = "경보"
+    advisory_text = "주의보"
 
-    if warning_text in event_text or "warning" in lower_text:
+    if warning_text in event_text:
 
         return "warning", warning_text
 
-    return "advisory", decode_alert_text("\\uc8fc\\uc758\\ubcf4")
+    if advisory_text in event_text:
 
+        return "advisory", advisory_text
+
+    if "warning" in lower_text:
+
+        return "warning", warning_text
+
+    return "advisory", advisory_text
 
 def get_alert_type(event_text):
 
@@ -933,6 +942,80 @@ def get_alert_type(event_text):
     return None
 
 
+def is_alert_active(alert, now_ts=None):
+
+    now_ts = time.time() if now_ts is None else now_ts
+    start_at = alert.get("start")
+    end_at = alert.get("end")
+
+    if isinstance(start_at, (int, float)) and now_ts < start_at:
+
+        return False
+
+    if isinstance(end_at, (int, float)) and now_ts > end_at:
+
+        return False
+
+    return True
+
+
+def build_weather_alert_notice(alerts, city_name, now_ts=None):
+
+    if not isinstance(alerts, list):
+
+        return None
+
+    candidates = []
+    area = normalize_alert_area(city_name)
+    prefix = "⚠️"
+    suffix = "발효"
+
+    for index, alert in enumerate(alerts):
+
+        if not isinstance(alert, dict):
+
+            continue
+
+        if not is_alert_active(alert, now_ts):
+
+            continue
+
+        event_text = " ".join([
+            str(alert.get("event", "")),
+            str(alert.get("description", ""))
+        ])
+        alert_type = get_alert_type(event_text)
+
+        if not alert_type:
+
+            continue
+
+        level, level_text = get_alert_level(event_text)
+
+        if area:
+
+            text = f"{prefix} {area} {alert_type}{level_text} {suffix}"
+
+        else:
+
+            text = f"{prefix} {alert_type}{level_text} {suffix}"
+
+        candidates.append((
+            1 if level == "warning" else 0,
+            -index,
+            {
+                "text": text,
+                "level": level
+            }
+        ))
+
+    if not candidates:
+
+        return None
+
+    return max(candidates, key=lambda item: item[:2])[2]
+
+
 def get_weather_alert_notice(lat, lon, city_name):
 
     if lat is None or lon is None:
@@ -945,56 +1028,16 @@ def get_weather_alert_notice(lat, lon, city_name):
         f"&exclude=current,minutely,hourly,daily"
         f"&appid={API_KEY}"
     )
-
     alert_data, alert_status_code = fetch_json(alert_url)
 
     if alert_status_code != 200 or not alert_data:
 
         return None
 
-    alerts = alert_data.get("alerts", [])
-
-    if not isinstance(alerts, list):
-
-        return None
-
-    for alert in alerts:
-
-        if not isinstance(alert, dict):
-
-            continue
-
-        event_text = " ".join([
-            str(alert.get("event", "")),
-            str(alert.get("description", ""))
-        ])
-
-        alert_type = get_alert_type(event_text)
-
-        if not alert_type:
-
-            continue
-
-        level, level_text = get_alert_level(event_text)
-        area = normalize_alert_area(city_name)
-        prefix = decode_alert_text("\\u26a0\\ufe0f")
-        suffix = decode_alert_text("\\ubc1c\\ud6a8")
-
-        if area:
-
-            text = f"{prefix} {area} {alert_type}{level_text} {suffix}"
-
-        else:
-
-            text = f"{prefix} {alert_type}{level_text} {suffix}"
-
-        return {
-            "text": text,
-            "level": level
-        }
-
-    return None
-
+    return build_weather_alert_notice(
+        alert_data.get("alerts", []),
+        city_name
+    )
 
 def get_uv_index(lat, lon):
 
