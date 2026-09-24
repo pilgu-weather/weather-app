@@ -683,11 +683,12 @@ BACKGROUND_MAP = {
 
 
 STYLE_SEASON_FALLBACK = {
-    "spring_warm": "spring",
-    "spring_cool": "spring",
-    "summer_cool": "summer",
-    "fall_warm": "fall",
-    "fall_cool": "fall",
+    "spring_warm": ("spring", "summer_cool", "summer"),
+    "spring_cool": ("spring", "summer_cool", "summer"),
+    "summer_cool": ("summer", "spring"),
+    "fall_warm": ("fall", "summer_cool", "summer", "spring"),
+    "fall_cool": ("fall", "spring", "summer_cool", "summer"),
+    "winter": ("spring", "summer_cool", "summer"),
 }
 
 IMAGE_EXTENSIONS = (
@@ -1132,11 +1133,13 @@ def get_style_folder_candidates(season, style_folder):
 
     seasons = [season]
 
-    fallback_season = STYLE_SEASON_FALLBACK.get(season)
+    fallback_seasons = STYLE_SEASON_FALLBACK.get(season, ())
 
-    if fallback_season:
+    for fallback_season in fallback_seasons:
 
-        seasons.append(fallback_season)
+        if fallback_season not in seasons:
+
+            seasons.append(fallback_season)
 
     return [
         (
