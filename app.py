@@ -686,9 +686,10 @@ STYLE_SEASON_FALLBACK = {
     "spring_warm": ("spring", "summer_cool", "summer"),
     "spring_cool": ("spring", "summer_cool", "summer"),
     "summer_cool": ("summer", "spring"),
-    "fall_warm": ("fall", "summer_cool", "summer", "spring"),
-    "fall_cool": ("fall", "spring", "summer_cool", "summer"),
-    "winter": ("spring", "summer_cool", "summer"),
+    "fall_warm": ("winter", "fall", "summer_cool", "summer", "spring"),
+    "fall_cool": ("fall", "winter", "spring", "summer_cool", "summer"),
+    # Keep cold-weather recommendations with cold-weather outfits.
+    "winter": (),
 }
 
 IMAGE_EXTENSIONS = (
@@ -1148,6 +1149,54 @@ def get_style_folder_candidates(season, style_folder):
         )
         for current_season in seasons
     ]
+
+
+def get_available_style_folder_candidates(season, style_folder):
+
+    candidates = get_style_folder_candidates(season, style_folder)
+
+    if season not in ("fall_cool", "fall_warm", "winter"):
+
+        return candidates
+
+    winter_folder = next(
+        (
+            candidate
+            for candidate in candidates
+            if candidate[0] == "winter"
+        ),
+        None
+    )
+
+    if winter_folder is None:
+
+        return candidates
+
+    season_folder = next(
+        (
+            candidate
+            for candidate in candidates
+            if candidate[0] == season
+        ),
+        None
+    )
+
+    if (
+        season_folder is None
+        or not os.path.isdir(season_folder[1])
+        or not get_style_image_files(season_folder[1])
+    ):
+
+        return [
+            winter_folder,
+            *(
+                candidate
+                for candidate in candidates
+                if candidate[0] != "winter"
+            )
+        ]
+
+    return candidates
 
 
 def get_location_name(lat, lon):
@@ -2312,7 +2361,7 @@ def home():
             selected_season = season
 
             for candidate_season, folder_path in (
-                get_style_folder_candidates(
+                get_available_style_folder_candidates(
                     season,
                     style["folder"]
                 )
