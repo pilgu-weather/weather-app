@@ -1132,6 +1132,15 @@ def get_style_season(month, temp):
 
 def get_style_folder_candidates(season, style_folder):
 
+    if style_folder == "snow":
+
+        return [
+            (
+                "winter",
+                "static/styles/winter/snow"
+            )
+        ]
+
     seasons = [season]
 
     fallback_seasons = STYLE_SEASON_FALLBACK.get(season, ())
@@ -1856,6 +1865,9 @@ def home():
     selected_rain = False
     selected_rain_pops = []
     selected_rain_total_mm = 0
+    selected_snow = False
+    selected_snow_pops = []
+    selected_snow_total_mm = 0
     selected_icon = icon_url
     selected_icon_code = icon
     target_hours = [6, 9, 12, 15, 18, 21]
@@ -1955,6 +1967,9 @@ def home():
             selected_rain_total_mm += (
                 item.get("rain", {}) or {}
             ).get("3h", 0) or 0
+            selected_snow_total_mm += (
+                item.get("snow", {}) or {}
+            ).get("3h", 0) or 0
 
             # =========================
             # TOMORROW → 06~21 고정
@@ -2012,6 +2027,14 @@ def home():
 
                 selected_rain = True
                 selected_rain_pops.append(forecast_pop)
+
+            if (
+                6 <= kst_hour <= 21
+                and weather_type == "Snow"
+            ):
+
+                selected_snow = True
+                selected_snow_pops.append(forecast_pop)
 
     # =========================
     # TODAY MODE
@@ -2081,6 +2104,11 @@ def home():
     ) if selected_rain_pops else 0
     rain_total_mm = round(selected_rain_total_mm, 1)
     rain_score = rain_total_mm * (rain_probability / 100)
+    snow_mode = selected_snow or weather_main == "Snow"
+    snow_probability = round(
+        sum(selected_snow_pops) / len(selected_snow_pops)
+    ) if selected_snow_pops else 0
+    snow_total_mm = round(selected_snow_total_mm, 1)
 
     # =========================
     # 미세먼지
@@ -2264,6 +2292,37 @@ def home():
     ]
 
     rain_recommendation = None
+
+    if snow_mode:
+
+        snow_desc_lines = [
+            "보온성 있는 겉옷과 목도리·장갑 추천",
+            "미끄럼 방지 신발을 신어주세요"
+        ]
+
+        if snow_probability:
+
+            snow_desc_lines.insert(
+                0,
+                f"눈 예보 {snow_probability}%"
+            )
+
+        if snow_total_mm > 0:
+
+            snow_desc_lines.insert(
+                1,
+                f"예상 적설량 {snow_total_mm:.1f}mm"
+            )
+
+        styles.insert(0, {
+
+            "folder": "snow",
+
+            "title": "Snowy day",
+
+            "desc": "\n".join(snow_desc_lines)
+
+        })
 
     if rain_mode:
 
