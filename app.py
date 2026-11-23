@@ -2294,28 +2294,41 @@ def home():
 
     ]
 
+    if snow_mode:
+
+        styles = [
+            {
+                "folder": "snow_casual",
+                "title": "Snowy Casual",
+                "desc": "눈 오는 날 편안한 겨울 캐주얼"
+            },
+            {
+                "folder": "snow_urban",
+                "title": "Snowy Urban",
+                "desc": "눈 오는 날 따뜻한 어반 스타일"
+            },
+            {
+                "folder": "snow_street",
+                "title": "Snowy Street",
+                "desc": "눈 오는 날 겨울 스트릿 스타일"
+            },
+            {
+                "folder": "snow_minimal",
+                "title": "Snowy Minimal",
+                "desc": "눈 오는 날 깔끔한 겨울 미니멀"
+            }
+        ]
+
     rain_recommendation = None
 
     if snow_mode:
 
         snow_desc_lines = [
+            f"강설 확률: {snow_probability}%",
+            f"예상 적설량: {snow_total_mm:.1f}mm",
             "보온성 있는 겉옷과 목도리·장갑 추천",
             "미끄럼 방지 신발을 신어주세요"
         ]
-
-        if snow_probability:
-
-            snow_desc_lines.insert(
-                0,
-                f"눈 예보 {snow_probability}%"
-            )
-
-        if snow_total_mm > 0:
-
-            snow_desc_lines.insert(
-                1,
-                f"예상 적설량 {snow_total_mm:.1f}mm"
-            )
 
         styles.insert(0, {
 
@@ -2391,7 +2404,7 @@ def home():
         temp_max if temp_max is not None else temp
     )
 
-    if (
+    if not snow_mode and (
         season.startswith("spring")
         or season.startswith("fall")
     ) and temp_gap >= 6 and (

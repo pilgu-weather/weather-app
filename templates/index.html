@@ -301,7 +301,7 @@
                     {{ outfit.title }}
                 </div>
 
-                {% if outfit.title == "Rainy day" %}
+                {% if outfit.title == "Rainy day" or outfit.title == "Snowy day" %}
 
                 <div class="style-desc style-desc-rain">
                     {% for desc_line in outfit.desc.split('\n') %}
