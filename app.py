@@ -2031,6 +2031,7 @@ def home():
             if (
                 6 <= kst_hour <= 21
                 and weather_type == "Snow"
+                and (selected_date != today or kst_hour >= now_hour)
             ):
 
                 selected_snow = True
@@ -2104,11 +2105,13 @@ def home():
     ) if selected_rain_pops else 0
     rain_total_mm = round(selected_rain_total_mm, 1)
     rain_score = rain_total_mm * (rain_probability / 100)
-    snow_mode = selected_snow or weather_main == "Snow"
     snow_probability = round(
         sum(selected_snow_pops) / len(selected_snow_pops)
     ) if selected_snow_pops else 0
     snow_total_mm = round(selected_snow_total_mm, 1)
+    snow_mode = snow_total_mm > 0 or (
+        selected_snow and snow_probability >= 20
+    )
 
     # =========================
     # 미세먼지
@@ -2394,7 +2397,7 @@ def home():
     ) and temp_gap >= 6 and (
         layered_temp_reference is None
         or layered_temp_reference < 27
-    ):
+    ) and outfit_temp >= 10:
 
         styles.insert(0, {
 
